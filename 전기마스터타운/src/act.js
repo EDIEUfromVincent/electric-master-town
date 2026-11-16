@@ -165,7 +165,7 @@ function actSync(){
   const S = actState(), i = actIdx();
   if (S.idx == null || !SAVE.met || !SAVE.met.volt){ S.idx = i; return; }
   if (i > S.idx){
-    const doneAct = ACTS[i - 1];
+    const doneAct = ACTS[S.idx] && actDone(ACTS[S.idx]) ? ACTS[S.idx] : ACTS[i - 1];   /* 방금 끝낸 활동 (전기차처럼 미리 해 둔 활동은 건너뛴다) */
     S.idx = i; persist();
     if (SAVE.story && Array.isArray(SAVE.story.queue)) storyEnqueue('act:' + doneAct.id);
   } else if (i < S.idx) S.idx = i;
@@ -201,7 +201,9 @@ function openActs(){
     <p class="sub">교과서 활동 순서대로 하나씩 해요. <b>맡은 사람(👤)에게 말을 걸면</b> 활동할 장소를 알려 줘요. 그 장소까지 걸어가 E를 누르면 시작되고, 끝나면 다음에 만날 사람을 알려 줘요. 다음 사람은 머리 위에 <b>!</b>가 뜨고 폴짝폴짝 뛰어요.</p>
     ${met ? '' : '<div class="okbox" style="margin-bottom:10px">먼저 AI 연구소 앞의 <b>볼트 박사</b>와 이야기해요.</div>'}
     <div class="act-list">${ACTS.map(row).join('')}</div>
+    ${met && typeof evQuestCard === 'function' ? evQuestCard() : ''}
     <div class="row" style="margin-top:12px;gap:8px"><button class="btn" id="actRec">🗂️ 배움 기록</button></div>`, {wide:true});
+  const eg = p.querySelector('#evGo'); if (eg) eg.onclick = () => { closePanel(); evGuide(); };
   p.querySelectorAll('[data-replay]').forEach(b => b.onclick = () => actReplay(actById(b.dataset.replay)));
   const go = p.querySelector('[data-go]'); if (go) go.onclick = () => { closePanel(); actWaypoint(); toast('노란 화살표를 따라가요!'); };
   p.querySelector('#actRec').onclick = openPortfolio;

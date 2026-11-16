@@ -119,7 +119,7 @@ function pedNearSafe(p){
 }
 function pedPick(p){
   pedSpotFix(p);
-  if (p.def.jay && Math.random() < .12){   /* 무단 횡단: 차도를 가로질러 바로 간다 */
+  if (p.def.jay && Math.random() < .2){   /* 무단 횡단: 차도를 가로질러 바로 간다 */
     for (let k = 0; k < 12; k++){
       const a = Math.random() * Math.PI * 2, r = 3 + Math.random() * 5, x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r, tx = Math.floor(x), ty = Math.floor(y);
       const ch = tileAt(tx, ty); if (!ch || solidAt(tx, ty) || ch === '=') continue;
@@ -185,19 +185,20 @@ function updatePeds(dt){
   if (playing) updatePlayerKnock(dt);
 }
 /* 길가 친구가 부딪혔을 때 몸짓 */
-function walkerReact(w, nx, ny, strong){
+function walkerReact(w, nx, ny, strong, quiet){
   const R = WALKER_REACT[w.id] || ['어이쿠!', '앗!', 'hop'], kind = R[2];
-  w.say = {t:2.2, txt:pick(R.slice(0, 2))};
+  if (!quiet) w.say = {t:2.2, txt:pick(R.slice(0, 2))};
   w.hopT = kind === 'fly' ? 1.4 : kind === 'jump' ? .7 : .45; w.hop = w.hopT; w.hopH = kind === 'fly' ? 1.5 : kind === 'jump' ? .7 : .25;
   const f = kind === 'flee' ? 4.5 : kind === 'fly' ? 1 : 2.2 * (strong ? 1.5 : 1);
   w.kx = nx * f; w.ky = ny * f; w.tx = null; w.wait = kind === 'flee' ? .2 : 1.2;
   if (kind === 'spin') w.ry = (w.ry || 0) + Math.PI;
-  SFX.tone(kind === 'fly' ? 900 : 520, .08, 'square', .035); SFX.tone(kind === 'fly' ? 1200 : 400, .08, 'square', .03, 0, .07);
+  if (!quiet){ SFX.tone(kind === 'fly' ? 900 : 520, .08, 'square', .035); SFX.tone(kind === 'fly' ? 1200 : 400, .08, 'square', .03, 0, .07); }
 }
 
 /* ----- NPC끼리 부딪힘 · 다툼 ----- */
 function npcBumps(dt){
   const W = WORLD, list = W.peds.filter(p => p.hurt <= 0 && !p.hospital).concat((W.walkers || []).filter(w => !walkerHidden(w)));
+  STREET.fightCool = Math.max(0, (STREET.fightCool || 0) - dt);
   for (const [k, v] of STREET.pair) { const nv = v - dt; if (nv <= 0) STREET.pair.delete(k); else STREET.pair.set(k, nv); }
   for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++){
     const a = list[i], b = list[j], [ax, ay] = entXY(a), [bx, by] = entXY(b), dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy);
@@ -206,12 +207,14 @@ function npcBumps(dt){
     entMove(a, -nx * over * .5, -ny * over * .5); entMove(b, nx * over * .5, ny * over * .5);
     const key = a.id + '|' + b.id; if (STREET.pair.has(key)) continue; STREET.pair.set(key, 4);
     const fastA = a.type === 'ped' ? pedSpeedNow(a) : 0, fastB = b.type === 'ped' ? pedSpeedNow(b) : 0, strong = fastA + fastB > 2;
-    const react = (e, sx, sy) => { if (e.type === 'ped'){ e.bump = .6; e.kx = sx * 1.6; e.ky = sy * 1.6; e.say = {t:2, txt:pick(e.def.bump)}; e.path = null; e.wait = .8; } else walkerReact(e, sx, sy, strong); };
+    /* NPC끼리 부딪히면 말없이 몸짓만 (도로가 시끄럽지 않게) */
+    const react = (e, sx, sy) => { if (e.type === 'ped'){ e.bump = .6; e.kx = sx * 1.6; e.ky = sy * 1.6; e.path = null; e.wait = .8; } else walkerReact(e, sx, sy, strong, true); };
     react(a, -nx, -ny); react(b, nx, ny);
     /* 세게 부딪힌 사람끼리는 다툰다. 빠른 아이가 어르신을 세게 치면 어르신이 넘어져 다친다 */
-    if (a.type === 'ped' && b.type === 'ped' && strong && !a.fight && !b.fight){
+    if (a.type === 'ped' && b.type === 'ped' && strong && !a.fight && !b.fight && STREET.fightCool <= 0 && !STREET.fights.length && Math.random() < .12){
+      STREET.fightCool = 120;
       const elder = a.def.elder ? a : b.def.elder ? b : null, kid = elder === a ? b : a;
-      if (elder && kid.def.fast && Math.random() < .35){ pedHurt(elder, 'fall'); elder.hurt = 999; elder.injured = true; elder.say = {t:3, txt:elder.def.ouch}; kid.say = {t:3, txt:'앗… 어떡해!'}; nearToast(elder, `🆘 ${elder.name}가 넘어졌어요! 가서 도와줄까요?`); }
+      if (elder && kid.def.fast && Math.random() < .45){ pedHurt(elder, 'fall'); elder.hurt = 999; elder.injured = true; nearToast(elder, `🆘 ${elder.name}가 넘어졌어요! 가서 도와줄까요?`); }
       else startFight(a, b);
     }
   }
@@ -227,8 +230,8 @@ function updateFights(dt){
   for (const f of STREET.fights.slice()){
     f.t += dt; f.next -= dt;
     const {a, b} = f; a.ry = angLerp(a.ry || 0, Math.atan2(b.x - a.x, b.y - a.y), .2); b.ry = angLerp(b.ry || 0, Math.atan2(a.x - b.x, a.y - b.y), .2);
-    if (f.next <= 0){ const s = f.line % 2 ? b : a; s.say = {t:1.8, txt:'💢 ' + s.def.angry[Math.min(2, Math.floor(f.line / 2))]}; s.bump = .4; f.line++; f.next = 1.9; SFX.tone(150 + Math.random() * 60, .1, 'sawtooth', .025); }
-    if (f.t > 40){ a.say = {t:2, txt:'흥!'}; b.say = {t:2, txt:'흥!'}; endFight(a); a.wait = b.wait = 2; }   /* 아무도 안 말리면 씩씩대며 헤어진다 */
+    if (f.next <= 0){ const s = f.line % 2 ? b : a; s.bump = .4; f.line++; f.next = 1.9; }
+    if (f.t > 40){ endFight(a); a.wait = b.wait = 2; }   /* 아무도 안 말리면 씩씩대며 헤어진다 */
   }
 }
 
@@ -333,7 +336,7 @@ function talkPed(p){
 function helpInjured(p){
   const L = t => ({who:p.name, text:t});
   const q = {who:'', text:`${p.name}가 쓰러져 있어요. 어떻게 도울까요?`, choices:[
-    {label:'"움직이지 마세요!" 하고 어른께 알리고 119에 신고한다', next:[{who:'', text:'잘했어요! 다친 사람을 함부로 움직이면 더 다칠 수 있어요. 어른께 알리고 119에 신고하는 게 먼저예요.'}, L('고맙구나… 구급대원 선생님이 괜찮다고 하는구나.')], fn:() => { p.hurt = 0; p.injured = false; p.check = true; p.wait = 99; const st = streetState(); st.helped = (st.helped || 0) + 1; persist(); award('safe', 6); }},
+    {label:'"움직이지 마세요!" 하고 어른께 알리고 119에 신고한다', next:[{who:'', text:'잘했어요! 다친 사람을 함부로 움직이면 더 다칠 수 있어요. 어른께 알리고 119에 신고하는 게 먼저예요.'}, L('고맙구나… 구급대원 선생님이 괜찮다고 하는구나.')], fn:() => { p.hurt = 0; p.injured = false; const st = streetState(); st.helped = (st.helped || 0) + 1; if (!st.mriAsked && !st.hqDone && st.hq !== 'mri'){ st.mriAsked = true; p.check = true; p.wait = 99; } else p.wait = 1.5; persist(); award('safe', 6); }},
     {label:'얼른 일으켜서 걸어 보라고 한다', next:[{who:'', text:'잠깐! 뼈나 머리를 다쳤을 수도 있어요. 다친 사람을 억지로 일으키면 더 위험해요. 다시 골라 봐요.'}]},
     {label:'모른 척하고 지나간다', next:[{who:'', text:'다친 사람을 그냥 지나치면 안 돼요. 어른께 알리기만 해도 큰 도움이 돼요. 다시 골라 봐요.'}]},
   ]};
@@ -353,9 +356,7 @@ function mediateFight(f){
     if (!f.ok) return;
     endFight(a); const st = streetState(); st.mediated = (st.mediated || 0) + 1; persist(); award('safe', 8);
     a.say = {t:2, txt:'😊'}; b.say = {t:2, txt:'😊'};
-    const hurtOne = a.def.elder || a.def.id === 'p_uni2' ? a : b;   /* 부딪힌 사람 중 한 명이 머리를 콩 → MRI 이야기로 */
-    hurtOne.check = true; hurtOne.wait = 99; (hurtOne === a ? b : a).wait = 1;
-    setTimeout(() => { if (!uiBlocking()) recommendMRI(hurtOne); }, 80);
+    a.wait = b.wait = 1.5; toast('🤝 다툼을 말렸어요! 안전 경험치 +8', 'ok');
   });
 }
 /* 숨은 퀘스트: 병원의 전자석 — MRI(자기 공명 영상 장치)를 권하고, 병원에서 직접 확인한다 */
