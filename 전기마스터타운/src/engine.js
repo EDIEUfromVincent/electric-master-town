@@ -287,11 +287,8 @@ function objDone(o){
   }
   if (o.type === 'device') return !!(SAVE.dex[o.dev] && SAVE.dex[o.dev].done);
   if (o.type === 'scene') return !!SAVE.judged[o.id];
-  if (o.type === 'npc') return !!SAVE.met[o.id];
-  if (o.type === 'mission'){
-    const q = Q();
-    return {exp:q.em1, crane:q.em2, tree:q.em3, nb:q.es2, editor:q.es3, g_detect:q.em4, g_home:q.es1}[o.act];
-  }
+  if (o.type === 'npc') return o.id !== actGiverNow();
+  if (o.type === 'mission') return WORLD.kind === 'story' ? o.id !== actPlaceNow() : true;   /* 지금 가야 할 장소만 빛난다 */
   return true;
 }
 function testRevealed(){ return SAVE.robotRuns.some(r => r.kind === 'story'); }
@@ -372,7 +369,17 @@ function drawLabel(x, y, txt){
 }
 
 /* ----- 세계 불러오기 ----- */
-const player = {x:0, y:0, dir:'down', walk:0, moving:false};
+const player = {x:0, y:0, dir:'down', walk:0, moving:false, jz:0, jv:0};
+/* 점프: 스페이스 · 점프 버튼. 보기만 하는 점프라서 차를 피하는 데는 쓸 수 없다 (길은 횡단보도로!) */
+function playerJump(){
+  if (MODE !== 'play' || uiBlocking() || player.jz > .02) return;
+  player.jv = 7.4; SND.beep(392, .05, 'square', .035); setTimeout(() => SND.beep(587, .06, 'square', .03), 50);
+}
+function updateJump(dt){
+  if (!player.jv && !player.jz) return;
+  player.jv -= 26 * dt; player.jz = Math.max(0, player.jz + player.jv * dt);
+  if (player.jz === 0 && player.jv < 0) player.jv = 0;
+}
 const cam = {x:0, y:0};
 let NEAR = null;
 function loadWorld(def){
@@ -380,7 +387,7 @@ function loadWorld(def){
   WORLD.cars = (def.cars || []).map(c => ({...c}));
   WORLD.objects = def.objects;
   rebuildSolidMap();
-  initWalkers(WORLD);
+  initWalkers(WORLD); initPeds(WORLD);
   if (WORLD.kind === 'story') evSyncWorld();
   MINI.base = null;
 }
@@ -419,6 +426,7 @@ function findNear(){
     if (d < bd){ bd = d; best = o; }
   }
   for (const w of (WORLD.walkers || [])){ if (walkerHidden(w)) continue; const d = Math.hypot(player.x - (w.x + .5), (player.y - .3) - (w.y + .5)); if (d < bd){ bd = d; best = w; } }
+  for (const p of (WORLD.peds || [])){ if (p.hospital) continue; const d = Math.hypot(player.x - p.x, (player.y - .3) - p.y); if (d < bd){ bd = d; best = p; } }
   return best;
 }
 
@@ -438,7 +446,7 @@ function inputVector(){
 function updatePlayer(dt){
   const v = inputVector();
   if (Math.abs(v.x) + Math.abs(v.y) > .05){
-    const sp = 4.6 * dt * rpgSpeed();
+    const sp = 4.6 * dt * rpgSpeed() * bikeMul();
     if (!blockedAt(player.x + v.x * sp, player.y)) player.x += v.x * sp;
     if (!blockedAt(player.x, player.y + v.y * sp)) player.y += v.y * sp;
     player.dir = Math.abs(v.x) > Math.abs(v.y) ? (v.x < 0 ? 'left' : 'right') : (v.y < 0 ? 'up' : 'down');
@@ -476,6 +484,7 @@ function updateCars(dt){
     };
     if (ahead(player.x, player.y - .2) && (MODE !== 'play' || W.kind !== 'story' || onCrosswalk(player.x, player.y))) go = false;   /* 횡단보도 위의 사람에게만 멈춘다 */
     if (ROBOT.active && ahead(ROBOT.x, ROBOT.y - .2)) go = false;
+    for (const p of (W.peds || [])) if (p.hurt <= 0 && ahead(p.x, p.y) && onCrosswalk(p.x, p.y)) go = false;   /* 횡단보도의 행인에게도 멈춘다 */
     for (const o of W.cars){ if (o !== c && o.axis === c.axis && o.lane === c.lane){ const al = (o.pos - c.pos) * c.dir; if (al > 0 && al < 2.1) go = false; } }
     const [cx, cy] = carXY(c);
     if (go && !inBox(cx, cy)){
@@ -594,7 +603,7 @@ function renderWorld(t){
   const ents = [];
   for (const o of W.objects){ if (o.x >= x0 - 1 && o.x <= x1 + 1 && o.y >= y0 - 1 && o.y <= y1 + 1) ents.push({y:o.y + .8, f:() => drawObject(o, S, t)}); }
   for (const c of (W.cars || [])){ const [cx, cy] = carXY(c); ents.push({y:cy + (c.axis === 'y' ? .7 : .35), f:() => drawCar(c, S)}); }
-  if (MODE !== 'title' && !(HP.inv > 0 && Math.floor(TIME * 12) % 2)) ents.push({y:player.y, f:() => drawPerson(player.x * S, player.y * S, S, 'player', player.dir, player.moving ? player.walk : 0)});
+  if (MODE !== 'title' && !(HP.inv > 0 && Math.floor(TIME * 12) % 2)) ents.push({y:player.y, f:() => drawPerson(player.x * S, (player.y - (player.jz || 0)) * S, S, 'player', player.dir, player.moving ? player.walk : 0)});
   if (ROBOT.active) ents.push({y:ROBOT.y, f:() => drawRobot(ROBOT.x * S, ROBOT.y * S, S, t)});
   rpgEnts2D(S, ents, x0, x1, y0, y1);
   ents.sort((a, b) => a.y - b.y);
@@ -629,7 +638,7 @@ function renderWorld(t){
       drawBubble((b.obj.x + .5) * S, b.obj.y * S - S * .1, `${lb.icon} ${lb.name} ${Math.round(b.p * 100)}%`, '#ffffff', '#1c2733');
     }
     if (MODE === 'play' && NEAR && !uiBlocking()){
-      const name = (NEAR.type === 'npc' || NEAR.type === 'walker') ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
+      const name = (NEAR.type === 'npc' || NEAR.type === 'walker' || NEAR.type === 'ped') ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
       drawLabel((NEAR.x + .5) * S, NEAR.y * S - S * (NEAR.type === 'npc' || NEAR.type === 'walker' ? 1.25 : .62), `${IS_TOUCH ? '' : 'E · '}${name}`);
     }
   }

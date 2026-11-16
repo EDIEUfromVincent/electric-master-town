@@ -108,12 +108,7 @@ function drawExp(g, c, st, clips, t){
   g.strokeStyle = '#6f7b88'; g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(590, 164);
   if (st.on) g.lineTo(590, 106); else g.lineTo(626, 118); g.stroke();
   g.fillStyle = '#e5483a'; g.beginPath(); g.arc(st.on ? 590 : 626, st.on ? 106 : 118, 6, 0, 7); g.fill();
-  // 자기장
-  if (st.on){
-    const a = st.batt === 1 ? .25 : .45; g.strokeStyle = `rgba(58,142,230,${a})`; g.lineWidth = 2; g.setLineDash([6, 6]); g.lineDashOffset = -t * 30 * st.dir;
-    for (const [rx, ry] of [[175, 44], [205, 66], [235, 88]]){ g.beginPath(); g.ellipse(320, 250, rx, ry, 0, 0, 7); g.stroke(); }
-    g.setLineDash([]);
-  }
+  /* 교육과정: 전류에 의한 자기장 개념은 도입하지 않는다 → 자기력선 그림은 그리지 않는다 */
   // 볼트와 에나멜선
   g.fillStyle = '#9aa3ad'; g.fillRect(190, 240, 260, 20); g.fillStyle = '#7d8691'; g.fillRect(190, 254, 260, 6);
   g.fillStyle = '#6f7882'; rr(g, 174, 230, 18, 40, 3); g.fill();

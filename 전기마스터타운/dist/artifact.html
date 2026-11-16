@@ -514,6 +514,65 @@ button.mg-st:hover{border-color:var(--volt)}
 @keyframes faintIn{from{opacity:0}to{opacity:1}}
 #hpBar{letter-spacing:-2px}
 #hpBar.low{animation:mgUrg .5s ease-in-out infinite alternate}
+/* 📘 오늘의 수업 */
+.ls-card{display:grid;gap:6px;align-content:start}
+.ls-card.locked{opacity:.75}
+.ls-star{font-size:12px;font-weight:800;background:var(--volt);color:#2a2200;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.ls-day{font-size:13px;color:var(--volt);font-weight:800;letter-spacing:.02em}
+.ls-q{background:var(--ink-3);border-left:5px solid var(--volt);border-radius:8px;padding:10px 12px;line-height:1.5}
+.panel h3.ls-h{display:flex;align-items:baseline;gap:8px;margin:16px 0 8px}
+.panel h3.ls-h small{font-family:inherit;font-size:13px;color:var(--text-dim)}
+.ls-intro{display:grid;gap:8px;background:var(--ink-2);border:2px solid var(--line);border-radius:12px;padding:12px}
+.ls-intro.on,.ls-act.on{border-color:var(--volt);box-shadow:0 0 0 3px rgba(255,210,63,.18)}
+.ls-lab{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:700;line-height:1.5}
+.ls-tip{font-size:13px;color:var(--text-dim);margin:6px 0 0;line-height:1.5}
+.ls-quote{font-size:14px;background:var(--ink-3);border-radius:8px;padding:8px 10px;color:var(--text-dim)}
+.ls-act{display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:start;background:var(--ink-2);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.ls-act.done{border-color:var(--ok)}
+.ls-num{width:36px;height:36px;border-radius:50%;background:var(--ink-3);display:grid;place-items:center;font-weight:800;font-size:17px}
+.ls-act.on .ls-num{background:var(--volt);color:#2a2200}
+.ls-body p{margin:4px 0 8px;font-size:14px;color:var(--text-dim);line-height:1.5}
+.ls-body small{color:var(--text-dim)}
+.ls-chk{display:inline-flex;align-items:center;gap:6px;font-weight:700;cursor:pointer}
+.ls-chk input{width:20px;height:20px}
+.ls-quiz{background:var(--ink-2);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;line-height:1.5}
+.ls-quiz .btn.ok{background:var(--ok);border-color:#7be0a8;color:#fff;opacity:1}
+.ls-quiz .btn.bad{background:var(--warn);border-color:#ff9b90;color:#fff;opacity:1}
+.ls-why{margin:6px 0 0;font-size:14px;color:var(--text-dim)}
+.ls-pf{white-space:pre-wrap;word-break:break-word;background:var(--paper);color:var(--text-dark);border-radius:10px;padding:12px 14px;max-height:46vh;overflow:auto;font:14px/1.6 system-ui,sans-serif;margin:10px 0}
+/* 👤 로그인 */
+#login{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:16px;background:linear-gradient(160deg,rgba(15,24,32,.97),rgba(29,42,56,.93));overflow:auto}
+.login-card{width:min(420px,100%);display:grid;gap:12px;justify-items:stretch;text-align:center}
+.login-card .logo{font-size:44px}
+.login-card form{display:grid;gap:10px;text-align:left;background:var(--ink-2);border:2px solid var(--line);border-radius:14px;padding:16px}
+.login-card label{display:grid;gap:4px;font-weight:700;font-size:14px}
+.login-card input{font-size:18px;padding:10px 12px}
+.lg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#lgMsg{margin:0;min-height:1.2em;font-weight:700}
+#lgMsg.bad{color:#ff9b90} #lgMsg.ok{color:#8ff0b9}
+.acc-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px;margin:4px 0 8px}
+.acc-line #accSync{font-size:13px;color:var(--text-dim)}
+/* 📘 활동 */
+.act-list{display:grid;gap:8px}
+.act-row{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;background:var(--ink-2);border:2px solid var(--line);border-radius:12px;padding:10px 12px}
+.act-row.done{border-color:var(--ok)} .act-row.cur{border-color:var(--volt);box-shadow:0 0 0 3px rgba(255,210,63,.18)} .act-row.lock{opacity:.6}
+.act-n{font-size:20px;text-align:center}
+.act-b p{margin:4px 0;font-size:13px;color:var(--text-dim);line-height:1.5} .act-b small{color:var(--text-dim)}
+@media (max-width:560px){.act-row{grid-template-columns:30px 1fr}.act-r{grid-column:2}}
+/* 📊 계기판 */
+.tbl.dash{min-width:900px;font-size:13px}
+.tbl.dash th,.tbl.dash td{padding:6px 6px;text-align:center;vertical-align:middle}
+.tbl.dash td:nth-child(3){text-align:left;white-space:nowrap}
+.dash-c{font-size:15px}
+.dash-bar{height:8px;border-radius:99px;background:var(--ink-3);overflow:hidden;min-width:60px}
+.dash-bar i{display:block;height:100%;background:var(--ok)}
+.dash-sum td{background:var(--ink-3)}
+#jumpBtn{position:absolute;right:max(118px,calc(env(safe-area-inset-right) + 98px));bottom:max(36px,env(safe-area-inset-bottom));width:70px;height:70px;border-radius:50%;background:var(--info);color:#fff;font-size:16px;font-weight:800;pointer-events:auto;box-shadow:0 5px 0 rgba(0,0,0,.4);border:3px solid #9cc9ff;touch-action:manipulation}
+.rpg-toast.minus{border-color:#ff7a6e;background:#3a1714}
+#bBike.on{background:var(--info);border-color:#9cc9ff}
+#delayAlarm{position:absolute;top:max(64px,calc(env(safe-area-inset-top) + 56px));left:50%;transform:translateX(-50%);z-index:26;background:#3a1714;border:3px solid #ff7a6e;color:#fff;border-radius:999px;padding:8px 16px;font-size:16px;box-shadow:0 6px 18px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
+#delayAlarm.hot{animation:alarmPulse .6s infinite alternate}
+@keyframes alarmPulse{from{background:#3a1714}to{background:#a3271c}}
 </style>
 <div id="app">
   <canvas id="gl" aria-hidden="true"></canvas>
@@ -531,10 +590,9 @@ button.mg-st:hover{border-color:var(--volt)}
         <div id="objective"></div>
       </div>
       <div id="hudBtns">
-        <button class="btn small volt" id="bGames" title="미니 게임 (G)">🎮 미니 게임</button>
+        <button class="btn small primary" id="bQuest" title="활동 (Q)">📘 활동 <kbd>Q</kbd></button>
+        <button class="btn small" id="bBike" title="전기 자전거 타기·내리기 (B)" hidden>🚲 타기</button>
         <button class="btn small" id="bBag" title="가방 (I)">🎒 Lv.1</button>
-        <button class="btn small" id="bQuest">미션 <kbd>Q</kbd></button>
-        <button class="btn small" id="bLab">AI 연구소</button>
         <button class="btn small" id="bMenu">메뉴</button>
       </div>
     </div>
@@ -551,6 +609,7 @@ button.mg-st:hover{border-color:var(--volt)}
   <div id="touch" hidden>
     <div id="joy"><div id="joyKnob"></div></div>
     <button id="actBtn">살펴<br>보기</button>
+    <button id="jumpBtn" aria-label="점프">점프</button>
   </div>
 
   <div id="craneBar" hidden>
@@ -626,13 +685,12 @@ button.mg-st:hover{border-color:var(--volt)}
       <div class="logo">전기<br><span>마스터</span> 타운</div>
       <div class="tagline"><b>전자석 마스터</b> · <b>전기 안전 마스터</b>에 도전하는 블록 마을</div>
       <div class="story-teaser" id="storyTeaser"></div>
+      <div class="acc-line">👤 <b id="accName"></b> <span id="accSync"></span> <button class="btn small ghost" id="mLogout">학생 바꾸기</button></div>
       <div class="badgebar" id="titleBadges"></div>
       <div class="menu">
         <button class="btn primary" id="mStart">마을 탐험 <small id="mStartSub">처음 시작</small></button>
-        <button class="btn volt" id="mGames">🎮 미니 게임 <small>교재 활동 게임 7개</small></button>
-        <button class="btn" id="mLab">AI 연구소 <small>크레인 두뇌 · 안전 로봇</small></button>
+        <button class="btn" id="mActs">📘 활동 순서 <small>교과서 활동 10개</small></button>
         <button class="btn" id="mEditor">맵 만들기 <small>우리 동네 맵 짓기</small></button>
-        <button class="btn" id="mImport">친구 맵 불러오기 <small>맵 코드 붙여넣기</small></button>
       </div>
       <div class="title-foot">
         <button class="btn small" id="mGuide">교사용 안내</button>
@@ -643,6 +701,23 @@ button.mg-st:hover{border-color:var(--volt)}
     </div>
   </div>
 
+  <div id="login" hidden>
+    <div class="login-card">
+      <div class="logo">전기<br><span>마스터</span> 타운</div>
+      <p class="tagline">반 · 번호 · 이름 · 비밀번호로 들어와요. 처음이면 새로 만들어져요.</p>
+      <form id="lgForm" autocomplete="off">
+        <div class="lg-row"><label>반<input id="lgCls" maxlength="10" placeholder="예: 6-3"></label><label>번호<input id="lgNo" type="number" inputmode="numeric" min="1" max="99" placeholder="12"></label></div>
+        <label>이름 (또는 별명)<input id="lgName" maxlength="12" placeholder="이름"></label>
+        <label>비밀번호 (숫자 4자리)<input id="lgPin" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"></label>
+        <button class="btn primary big" id="lgGo" type="submit">들어가기</button>
+        <p id="lgMsg"></p>
+        <p class="note" id="lgMode"></p>
+      </form>
+      <button class="btn small ghost" id="lgTeacher">교사용 안내 · 계기판</button>
+    </div>
+  </div>
+
+  <div id="delayAlarm" hidden></div>
   <div id="hitFlash"></div>
   <div id="faint" hidden><b>쿵…</b><span>정신이 아득해져요</span></div>
 
@@ -919,6 +994,9 @@ function buildStoryWorld(){
   objects.push({type:'mission', id:'m_build', act:'editor', x:39, y:33, name:'맵 만들기 공방',       emoji:'🧱'});
   objects.push({type:'mission', id:'m_detect', act:'g_detect', x:45, y:27, name:'전자석 탐정 게임기',  emoji:'🔍'});
   objects.push({type:'mission', id:'m_home', act:'g_home', x:12, y:15, name:'우리 집 안전 탐정 게임기', emoji:'🏠'});
+  objects.push({type:'mission', id:'m_tv',    act:'p_tv',    x:10, y:5,  name:'해님네 텔레비전',      emoji:'📺'});
+  objects.push({type:'mission', id:'m_stage', act:'p_stage', x:19, y:5,  name:'달님네 역할놀이 무대',  emoji:'📣'});
+  objects.push({type:'mission', id:'m_mart',  act:'p_mart',  x:7,  y:14, name:'별님네 가전제품 카탈로그', emoji:'🏷️'});
   for (const n of NPCS) objects.push({type:'npc', id:n.id, x:n.x, y:n.y, name:n.name, look:n.look});
   objects.push({type:'npc', id:'mayor', x:50, y:18, name:'시장님', look:'mayor'});
   objects.push({type:'sign', id:'sgCity', x:43, y:18, text:'🏛️ 시청 — 시장님(오른쪽)이 마을 일을 의논해요.'});
@@ -959,7 +1037,7 @@ const LINES = {
     '그래서 두 가지를 배워야 해요. 전자석이 어떻게 일하는지, 그리고 전기를 안전하게 아껴 쓰는 방법이요.',
     '마을이 너무 넓어서 사람 혼자서는 다 못 살펴요. 그래서 AI를 직접 가르쳐 도움을 받을 거예요. 단, AI는 틀릴 수 있으니 우리가 꼭 확인해야 해요!',
     '마을 사람들과 동물 친구들도 도움이 필요해요. 말을 걸어 도와주면 경험치와 도구를 얻을 수 있어요. 가방은 화면 위 🎒 버튼이나 I 키예요.',
-    '화면 위 [미션]이나 Q 키를 누르면 할 일이 보여요. 노란 화살표를 따라 공장 지대의 전자석 실험실부터 가 봐요!',
+    '화면 위 [📘 활동]이나 Q 키를 누르면 할 일이 보여요. 활동을 마칠 때마다 다음에 만날 사람을 알려 줄게요. 그 사람은 머리 위에 ! 가 뜨고 폴짝폴짝 뛰어요!',
   ],
   boss: [
     '고철장에 온 걸 환영해요! 저기 크레인 끝에 달린 둥근 판이 바로 전자석이에요.',
@@ -1266,11 +1344,8 @@ function objDone(o){
   }
   if (o.type === 'device') return !!(SAVE.dex[o.dev] && SAVE.dex[o.dev].done);
   if (o.type === 'scene') return !!SAVE.judged[o.id];
-  if (o.type === 'npc') return !!SAVE.met[o.id];
-  if (o.type === 'mission'){
-    const q = Q();
-    return {exp:q.em1, crane:q.em2, tree:q.em3, nb:q.es2, editor:q.es3, g_detect:q.em4, g_home:q.es1}[o.act];
-  }
+  if (o.type === 'npc') return o.id !== actGiverNow();
+  if (o.type === 'mission') return WORLD.kind === 'story' ? o.id !== actPlaceNow() : true;   /* 지금 가야 할 장소만 빛난다 */
   return true;
 }
 function testRevealed(){ return SAVE.robotRuns.some(r => r.kind === 'story'); }
@@ -1351,7 +1426,17 @@ function drawLabel(x, y, txt){
 }
 
 /* ----- 세계 불러오기 ----- */
-const player = {x:0, y:0, dir:'down', walk:0, moving:false};
+const player = {x:0, y:0, dir:'down', walk:0, moving:false, jz:0, jv:0};
+/* 점프: 스페이스 · 점프 버튼. 보기만 하는 점프라서 차를 피하는 데는 쓸 수 없다 (길은 횡단보도로!) */
+function playerJump(){
+  if (MODE !== 'play' || uiBlocking() || player.jz > .02) return;
+  player.jv = 7.4; SND.beep(392, .05, 'square', .035); setTimeout(() => SND.beep(587, .06, 'square', .03), 50);
+}
+function updateJump(dt){
+  if (!player.jv && !player.jz) return;
+  player.jv -= 26 * dt; player.jz = Math.max(0, player.jz + player.jv * dt);
+  if (player.jz === 0 && player.jv < 0) player.jv = 0;
+}
 const cam = {x:0, y:0};
 let NEAR = null;
 function loadWorld(def){
@@ -1359,7 +1444,7 @@ function loadWorld(def){
   WORLD.cars = (def.cars || []).map(c => ({...c}));
   WORLD.objects = def.objects;
   rebuildSolidMap();
-  initWalkers(WORLD);
+  initWalkers(WORLD); initPeds(WORLD);
   if (WORLD.kind === 'story') evSyncWorld();
   MINI.base = null;
 }
@@ -1398,6 +1483,7 @@ function findNear(){
     if (d < bd){ bd = d; best = o; }
   }
   for (const w of (WORLD.walkers || [])){ if (walkerHidden(w)) continue; const d = Math.hypot(player.x - (w.x + .5), (player.y - .3) - (w.y + .5)); if (d < bd){ bd = d; best = w; } }
+  for (const p of (WORLD.peds || [])){ if (p.hospital) continue; const d = Math.hypot(player.x - p.x, (player.y - .3) - p.y); if (d < bd){ bd = d; best = p; } }
   return best;
 }
 
@@ -1417,7 +1503,7 @@ function inputVector(){
 function updatePlayer(dt){
   const v = inputVector();
   if (Math.abs(v.x) + Math.abs(v.y) > .05){
-    const sp = 4.6 * dt * rpgSpeed();
+    const sp = 4.6 * dt * rpgSpeed() * bikeMul();
     if (!blockedAt(player.x + v.x * sp, player.y)) player.x += v.x * sp;
     if (!blockedAt(player.x, player.y + v.y * sp)) player.y += v.y * sp;
     player.dir = Math.abs(v.x) > Math.abs(v.y) ? (v.x < 0 ? 'left' : 'right') : (v.y < 0 ? 'up' : 'down');
@@ -1455,6 +1541,7 @@ function updateCars(dt){
     };
     if (ahead(player.x, player.y - .2) && (MODE !== 'play' || W.kind !== 'story' || onCrosswalk(player.x, player.y))) go = false;   /* 횡단보도 위의 사람에게만 멈춘다 */
     if (ROBOT.active && ahead(ROBOT.x, ROBOT.y - .2)) go = false;
+    for (const p of (W.peds || [])) if (p.hurt <= 0 && ahead(p.x, p.y) && onCrosswalk(p.x, p.y)) go = false;   /* 횡단보도의 행인에게도 멈춘다 */
     for (const o of W.cars){ if (o !== c && o.axis === c.axis && o.lane === c.lane){ const al = (o.pos - c.pos) * c.dir; if (al > 0 && al < 2.1) go = false; } }
     const [cx, cy] = carXY(c);
     if (go && !inBox(cx, cy)){
@@ -1573,7 +1660,7 @@ function renderWorld(t){
   const ents = [];
   for (const o of W.objects){ if (o.x >= x0 - 1 && o.x <= x1 + 1 && o.y >= y0 - 1 && o.y <= y1 + 1) ents.push({y:o.y + .8, f:() => drawObject(o, S, t)}); }
   for (const c of (W.cars || [])){ const [cx, cy] = carXY(c); ents.push({y:cy + (c.axis === 'y' ? .7 : .35), f:() => drawCar(c, S)}); }
-  if (MODE !== 'title' && !(HP.inv > 0 && Math.floor(TIME * 12) % 2)) ents.push({y:player.y, f:() => drawPerson(player.x * S, player.y * S, S, 'player', player.dir, player.moving ? player.walk : 0)});
+  if (MODE !== 'title' && !(HP.inv > 0 && Math.floor(TIME * 12) % 2)) ents.push({y:player.y, f:() => drawPerson(player.x * S, (player.y - (player.jz || 0)) * S, S, 'player', player.dir, player.moving ? player.walk : 0)});
   if (ROBOT.active) ents.push({y:ROBOT.y, f:() => drawRobot(ROBOT.x * S, ROBOT.y * S, S, t)});
   rpgEnts2D(S, ents, x0, x1, y0, y1);
   ents.sort((a, b) => a.y - b.y);
@@ -1608,7 +1695,7 @@ function renderWorld(t){
       drawBubble((b.obj.x + .5) * S, b.obj.y * S - S * .1, `${lb.icon} ${lb.name} ${Math.round(b.p * 100)}%`, '#ffffff', '#1c2733');
     }
     if (MODE === 'play' && NEAR && !uiBlocking()){
-      const name = (NEAR.type === 'npc' || NEAR.type === 'walker') ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
+      const name = (NEAR.type === 'npc' || NEAR.type === 'walker' || NEAR.type === 'ped') ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
       drawLabel((NEAR.x + .5) * S, NEAR.y * S - S * (NEAR.type === 'npc' || NEAR.type === 'walker' ? 1.25 : .62), `${IS_TOUCH ? '' : 'E · '}${name}`);
     }
   }
@@ -2648,6 +2735,11 @@ function findNear3(){
     const d = Math.hypot(w.x + .5 - player.x, w.y + .5 - player.y), lim = CAM3.fp ? 2.2 : 1.8;
     if (d < lim && (CAM3.fp ? d * .9 : d) < bd){ bd = CAM3.fp ? d * .9 : d; best = w; }
   }
+  for (const p of (WORLD.peds || [])){
+    if (p.hospital) continue;
+    const d = Math.hypot(p.x - player.x, p.y - player.y), lim = p.injured || p.fight ? 2.4 : 1.6;
+    if (d < lim && d * (p.injured || p.fight || p.check ? .6 : 1) < bd){ bd = d * (p.injured || p.fight || p.check ? .6 : 1); best = p; }
+  }
   return best;
 }
 function updatePlayer3D(dt){
@@ -2674,7 +2766,7 @@ function updatePlayer3D(dt){
     }
   }
   if (m > .05){
-    const sp = (C.fp ? 4.0 : 4.6) * dt * Math.min(1, m) * rpgSpeed(), ox = player.x, oz = player.y;
+    const sp = (C.fp ? 4.0 : 4.6) * dt * Math.min(1, m) * rpgSpeed() * bikeMul(), ox = player.x, oz = player.y;
     if (!blocked3(player.x + mx * sp, player.y)) player.x += mx * sp;
     if (!blocked3(player.x, player.y + mz * sp)) player.y += mz * sp;
     const moved = Math.hypot(player.x - ox, player.y - oz);
@@ -2844,7 +2936,8 @@ function drawObjects3D(env, dt){
     if (o.type === 'npc'){
       const near = playing && Math.hypot(player.x - cx, player.y - cz) < 3.2;
       const ry = faceTo(o, (talk === o || near) ? player.x : null, player.y, dt, 0);
-      if (o.look === 'robot') robot3(cx, gy, cz, ry, t); else person3(o.look, cx, gy, cz, ry, 0);
+      const hop = playing && o.id === actGiverNow() && talk !== o ? Math.abs(Math.sin(t * 5.5)) * .38 : 0;   /* 다음에 만날 사람은 폴짝폴짝 */
+      if (o.look === 'robot') robot3(cx, gy + hop, cz, ry, t); else person3(o.look, cx, gy + hop, cz, ry, 0);
     } else if (o.type === 'device'){
       const done = objDone(o), icon = story ? DEVICES.find(d => d.id === o.dev).icon : (o.icon || '⚡');
       let iy = 1.35;
@@ -2898,7 +2991,10 @@ function drawObjects3D(env, dt){
   if (playing && !CAM3.fpActive && !(MODE === 'crane' && CR3.from === 'title')){
     if (talk) player.ang = angLerp(player.ang || 0, Math.atan2(talk.x + .5 - player.x, talk.y + .5 - player.y), 1 - Math.pow(.002, dt));
     setCut(VOXU, null);
-    if (!(HP.inv > 0 && Math.floor(TIME * 12) % 2)) person3('player', player.x, player.h || 0, player.y, player.ang || 0, player.moving ? player.walk : 0, hasEquipped('gloves'));
+    if (!(HP.inv > 0 && Math.floor(TIME * 12) % 2)){
+      const py = bikeOn() ? drawPlayerBike3D() : (player.h || 0) + (player.jz || 0) + (player.bump > 0 ? Math.sin(player.bump / .45 * Math.PI) * .12 : 0);
+      person3('player', player.x, py, player.y, player.ang || 0, player.moving && !player.jz ? player.walk : 0, hasEquipped('gloves'));
+    }
   }
 }
 function drawFlats(env, U){
@@ -2990,6 +3086,7 @@ function overlay3D(){
     const W = WORLD, t = TIME, ox = CAM3.fpActive ? player.x : CAM3.tx, oz = CAM3.fpActive ? player.y : CAM3.tz;
     if (!UI.dialog && !UI.cutscene) for (const o of W.objects){
       if (o.type === 'deco' || o.type === 'sign') continue;
+      if (W.kind === 'story' && ((o.type === 'device' && !actReached('a2')) || (o.type === 'scene' && !actReached('a7')) || (o.type === 'mission' && o.id !== actPlaceNow()))) continue;   /* 활동 순서가 오기 전에는 표시를 숨긴다 */
       const cx = o.x + .5, cz = o.y + .5; if (Math.hypot(cx - ox, cz - oz) > 24) continue;
       const hy = surfY(cx, cz) + (o.type === 'npc' ? 2.35 : o.type === 'device' ? (o.dev === 'maglev' || o.dev === 'ev' ? 2.55 : 2.0) : o.type === 'mission' ? 2.45 : o.type === 'test' ? (testRevealed() ? 1.85 : 1.2) : 1.85);
       const p = proj3(cx, hy, cz); if (!p.ok || p.x < -40 || p.x > CW + 40 || p.y < -40 || p.y > CH + 40) continue;
@@ -3015,13 +3112,15 @@ function overlay3D(){
       if (p.ok) drawBubble(p.x, p.y, `${lb.icon} ${lb.name} ${Math.round(b.p * 100)}%`, '#ffffff', '#1c2733');
     }
     if (MODE === 'play' && NEAR && !uiBlocking()){
-      const talkable = NEAR.type === 'npc' || NEAR.type === 'walker';
-      const name = talkable ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
-      const hy = NEAR.type === 'walker' ? (NEAR.def.kind === 'person' ? 2.85 : 1.8) : NEAR.type === 'npc' ? 2.95 : 2.55;
-      const p = proj3(NEAR.x + .5, surfY(NEAR.x + .5, NEAR.y + .5) + hy, NEAR.y + .5);
+      const ped = NEAR.type === 'ped', talkable = NEAR.type === 'npc' || NEAR.type === 'walker' || ped;
+      const name = ped && NEAR.injured ? `${NEAR.name} 도와주기` : ped && NEAR.fight ? '다툼 말리기' : talkable ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
+      const hy = ped ? (NEAR.hurt > 0 ? 1.6 : 2.85) : NEAR.type === 'walker' ? (NEAR.def.kind === 'person' ? 2.85 : 1.8) : NEAR.type === 'npc' ? 2.95 : 2.55;
+      const ox = ped ? NEAR.x : NEAR.x + .5, oz = ped ? NEAR.y : NEAR.y + .5;
+      const p = proj3(ox, surfY(ox, oz) + hy, oz);
       if (p.ok) drawLabel(p.x, p.y, `${IS_TOUCH ? '' : 'E · '}${name}`);
     }
     if (MODE === 'play' && !uiBlocking()) evOverlay3D();
+    if (MODE === 'play' && !UI.cutscene) pedOverlay3D();
     if (MODE === 'play' && !uiBlocking()) waypoint3D();
     if (MODE === 'play' && !uiBlocking() && hasEquipped('compass')) compass3D();
     if (CAM3.fpActive && !uiBlocking()){
@@ -3258,10 +3357,10 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&l
 const IS_TOUCH = ('ontouchstart' in window) || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
 
 /* ----- 저장 (이 기기 브라우저) ----- */
-const SAVE_KEY = 'emt.save.v1';
+let SAVE_KEY = 'emt.save.v1:__none';   /* 로그인하면 학생별 열쇠로 바뀐다 (account.js) */
 const DEFAULT_SAVE = () => ({met:{}, exp:{}, badges:{}, dex:{}, judged:{}, tree:null, treeRuns:[], treeNote:'',
   train:{good:[], danger:[], waste:[]}, model:null, robotRuns:[], lastTest:{}, robotNote:'', crane:{},
-  pos:null, nickname:'', sound:true, maps:[], rpg:null, hp:5, evq:null, mg:{}, notes:{}, works:[], mgTree:null, mgTree1:null, mgTreeDraft:null,
+  pos:null, nickname:'', sound:true, maps:[], rpg:null, hp:5, evq:null, mg:{}, notes:{}, works:[], mgTree:null, mgTree1:null, mgTreeDraft:null, act:{}, mgLog:[], bike:null, street:null,
   story:{init:false, openingSeen:false, chapter:0, done:{}, queue:[], finale:false}});
 let SAVE = DEFAULT_SAVE();
 function loadSave(){
@@ -3275,7 +3374,7 @@ function loadSave(){
 let saveTimer = null;
 function persist(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); } catch (e) {} }, 120);
+  saveTimer = setTimeout(() => { if (!ACC.id) return; SAVE._t = Date.now(); accPersist(); }, 120);
 }
 
 /* ----- 소리 ----- */
@@ -3337,6 +3436,7 @@ function setWaypointFor(m){
 }
 function objectiveHTML(){
   const q = Q();
+  if (typeof actObjective === 'function') return actObjective();
   if (!q.met) return '<b>프롤로그</b> AI 연구소의 볼트 박사와 이야기하기';
   const m = nextMission();
   if (m === 'done') return SAVE.story.finale
@@ -3347,6 +3447,7 @@ function objectiveHTML(){
 }
 function checkMasters(){
   rpgSync();
+  actSync();
   storySync();
   const c = masterCounts();
   if (c.em === 4 && !SAVE.badges.emMaster){
@@ -3426,7 +3527,7 @@ function celebrate(title, icon, text){
   if (uiBlocking()) UI.pending.push(run); else run();
 }
 function updateHUD(){
-  updateHpHUD();
+  updateHpHUD(); if (typeof updateBikeHUD === 'function') updateBikeHUD();
   const c = masterCounts();
   $('#pillEM').innerHTML = `🧲 전자석 마스터 <b>${c.em}/4</b>`; $('#pillEM').classList.toggle('done', c.em === 4);
   $('#pillES').innerHTML = `⚡ 전기 안전 마스터 <b>${c.es}/3</b>`; $('#pillES').classList.toggle('done', c.es === 3);
@@ -3477,12 +3578,15 @@ function onAction(){
 function interact(o){
   SND.tick();
   if (o.type === 'evcar') return evCatch();
+  if (o.type === 'bikerack') return bikeRack();
+  if (o.type === 'ped') return talkPed(o);
   if (o.type === 'walker') return talkWalker(o);
   if (WORLD.kind === 'custom') return interactCustom(o);
   if (o.type === 'npc') return talkNPC(o);
   if (o.type === 'sign') return showDialog('표지판', [o.text]);
   if (o.type === 'device'){
     const dev = DEVICES.find(d => d.id === o.dev);
+    if (dev.id === 'mri' && streetMRIReady()) return mriFinale(dev, () => { SAVE.dex[dev.id] = {done:true}; persist(); updateHUD(); checkMasters(); });
     return openDeviceQuiz(dev, () => { SAVE.dex[dev.id] = {done:true}; persist(); updateHUD(); checkMasters(); if (Q().em4) toast('전자석 도감 완성!', 'ok'); }, SAVE.dex[dev.id] && SAVE.dex[dev.id].done);
   }
   if (o.type === 'scene'){
@@ -3501,13 +3605,16 @@ function talkNPC(o){
   SAVE.met[o.id] = true; persist();
   if (o.id === 'mayor') return evMayorTalk();
   if (o.id === 'evdriver') return evDriverTalk();
-  const lines = npcLines(o.id);
-  showDialog(o.name, lines, () => {
-    if (o.id === 'volt'){ const m = nextMission(); if (m && m !== 'done') setWaypointFor(m); }
-    updateHUD();
-  });
+  const a = actCur();
+  if (a && !a.ev && a.giver === o.id) return actTalk(a, o);
+  const lines = npcLines(o.id).slice(), hint = actHintLine(o); if (hint) lines.push(hint);
+  showDialog(o.name, lines, () => { if (hint) actWaypoint(); updateHUD(); });
 }
 function openMission(act){
+  /* 마을의 실험대·게임기·컴퓨터도 활동 순서를 따른다: 걸어와서 E로 시작 */
+  const mo = WORLD.objects.find(x => x.type === 'mission' && x.act === act);
+  if (mo && actAtPlace(mo.id)) return;
+  if (act === 'editor' && !actReached('a9')) return showDialog('안내', ['맵 만들기 공방은 「다양한 방법으로 표현하기」 활동부터 열려요.']);
   if (act === 'exp') return mgOpenGame('mag');
   if (act === 'crane') return openCraneMenu();
   if (act === 'tree') return mgOpenGame('slide');
@@ -3562,7 +3669,8 @@ function openTestInfo(t){
 }
 
 /* ----- 미션·연구소·메뉴 패널 ----- */
-function openQuests(){
+function openQuests(){ return openActs(); }
+function openQuestsOld(){
   const q = Q();
   const row = m => {
     const done = q[m.key];
@@ -3601,16 +3709,18 @@ function openLabHub(){
 function openMenu(){
   const p = openPanel(`<h2>메뉴</h2><div class="menu" style="max-width:420px">
     <button class="btn primary" data-m="resume">계속하기</button>
-    <button class="btn" data-m="quest">미션 보기</button>
+    <button class="btn" data-m="quest">📘 활동 보기</button>
     <button class="btn" data-m="cert">마스터 인증서</button>
     <button class="btn" data-m="guide">교사용 안내</button>
     <button class="btn" data-m="sound">${SAVE.sound ? '소리 끄기' : '소리 켜기'}</button>
-    <button class="btn" data-m="title">처음 화면으로</button></div>
-    <p class="note" style="margin-top:14px">조작: <kbd>W A S D</kbd>·화살표 이동, <kbd>E</kbd>·<kbd>스페이스</kbd> 살펴보기, <kbd>Q</kbd> 미션, <kbd>M</kbd> 지도 크게, <kbd>Esc</kbd> 닫기</p>`);
+    <button class="btn" data-m="title">처음 화면으로</button>
+    <button class="btn ghost" data-m="logout">👤 학생 바꾸기 (${esc(ACC.label || '')})</button></div>
+    <p class="note" style="margin-top:14px">조작: <kbd>W A S D</kbd>·화살표 이동, <kbd>스페이스</kbd> 점프, <kbd>E</kbd> 말 걸기·살펴보기, <kbd>Q</kbd> 활동, <kbd>M</kbd> 지도 크게, <kbd>Esc</kbd> 닫기</p>`);
   p.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
     const m = b.dataset.m;
     if (m === 'resume') closePanel();
-    else if (m === 'quest') openQuests();
+    else if (m === 'quest') openActs();
+    else if (m === 'logout') logout();
     else if (m === 'cert') openCert();
     else if (m === 'guide') openGuide();
     else if (m === 'sound'){ SAVE.sound = !SAVE.sound; persist(); b.textContent = SAVE.sound ? '소리 끄기' : '소리 켜기'; }
@@ -3618,49 +3728,42 @@ function openMenu(){
   });
 }
 function openGuide(){
-  openPanel(`<h2>교사용 안내</h2>
+  const gp = openPanel(`<h2>교사용 안내</h2>
+    <div class="okbox" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px"><span><b>📊 교사 계기판</b> · 학생별 레벨과 성공한 활동을 한눈에 봐요. 교사 코드가 있어야 들어갈 수 있어요.</span><button class="btn small primary" id="gdDash">계기판 열기</button></div>
     <p class="sub">전기 마스터 타운은 초6 과학 '전기의 이용'([6과15-03], [6과15-04])과 실과 '인공지능이 만들어지는 과정 체험'([6실05-05])을 잇는 AI 프로그램 개발 수업용 게임이에요. 학생은 코드를 쓰지 않고 AI의 판단 방법을 설계·학습·시험·개선해요.</p>
-    <h3>6차시 흐름과 이야기(장)</h3>
-    <p class="sub">이야기는 '점등식까지 D-5'예요. 마을 전기가 모자라 가로등이 깜빡이고, 학생은 전자석과 AI로 낭비와 위험을 찾아 점등식 날 큰 전구탑을 켜요. 장(D-5~D-DAY)이 차시와 같은 걸음으로 흘러요.</p>
-    <div class="tblwrap"><table class="tbl"><thead><tr><th>차시</th><th>이야기 장</th><th>단계</th><th>게임에서 하는 일</th></tr></thead><tbody>
-      <tr><td>1</td><td>프롤로그 · D-5 깜빡이는 마을</td><td>도구 학습 · 문제 발견</td><td>오프닝 컷신, 볼트 박사의 부탁, 전자석 실험실(예상 → 실험), 전자석 도감</td></tr>
-      <tr><td>2</td><td>D-4 고철장 소동</td><td>문제 분석</td><td>고철장 크레인 직접 조종, 판단 기준(특징) 찾기, 종이 트리 초안</td></tr>
-      <tr><td>3 ★</td><td>D-3 자동이의 고집</td><td>해결안 도출 · 구현</td><td>옛 자동 크레인 '자동이'의 틀린 규칙을 AI 크레인 두뇌(의사결정트리)로 고치기 → 새 고철 시험 → 디버깅</td></tr>
-      <tr><td>4 ★</td><td>D-2 집집마다 숨은 위험</td><td>해결안 도출 · 구현</td><td>안전 마을 점검, AI 안전 로봇 데이터 구성 → 학습 → 시험 마을 순찰</td></tr>
-      <tr><td>5</td><td>D-1 우리 동네 안전 지도</td><td>문제 해결 · 개선</td><td>틀린 까닭 분석·데이터 보완·재학습, 맵 만들기로 우리 동네 안전 지도 짓기, 로봇 순찰</td></tr>
-      <tr><td>6</td><td>D-DAY 점등식</td><td>공유 · 성찰</td><td>맵 코드 교환, 친구 맵 순찰(처음 보는 데이터), 모든 미션을 마치면 점등식 컷신과 인증서</td></tr>
+    <h3>👤 학생 로그인과 기록</h3>
+    <p class="sub">처음 화면 전에 학생이 <b>반 · 번호 · 이름 · 비밀번호(숫자 4자리)</b>로 들어와요. 처음 들어오면 자동으로 만들어져요. 학급 서버 주소로 열면 기록이 서버에 저장되어 어느 기기에서든 이어 하고, 계기판에 반 전체가 모여요. 파일로 열면 기록이 그 기기 안에 학생별로 따로 저장돼요. 비밀번호를 잊은 학생은 계기판의 [🔑 초기화]로 지우면 다음 로그인 때 새로 정해요.</p>
+    <h3>📘 활동 순서 — 교과서 활동 순서 그대로</h3>
+    <p class="sub">활동은 한 줄로 이어져요. <b>맡은 사람에게 말을 걸면 활동할 장소를 알려 주고, 학생이 그 장소(바닥에 빛나는 동그라미)까지 직접 걸어가 E를 누르면 활동이 시작</b>되고, 끝나면 그 사람이 정리해 주고 확인 질문을 한 뒤 <b>다음에 만날 사람</b>을 알려 줘요. 다음 사람은 머리 위에 ! 가 뜨고 폴짝폴짝 뛰며, 노란 화살표가 길을 안내해요. 앞 활동을 끝내야 다음 활동이 열려요. 학생은 [📘 활동](Q 키)에서 순서와 진행을 봐요.</p>
+    <div class="tblwrap"><table class="tbl"><thead><tr><th>#</th><th>활동</th><th>교과서 활동</th><th>맡은 사람</th><th>게임</th></tr></thead><tbody>
+      ${ACTS.map((a, k) => `<tr><td>${k + 1}</td><td>${a.icon} <b>${esc(a.title)}</b>${a.ai ? '<br><small>AI 개발</small>' : ''}</td><td>${esc(a.book)}</td><td>${a.ev ? '전기차 운전자 → 시장님' : ACT_WHO[a.giver]}</td><td>${a.ev ? '전기차 붙잡기 · 시장님 설득' : a.games.map(([g, s]) => { const d = mgDef(g); return d ? `${d.icon} ${esc(d.title)}${d.single ? '' : ` ${s + 1}단계`}` : g; }).join('<br>')}</td></tr>`).join('')}
     </tbody></table></div>
-    <h3>🎮 미니 게임 — 교재 활동을 게임으로</h3>
-    <p class="sub">아이스크림 교재 활동 하나를 게임 하나로 바꿨어요. 게임마다 3단계이고 단계마다 ⚡ 1~3개를 받아요. 앞 단계를 깨면 다음 단계가 열려요. 화면 위 [🎮 미니 게임] 단추(<kbd>G</kbd>), 미션 창의 [🎮 게임], 마을의 실험대·컴퓨터·게임기, 처음 화면에서 열 수 있어요. 같은 미션을 마을 탐험으로 해도, 게임으로 해도 인정돼요.</p>
-    <p class="sub">미니 게임도 마을과 같은 <b>블록 3D 화면</b>에서 해요. 카메라가 마을 남쪽의 게임 무대로 날아가요: 실험실 실험대의 작은 전자석 기중기, 블록 교실 · 거실 · 부엌과 욕실, 질문 미끄럼틀 나무판, AI 연구소의 로봇과 분류 칸, 무대 위 3컷 역할놀이. 물건을 화면에서 바로 눌러 고르고, WebGL이 없는 옛 기기에서는 같은 규칙의 2D 판으로 자동으로 바뀌어요. 게임마다 ❤️ · 콤보 · 점수 · 마지막 10초 초읽기 · 효과음 · 불꽃과 화면 흔들림이 있어 긴장감 있게 해요.</p>
-    <div class="tblwrap"><table class="tbl"><thead><tr><th>게임</th><th>교재 활동</th><th>1 · 2 · 3단계</th><th>이어지는 미션</th></tr></thead><tbody>
-      <tr><td>🧲 전자석 실험 게임</td><td>전자석의 성질 떠올리기 (스위치 · 전지 2개 · 전지 방향과 나침반)</td><td>켜고 끄기(흔들리는 코일로 움직이는 수조에 클립 넣기) · 세기(주문 러시: 인내심 막대) · 극의 방향(나침반 속사 · 다가오는 자석 자동차 막기)</td><td>전자석 실험실 (3단계 모두)</td></tr>
-      <tr><td>🔍 전자석 탐정</td><td>전자석을 사용하는 예 조사하기</td><td>교실 곳곳에 흩어진 전자석 예시 모형 12개 찾기(콤보) · 떨어지는 기기를 성질 칸으로 · 공중 부양 제품(오르내리는 목표 높이) + 새롭게 알게 된 점</td><td>전자석 도감 (2단계)</td></tr>
-      <tr><td>🏗️ 고철장 크레인 조종</td><td>전자석 기중기</td><td>3D 고철장 조종석 (실수가 적을수록 ⚡)</td><td>크레인 조종</td></tr>
-      <tr><td>🛝 질문 미끄럼틀</td><td>전자석 기중기의 판단 → AI 크레인 두뇌</td><td>질문 하나로 나누기 · 질문 길 만들기 · 새 고철 트럭 시험(예상 먼저). 고철마다 '어느 통으로 갈까?'를 예측하면 점수·콤보, 통 위 꼬마 전자석이 결정대로 집어 봄</td><td>AI 크레인 두뇌 (3단계 8개 중 7개 이상)</td></tr>
-      <tr><td>🏠 우리 집 안전 탐정</td><td>전기를 안전하게 사용하고 절약하는 방법</td><td>거실 점검 · 부엌·욕실 점검(위험을 내버려 두면 불이 나고, 낭비하면 전기 요금이 올라감) · 에너지 라벨 마트 + 까닭 3가지 영수증</td><td>안전 마을 점검 (2단계)</td></tr>
-      <tr><td>🤖 로봇 훈련소</td><td>바른 사용 · 위험 · 낭비 판단 → AI 안전 로봇</td><td>라벨 붙이기(카드가 컨베이어로 점점 빨리) · 데이터 고르기(상관없는 문장 · 개인정보 버리기) · 시험하고 고치기</td><td>AI 안전 로봇 (3단계)</td></tr>
-      <tr><td>📣 전기 안전 캠페인</td><td>표현하기 (과학 글쓰기 · 역할놀이 · 그림)</td><td>만약 ~라면 수칙 카드 · 역할놀이 3컷 대본 · 우리 동네 안전 지도(맵 만들기) + 갤러리 · 공유 글 복사</td><td>우리 동네 맵 (2단계)</td></tr>
-    </tbody></table></div>
-    <p class="note">AI 프로그램 개발 흐름이 게임 단계에 그대로 들어 있어요. 질문 미끄럼틀은 <b>규칙 세우기 → 다듬기 → 처음 보는 데이터로 시험</b>, 로봇 훈련소는 <b>라벨 붙이기 → 데이터 고르기 → 시험하고 고치기</b>예요. 로봇 훈련소의 정확도는 학생이 붙인 라벨로 실제로 학습해서 계산해요(바른 라벨 12개로 배우면 처음 보는 문장 9개 중 8개, 라벨 2개가 틀리면 6개). ⚡과 경험치는 동기 부여용이고, 평가는 결과 카드의 기록 · 영수증 · 수칙 카드 · 3컷 만화 · 새롭게 알게 된 점으로 해요.</p>
+    <p class="sub">AI 프로그램 개발은 5번(AI 크레인 두뇌: 규칙 세우기 → 다듬기 → 처음 보는 고철로 시험)과 8번(AI 안전 로봇: 라벨 붙이기 → 데이터 고르기 → 시험하고 고치기)이에요. 수업 실천 성찰에 이 두 활동이 든 차시를 추천해요. 2번은 마을 곳곳 기기 10개 도감으로, 7번은 안전 마을 장면 14개 판단으로 대신해도 인정돼요.</p>
+    <p class="note">미니 게임은 마을과 같은 블록 3D 화면에서 하고, 게임마다 ❤️ · 콤보 · 점수 · 마지막 10초 초읽기 · 효과음이 있어요. ⚡과 경험치는 동기 부여용이고, 평가는 [🗂️ 배움 기록](확인 질문 · 게임 결과)과 결과물(수칙 카드 · 3컷 만화 · 영수증 · 새롭게 알게 된 점)로 해요.</p>
     <h3>길 건너기 안전(❤️)과 전기차 충전소 퀘스트</h3>
     <p>마을 도로에는 차가 다녀요. 차는 <b>횡단보도 위의 사람에게만</b> 멈추고, 횡단보도 밖에서 부딪히면 ❤️(5개) 하나를 잃어요. ❤️가 0이 되면 병원 앞에서 깨어나고(진행은 그대로) 40초마다 하나씩 다시 차요. 눌러서 가기도 횡단보도로만 길을 건너요.</p>
-    <p><b>⚡ 전기차 충전소 프로젝트</b>(미션 창 아래): ① 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아 운전자 이야기를 듣고 ② 시청 옆 시장님께 <b>왜 필요한지</b>(전기차는 에너지를 아낀다 · 전동기 속 전자석의 실제 예)와 <b>어디에 세울지</b>(깃발 세 곳 중 안전하고 편리한 곳)를 설득해요. 틀린 근거를 고르면 시장님이 반박하고 다시 물어요. 설득하면 남쪽 주차장 입구에 충전소가 생겨요. [6과15-03]의 전자석 이용 예와 [6과15-04]의 효율·안전을 근거로 말하는 활동이에요.</p>
+    <p><b>⚡ 전기차 충전소 프로젝트</b>(6번 활동): ① 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아 운전자 이야기를 듣고 ② 시청 옆 시장님께 <b>왜 필요한지</b>(전기차는 에너지를 아낀다 · 전동기 속 전자석의 실제 예)와 <b>어디에 세울지</b>(깃발 세 곳 중 안전하고 편리한 곳)를 설득해요. 틀린 근거를 고르면 시장님이 반박하고 다시 물어요. 설득하면 남쪽 주차장 입구에 충전소가 생겨요. [6과15-03]의 전자석 이용 예와 [6과15-04]의 효율·안전을 근거로 말하는 활동이에요.</p>
+    <h3>🚲 전기 자전거와 거리의 행인</h3>
+    <p>충전소가 세워지면 시장님이 <b>전기 자전거</b>를 선물하고(바퀴 속 전동기의 전자석), 충전소 옆에 거치대가 생겨요. <b>길가 친구 10명(동물 5 · 로봇 삐삐 · 사람 4)을 모두 만나 대화해야</b> 탈 수 있고, 타면 빠르기가 2배예요(🚲 단추, <kbd>B</kbd>).</p>
+    <p>할아버지·할머니·유모차 끄는 아주머니·자전거 타는 아이·뛰어다니는 아이·대학생 같은 <b>행인 8명</b>과 길가 친구들이 <b>맵 곳곳을 돌아다녀요</b>. 사람마다 말투가 달라요. 부딪히면 서로 밀려나고, 동물은 펄쩍 뛰거나 날아오르거나 도망가요. <b>행인끼리도 부딪히고</b>, 세게 부딪히면 둘이 다투거나(💢) 어르신이 넘어져 다쳐요. 뛰어다니는 아이는 가끔 무단 횡단을 하다 차에 치여요.</p>
+    <p><b>내가 부딪혀 다툼이 나면</b> 화면 위에 <b>⏰ 다툼 시간 알람</b>이 떠요. 사과하면 바로 끝나지만, 말대꾸할 때마다 15초씩 더 지체되고 세 번째에는 안전이가 말려요. 지체된 시간은 교사 계기판의 '⏰ 다툼 지체'에 쌓여요. <b>자전거로 사람을 치면</b> 그 사람이 다치고 경험치가 20 깎여요. ❤️는 차에 치일 때만 줄어요.</p>
+    <p><b>🔎 숨은 퀘스트 · 병원의 전자석</b>: 다친 사람(🆘)이나 다투는 사람(💢)에게 가서 E를 누르면 도울 수 있어요. 바르게 도우면(움직이지 않게 하고 119 · 서로 사과하게 돕기) 그 사람이 MRI 검사를 걱정해요. MRI가 <b>센 전자석으로 몸속을 찍는 장치</b>이고 쇠붙이를 빼야 한다고 설명해 주면, 병원 옆 MRI에서 의사 선생님의 질문(MRI 전자석이 이용하는 성질)에 답해 퀘스트를 마쳐요. 교과서 '전자석을 사용하는 예'(자기 공명 영상 장치)와 이어져요.</p>
     <h3>이야기와 인물</h3>
     <p><b>볼트 박사</b>(AI 연구소장) · <b>무쇠 사장님</b>(고철장) · <b>자동이</b>(번쩍이면 철, 크면 무겁다고 우기는 옛 자동 크레인 두뇌) · <b>안전이</b>(안전 지킴이) · <b>해님·달님·별님</b>(안전 마을 아이들). 자동이는 "AI도 틀릴 수 있다, 틀리면 고친다, 사람이 시험해 봐야 안다"를 이야기로 보여 주는 인물이에요. 화면 위 '마을 전력' 게이지는 미션을 마칠수록 오르고, 가로등이 연구소에서 가까운 곳부터 하나씩 켜져요.</p>
     <p class="note">컷신은 <kbd>Esc</kbd>나 [건너뛰기]로 넘길 수 있어요. 이야기 진행(점등식)은 평가에 반영하지 않고, 평가는 트리·학습 데이터·오류 분석 기록과 활동지로 해요.</p>
     <h3>RPG 요소 (레벨 · 가방 · 길가 친구)</h3>
     <p>학생은 미션·도감·장면 판단·친구 돕기로 경험치를 얻어 레벨이 올라요(🎒 버튼이나 <kbd>I</kbd> 키로 가방). 능력치는 🧲 전자석 이해 · 🛡️ 안전 감각 · 🌱 절약 감각 · 🤖 AI 다루기 네 가지예요. 마을을 돌아다니는 행인과 동물 10명에게 말을 걸면 교과서 활동과 이어진 질문(효율 등급, LED, 플러그 뽑기, 젖은 손, 문어발, 안전 덮개, 효율·안전하게 써야 하는 까닭, 교실 속 전자석, 공중 부양 제품, 전자석 기중기, AI 확인)을 하고, 맞히면 보너스 경험치와 도구를 얻어요. 심부름 2개(안전 덮개 찾기, 다 쓴 건전지 모으기)도 있어요.</p>
     <p class="note">도구를 찾을 때만 확률(운)이 들어가요. 미션 성공 기준·정답·평가에는 운이나 레벨이 끼어들지 않아요. 크레인 두뇌는 학생 화면에 '질문 길(스무고개)'로 나오고, 질문은 재료·무게·크기·색 네 가지 특징만 고를 수 있으며 한 길에서 같은 특징을 두 번 묻지 못해요.</p>
-    <h3>저장과 공유</h3>
-    <p>진행 상황·트리·학습 데이터·맵은 <b>이 기기의 브라우저</b>에 자동 저장돼요. 다른 기기로 옮기거나 친구와 나눌 때는 맵 만들기의 <b>맵 코드</b>를 패들렛 등에 붙여 넣어요. 공용 기기라면 수업이 끝날 때 처음 화면의 '진행 초기화'를 눌러요.</p>
+    <h3>저장</h3>
+    <p>기록은 로그인한 학생별로 자동 저장돼요. 공용 기기에서는 수업이 끝날 때 처음 화면의 [학생 바꾸기]를 눌러 다음 학생이 로그인하게 해요.</p>
     <h3>개인정보와 안전</h3>
     <p>학습 문장·상황 카드·모둠 이름에 실명, 학교, 연락처를 쓰지 않도록 지도해 주세요. 숫자가 길게 이어지거나 '학교'가 들어간 문장은 프로그램이 경고해요. 위험 장면은 게임 속에서만 다루고 실제 콘센트로 따라 하지 않도록 지도해요.</p>
     <h3>AI 모델에 대해</h3>
     <p>AI 크레인 두뇌는 학생이 짠 규칙을 그대로 따르는 의사결정트리예요. AI 안전 로봇은 장면을 설명하는 문장의 낱말과 글자 조각이 각 무리에 얼마나 자주 나왔는지 세어 판단하는 간단한 분류 모델(나이브 베이즈)이에요. 그래서 데이터가 적거나 치우치면 틀려요. 그 오류 자체가 성찰 소재예요.</p>
     <h3>조작</h3>
-    <p>키보드: <kbd>W A S D</kbd>·화살표 이동, <kbd>E</kbd>·<kbd>스페이스</kbd> 살펴보기, <kbd>Q</kbd> 미션, <kbd>M</kbd> 지도 크게, <kbd>G</kbd> 미니 게임(게임마다 첫 화면에 조작이 나와요, <kbd>Esc</kbd> 그만하기). 태블릿: 왼쪽 조이스틱으로 이동, 오른쪽 버튼으로 살펴보기.</p>
+    <p>키보드: <kbd>W A S D</kbd>·화살표 이동, <kbd>스페이스</kbd> 점프, <kbd>E</kbd>·<kbd>Enter</kbd> 말 걸기·살펴보기, <kbd>Q</kbd> 활동, <kbd>M</kbd> 지도 크게(게임마다 첫 화면에 조작이 나와요, <kbd>Esc</kbd> 그만하기). 태블릿: 왼쪽 조이스틱으로 이동, 오른쪽 버튼으로 살펴보기·점프.</p>
     <p>3D 화면: 화면을 끌면 카메라가 돌고, 휠·두 손가락으로 가까이·멀리 볼 수 있어요. 땅이나 물체를 짧게 누르면 그곳까지 걸어가요. <kbd>Z</kbd>·<kbd>C</kbd> 카메라 돌리기, <kbd>V</kbd> 1인칭·3인칭 바꾸기. 맵 만들기에서는 끌어서 칠하고, 오른쪽 버튼으로 끌거나 <kbd>Q</kbd>·<kbd>E</kbd>로 돌리고, <kbd>W A S D</kbd>로 옮겨요. 크레인 조종과 AI 크레인 두뇌 시험은 고철장의 3D 크레인으로 해요(<kbd>←</kbd><kbd>→</kbd> 이동, <kbd>스페이스</kbd> 자석, <kbd>1</kbd><kbd>2</kbd> 전지 개수, <kbd>Esc</kbd> 그만하기). 오래된 기기에서 3D가 켜지지 않으면 예전 2D 화면으로 자동으로 바뀌어요.</p>`, {wide:true});
+  gp.querySelector('#gdDash').onclick = () => (DASH.code ? openDashboard() : openTeacherGate());
 }
 function openCert(){
   const q = Q(), c = masterCounts();
@@ -3702,18 +3805,20 @@ const CHAPTERS = [
   {id:2, day:'D-4',   title:'고철장 소동'},
   {id:3, day:'D-3',   title:'자동이의 고집'},
   {id:4, day:'D-2',   title:'집집마다 숨은 위험'},
-  {id:5, day:'D-1',   title:'우리 동네 안전 지도'},
+  {id:5, day:'D-1',   title:'로봇 순찰대'},
   {id:6, day:'D-DAY', title:'점등식'},
   {id:7, day:'',      title:'에필로그'},
 ];
 function currentChapter(){
   const q = Q();
   if (!q.met) return 0;
-  if (!(q.em1 && q.em4)) return 1;
-  if (!q.em2) return 2;
-  if (!q.em3) return 3;
-  if (!(q.es1 && q.es2)) return 4;
-  if (!q.es3) return 5;
+  /* 장은 활동 순서를 따라간다: 1 전자석 찾기·성질(활동 1~3) · 2 기중기(4) · 3 AI 크레인·전기차(5~6) · 4 집 안 안전(7) · 5 AI 로봇(8) · 6 표현·까닭(9~10) */
+  const i = actIdx();
+  if (i < 3) return 1;
+  if (i < 4) return 2;
+  if (i < 6) return 3;
+  if (i < 7) return 4;
+  if (i < 8) return 5;
   if (!SAVE.story.finale) return 6;
   return 7;
 }
@@ -3745,28 +3850,34 @@ function chapterCutscene(n){
   const sub = `마을 전력 ${Math.round(stability() * 100)}%`;
   const C = {
     2:{day:'D-4', title:'고철장 소동', sub, cam:{x:40, y:6.5}, slides:[
-      {who:'', text:'전자석 기기 10개를 모두 찾아낸 견습생에게 볼트 박사의 무전이 날아옵니다.'},
-      {who:'볼트 박사', text:'견습생, 급한 연락이에요! 고철장의 재활용 공장이 멈췄대요. 고철 더미에 철이 아닌 쓰레기가 섞여 있어서요.'},
+      {who:'', text:'전자석의 세 가지 성질을 떠올린 견습생에게 볼트 박사의 무전이 날아옵니다.'},
+      {who:'볼트 박사', text:'견습생, 급한 일이에요! 고철장의 재활용 공장이 멈췄대요. 고철 더미에 철이 아닌 쓰레기가 섞여 있어서요.'},
       {who:'볼트 박사', text:'게다가 크레인 전자석이 하루 종일 세게 켜져 있어서 마을 전기가 쭉쭉 새고 있어요. 무쇠 사장님을 도와주세요!'},
     ]},
     3:{day:'D-3', title:'자동이의 고집', sub, cam:{x:39, y:7}, slides:[
       {who:'무쇠 사장님', text:'고맙다, 견습생! 철을 골라내니 공장이 다시 돌아간다. 그런데 매번 사람이 크레인을 몰 수는 없잖아?'},
       {who:'자동이', text:'삐릭! 그럴 땐 내가 있다! 내 규칙은 완벽하다. 번쩍이면 철! 크면 무겁다!'},
       {who:'무쇠 사장님', text:'그 규칙대로 하다가 알루미늄 캔이 줄줄이 섞였잖아…'},
-      {who:'볼트 박사', text:'자동이의 두뇌를 우리가 새로 짜 줘야겠어요. AI 연구소 왼쪽 컴퓨터로 오세요. 질문으로 정확하게 나눠 봐요!'},
+      {who:'볼트 박사', text:'자동이의 두뇌를 우리가 새로 짜 줘야겠어요. 크레인 옆의 자동이에게 말을 걸어요. 질문으로 정확하게 나눠 봐요!'},
     ]},
     4:{day:'D-2', title:'집집마다 숨은 위험', sub, cam:{x:14, y:7}, slides:[
       {who:'', text:'자동이가 새 두뇌로 척척 일하자 고철장의 전기 사용량이 뚝 떨어졌어요. 하지만 마을 불빛은 아직 불안해요.'},
       {who:'안전이', text:'견습생! 이번에는 집집마다 살펴봐야 해요. 전기를 위험하게 쓰거나 낭비하는 집이 많거든요.'},
       {who:'안전이', text:'해님네, 달님네, 별님네 집 안의 장면을 보고 바른 사용인지, 위험한지, 낭비인지 판단해 주세요.'},
     ]},
-    5:{day:'D-1', title:'우리 동네 안전 지도', sub, cam:{x:38, y:28}, slides:[
-      {who:'', text:'점등식 전날 밤. 연구소 컴퓨터에 이웃 마을 이장님들의 메시지가 도착했어요.'},
-      {who:'볼트 박사', text:'견습생, 안전 로봇의 순찰이 성공했어요! 그런데 이웃 마을들도 전기 안전이 걱정이래요. 그래서 우리가 안전 지도를 만들어 보내기로 했어요.'},
-      {who:'볼트 박사', text:'광장의 맵 만들기 공방에서 우리 모둠 마을을 짓고, 상황 카드를 놓고, 로봇을 순찰시켜 봐요.'},
-      {who:'볼트 박사', text:'로봇이 틀리는 장면이 있다면 그 까닭을 찾아 로봇을 더 똑똑하게 고쳐 줘요. 틀린 걸 고치는 것도 마스터의 일이에요!'},
+    5:{day:'D-1', title:'로봇 순찰대', sub, cam:{x:38, y:28}, slides:[
+      {who:'안전이', text:'세 집의 위험과 낭비를 모두 살폈어요! 고마워요, 견습생.'},
+      {who:'안전이', text:'그런데 마을에는 집이 수백 채예요. 사람 혼자서 다 살필 수는 없어요.'},
+      {who:'볼트 박사', text:'그래서 AI 안전 로봇이 필요해요! 견습생이 판단한 장면들이 로봇의 학습 데이터가 돼요.'},
+      {who:'볼트 박사', text:'단, 로봇은 가르친 만큼만 알아요. 연구소 앞으로 와서 나에게 말을 걸어요. 이름표를 붙여 가르치고, 처음 보는 장면으로 시험하고, 틀리면 데이터부터 고쳐 줘요.'},
     ]},
-    6:{day:'D-DAY', title:'점등식', sub:'마을 전력 100%', cam:{x:53.5, y:24}, slides:[
+    6:{day:'D-DAY', title:'점등식 날 아침', sub, cam:{x:53.5, y:24}, slides:[
+      {who:'', text:'점등식 날 아침. 안전 로봇이 마을을 순찰하고, 전력 계기판이 거의 다 찼어요.'},
+      {who:'볼트 박사', text:'견습생, 마지막 부탁이에요. 이웃 마을들도 전기 안전이 걱정이래요. 우리가 배운 것을 알려 줘요!'},
+      {who:'안전이', text:'안전 마을의 달님이 역할놀이로 알리는 걸 도와 달래요. 별님은 에너지 소비 효율 등급이 헷갈린대요.'},
+      {who:'볼트 박사', text:'이번에는 로봇 없이 스스로 판단해 봐요. AI가 없어도 판단할 수 있어야 진짜 마스터니까요. 다 마치면 점등식을 시작해요!'},
+    ]},
+    fin:{day:'D-DAY', title:'점등식', sub:'마을 전력 100%', cam:{x:53.5, y:24}, slides:[
       {who:'', text:'점등식 저녁. 마을 사람들이 광장의 큰 전구탑 앞에 모였어요.'},
       {who:'볼트 박사', text:'발전소 계기판이 안정 구간이에요! 고철장은 필요한 만큼만 전기를 쓰고, 집집마다 위험과 낭비를 줄였고, 안전 로봇이 마을을 순찰하고 있어요.'},
       {who:'무쇠 사장님', text:'자동이도 새 두뇌로 척척이다!'},
@@ -3800,21 +3911,14 @@ function outroBeat(key){
   }
   return null;
 }
-const OUTRO_KEYS = ['em1', 'es1'];
+const OUTRO_KEYS = [];
 
 /* ===== 인물 대사 (이야기 진행에 따라 달라져요) ===== */
 function npcLines(id){
   const q = Q(), ch = currentChapter();
   if (id === 'volt'){
-    if (ch <= 1 && !q.em1) return ['먼저 공장 지대의 전자석 실험실로 가 봐요. 찌릿!', '실험 전에 어떻게 될까? 예상부터 골라야 해요. 예상이 맞았는지 틀렸는지가 공부의 시작이에요.'];
-    if (ch <= 1) return [`전자석 기기 10개 중 ${q.dexDone}개를 찾았어요.`, '마을 곳곳에서 ? 표시가 떠 있는 기기를 찾아, 어떤 성질을 이용하는지 맞혀 봐요. 깜빡임의 범인 후보도 숨어 있을지 몰라요.'];
-    if (ch === 2) return ['고철장의 무쇠 사장님이 기다리고 있어요. 철이 아닌 쓰레기가 섞여서 공장이 멈췄대요.', '크레인 조종석에서 철 고철만 골라 철 고철함에 옮겨 줘요. 전기는 아껴서요!'];
-    if (ch === 3) return ['자동이가 아직도 번쩍이면 철, 크면 무겁다고 우기고 있어요.', 'AI 연구소 왼쪽 컴퓨터에서 자동이의 새 두뇌를 만들어 줘요. 질문으로 나눠서 정확하게요!'];
-    if (ch === 4 && !q.es1) return ['이제 마을 집들을 살펴볼 차례예요. 안전 지킴이가 안내해 줄 거예요.', '해님네, 달님네, 별님네 집 안의 장면을 하나씩 판단해 봐요.'];
-    if (ch === 4) return ['이제 AI 안전 로봇을 가르칠 차례예요. 연구소 오른쪽 컴퓨터에서 예시 문장을 넣어 학습시키고, 시험 마을 순찰을 보내 봐요.', '로봇이 틀리면 데이터부터 살펴봐요. 틀린 까닭을 찾는 게 가장 중요해요.'];
-    if (ch === 5) return ['광장의 맵 만들기 공방에서 우리 모둠 마을을 지어 안전 지도를 만들어요.', '상황 카드를 3개 이상 놓고 내 로봇을 순찰시켜 봐요. 로봇이 틀린 장면은 데이터를 고쳐서 다시 도전해요!'];
-    if (ch === 6) return ['모든 준비가 끝났어요! 곧 점등식이 시작돼요.'];
-    return ['점등식은 대성공이에요! 마을 불빛이 환하죠?', 'AI는 틀릴 수 있어서 사람이 확인해야 한다는 것, 잊지 마요.', '이웃 마을의 안전 지도(친구 맵 코드)를 불러와 내 로봇으로 순찰시켜 봐도 좋아요.'];
+    if (SAVE.story.finale) return ['점등식은 대성공이에요! 마을 불빛이 환하죠?', 'AI는 틀릴 수 있어서 사람이 확인해야 한다는 것, 잊지 마요.'];
+    return [`찌릿! 마을 전력이 ${Math.round(stability() * 100)}%까지 올라왔어요.`];
   }
   if (id === 'boss'){
     if (!q.em2) return ['고철장에 온 걸 환영한다! 여긴 마을 재활용 공장에 보낼 고철을 모으는 곳이야.', '그런데 큰일이야. 철 말고도 알루미늄 캔, 플라스틱, 종이 상자가 마구 섞여서 공장이 멈췄어!', '크레인 끝의 둥근 판이 전자석이지. 철만 골라 오른쪽 철 고철함에 넣어 줘. 전기를 세게 켜면 마을 불이 더 깜빡이니까 아껴 써야 해!'];
@@ -3860,6 +3964,7 @@ function storySync(){
   }
   const ch = currentChapter();
   if (ch > S.chapter){ S.chapter = ch; if (ch >= 2 && ch <= 6) storyEnqueue('ch:' + ch); }
+  if (actAllDone() && !S.finale && S.chapter >= 6 && !S.finQ){ S.finQ = true; storyEnqueue('fin'); }
   persist();
 }
 function storyPoll(){
@@ -3873,6 +3978,8 @@ function runBeat(id){
     showDialog('', b.lines, () => { const m = MISSIONS.find(x => x.key === b.wp); if (m) setWaypointFor(m); });
     return;
   }
+  if (id.startsWith('act:')){ actDoneBeat(id.slice(4)); return; }
+  if (id === 'fin'){ const def = chapterCutscene('fin'); if (def) showCutscene(def, () => afterChapter('fin')); return; }
   if (id.startsWith('ch:')){
     const n = +id.slice(3), def = chapterCutscene(n); if (!def) return;
     showCutscene(def, () => afterChapter(n));
@@ -3880,20 +3987,21 @@ function runBeat(id){
 }
 function afterChapter(n){
   updateHUD();
-  if (n === 6){
+  if (n === 'fin'){
     SAVE.story.finale = true; persist(); updateHUD(); rpgSync();
     toast('점등식 성공! 마을이 환하게 밝아졌어요.', 'ok');
     UI.pending.push(() => openCert());
     return;
   }
   const c = CHAPTERS[n]; showBanner(c.day, c.title);
-  const m = nextMission(); if (m && m !== 'done') setWaypointFor(m);
+  actWaypoint();
 }
 function startPrologue(){
   const S = SAVE.story;
   const go = () => showDialog('볼트 박사', LINES.voltIntro, () => {
-    SAVE.met.volt = true; S.chapter = Math.max(S.chapter, 1); persist();
-    setWaypointFor(nextMission()); updateHUD(); showBanner('D-5', '깜빡이는 마을');
+    SAVE.met.volt = true; S.chapter = Math.max(S.chapter, 1); actState().idx = actIdx(); persist();
+    updateHUD(); showBanner('D-5', '깜빡이는 마을');
+    const v = actGiverObj('volt'), a = actCur(); if (v && a && a.giver === 'volt') actTalk(a, v); else actWaypoint();
   });
   if (!S.openingSeen){ S.openingSeen = true; persist(); showCutscene(OPENING, go); } else go();
 }
@@ -4205,12 +4313,7 @@ function drawExp(g, c, st, clips, t){
   g.strokeStyle = '#6f7b88'; g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(590, 164);
   if (st.on) g.lineTo(590, 106); else g.lineTo(626, 118); g.stroke();
   g.fillStyle = '#e5483a'; g.beginPath(); g.arc(st.on ? 590 : 626, st.on ? 106 : 118, 6, 0, 7); g.fill();
-  // 자기장
-  if (st.on){
-    const a = st.batt === 1 ? .25 : .45; g.strokeStyle = `rgba(58,142,230,${a})`; g.lineWidth = 2; g.setLineDash([6, 6]); g.lineDashOffset = -t * 30 * st.dir;
-    for (const [rx, ry] of [[175, 44], [205, 66], [235, 88]]){ g.beginPath(); g.ellipse(320, 250, rx, ry, 0, 0, 7); g.stroke(); }
-    g.setLineDash([]);
-  }
+  /* 교육과정: 전류에 의한 자기장 개념은 도입하지 않는다 → 자기력선 그림은 그리지 않는다 */
   // 볼트와 에나멜선
   g.fillStyle = '#9aa3ad'; g.fillRect(190, 240, 260, 20); g.fillStyle = '#7d8691'; g.fillRect(190, 254, 260, 6);
   g.fillStyle = '#6f7882'; rr(g, 174, 230, 18, 40, 3); g.fill();
@@ -5417,9 +5520,11 @@ function initWalkers(world){
 const walkerHidden = w => w.def.drop === 'bibi' && hasEquipped('bibi');
 function walkOK(x, y){
   const tx = Math.floor(x), ty = Math.floor(y), ch = tileAt(tx, ty);
-  return !!ch && ch !== '=' && !solidAt(tx, ty);
+  return !!ch && (ch !== '=' || onCrosswalk(x, y)) && !solidAt(tx, ty);
 }
 function pickWalkTarget(w){
+  /* 맵 여기저기: 먼 곳을 골라 길을 따라 간다 (가끔은 근처만 어슬렁) */
+  if (Math.random() < .75 && typeof npcPath === 'function'){ const P = npcPath(Math.floor(w.x + .5), Math.floor(w.y + .5)); if (P && P.length){ w.path = P; w.tx = P[0].x; w.ty = P[0].y; return; } }
   const d = w.def, cx = w.x + .5, cz = w.y + .5;
   for (let k = 0; k < 10; k++){
     const a = Math.random() * Math.PI * 2, r = .4 + Math.random() * d.r, x = d.home[0] + Math.cos(a) * r, y = d.home[1] + Math.sin(a) * r;
@@ -5431,6 +5536,7 @@ function pickWalkTarget(w){
   w.wait = 1.5;
 }
 function updateWalkers(dt){
+  updatePeds(dt);
   const W = WORLD; if (!W || !W.walkers || !W.walkers.length) return;
   const talk = UI.dialog ? dialogNPC() : null;
   for (const w of W.walkers){
@@ -5440,9 +5546,12 @@ function updateWalkers(dt){
     if (w.wait > 0){ w.wait -= dt; w.moving = false; continue; }
     if (w.tx == null){ pickWalkTarget(w); if (w.tx == null) continue; }
     const dx = w.tx - cx, dz = w.ty - cz, d = Math.hypot(dx, dz), sp = (w.def.kind === 'person' ? 1.1 : w.def.kind === 'bird' ? 1.5 : 1.25) * dt;
-    if (d < .08){ w.tx = null; w.wait = 1.2 + Math.random() * 3; w.moving = false; continue; }
+    if (d < .08){
+      if (w.path && w.path.length > 1){ w.path.shift(); w.tx = w.path[0].x; w.ty = w.path[0].y; continue; }
+      w.path = null; w.tx = null; w.wait = 1.2 + Math.random() * 3; w.moving = false; continue;
+    }
     const s = Math.min(sp, d), nx = cx + dx / d * s, nz = cz + dz / d * s;
-    if (!walkOK(nx, nz)){ w.tx = null; w.wait = .8; continue; }
+    if (!walkOK(nx, nz)){ w.tx = null; w.path = null; w.wait = .8; continue; }
     w.x = nx - .5; w.y = nz - .5; w.moving = true; w.walk += dt;
     w.ry = angLerp(w.ry || 0, Math.atan2(dx, dz), 1 - Math.pow(.001, dt));
   }
@@ -5548,9 +5657,10 @@ function drawRpg3D(t){
   for (const w of (W.walkers || [])){
     if (walkerHidden(w)) continue;
     const cx = w.x + .5, cz = w.y + .5, gy = surfY(cx, cz), walk = w.moving ? w.walk : 0;
-    if (w.def.kind === 'person') person3(w.def.look, cx, gy, cz, w.ry || 0, walk);
-    else if (w.def.kind === 'robot') robot3(cx, gy, cz, w.ry || 0, t, .62);
-    else animal3(w.def.kind, cx, gy, cz, w.ry || 0, walk, t);
+    const hop = w.hop > 0 ? Math.sin((1 - w.hop / w.hopT) * Math.PI) * w.hopH : 0;   /* 부딪혀서 깡충 · 날아오름 */
+    if (w.def.kind === 'person') person3(w.def.look, cx, gy + hop, cz, w.ry || 0, walk);
+    else if (w.def.kind === 'robot') robot3(cx, gy + hop, cz, w.ry || 0, t, .62);
+    else animal3(w.def.kind, cx, gy + hop, cz, w.ry || 0, hop ? 0 : walk, t);
   }
   for (const p of questPickups()){
     const gy = surfY(p.x, p.y);
@@ -5558,9 +5668,11 @@ function drawRpg3D(t){
     SHADOWS.push([p.x, gy, p.y, .22]);
   }
   if (PET.on) robot3(PET.x, surfY(PET.x, PET.y), PET.y, PET.ry, t, .5);
+  drawPeds3D(t);
 }
 /* 2D 화면(3D를 못 쓸 때)에서 친구들 그리기 */
 function rpgEnts2D(S, list, x0, x1, y0, y1){
+  pedEnts2D(S, list);
   for (const w of (WORLD.walkers || [])){
     if (walkerHidden(w) || w.x < x0 - 2 || w.x > x1 + 2 || w.y < y0 - 2 || w.y > y1 + 2) continue;
     const px = (w.x + .5) * S, py = (w.y + .82) * S;
@@ -5637,7 +5749,7 @@ const EVOBJ = {type:'evcar', name:'전기차 붙잡기', x:0, y:0};
 const EV_FLAGS = [[31, 39, '① 주차장 입구 옆'], [20, 13, '② 연못 옆'], [19, 12, '③ 꽃밭 놀이터 한가운데']];
 function evq(){ if (!SAVE.evq || typeof SAVE.evq !== 'object') SAVE.evq = {step:0, intro:false, miss:0}; return SAVE.evq; }
 const evCar = () => ((WORLD && WORLD.cars) || []).find(c => c.quest);
-const evOn = () => !!(WORLD && WORLD.kind === 'story' && SAVE.met && SAVE.met.volt);
+const evOn = () => !!(WORLD && WORLD.kind === 'story' && typeof actReached === 'function' && actReached('a6'));
 /* 붙잡기: 차의 옆이나 뒤에서 가까이 가면 'E · 전기차 붙잡기'가 뜬다 (앞에 서면 부딪힌다!) */
 function evNear(near){
   const q = evq(), c = evCar();
@@ -5720,6 +5832,7 @@ function evBuild(){
   award('eco', 25); award('em', 15);
   UI.waypoint = {x:31, y:40, label:'충전소'};
   toast(`⚡ 전기차 충전소 완공! 주차장 입구에 충전소가 생겼어요.${EVQ.miss ? '' : ' 한 번에 설득 성공! 🏅'}`, 'ok');
+  setTimeout(() => bikeGift(), 900);   /* 시장님의 선물: 전기 자전거 */
   checkMasters();
 }
 /* 퀘스트 단계에 맞게 마을을 꾸민다 (불러올 때 · 단계가 바뀔 때) */
@@ -5733,6 +5846,7 @@ function evSyncWorld(){
   }
   if (q.step === 1) EV_FLAGS.forEach(([x, y, label], i) => WORLD.objects.push({type:'deco', kind:'evflag', id:'evflag' + i, n:i, label, x, y, ev:true}));
   if (q.step >= 2) WORLD.objects.push({type:'deco', kind:'charger', id:'evcharger', x:31, y:40, ev:true});
+  if (q.step >= 2 && SAVE.bike && SAVE.bike.got) WORLD.objects.push({type:'bikerack', id:'bikerack', x:30, y:40, name:'전기 자전거 거치대', ev:true});
   rebuildSolidMap();
 }
 function evQuestCard(){
@@ -5754,6 +5868,551 @@ function evOverlay3D(){
   const q = evq(), c = evCar(), ox = CAM3.tx, oz = CAM3.tz;
   if (c){ const [cx, cy] = carXY(c); if (Math.hypot(cx - ox, cy - oz) < 26){ const p = proj3(cx, 3.2, cy); if (p.ok) drawLabel(p.x, p.y, q.step === 0 ? '⚡ 전기차 — 옆이나 뒤에서 붙잡아요' : q.step === 1 ? '🪫 충전을 기다리는 중' : '⚡ 충전 중'); } }
   if (q.step === 1) for (const [x, y, label] of EV_FLAGS){ if (Math.hypot(x + .5 - ox, y + .5 - oz) > 26) continue; const p = proj3(x + .5, 2.85, y + .5); if (p.ok) drawLabel(p.x, p.y, label); }
+}
+/* =========================================================
+   5-3. 거리 사람들(행인) · 부딪힘 · 전기 자전거
+   · 행인: 할아버지 · 할머니 · 유모차 끄는 아주머니 · 자전거 타는 아이 · 뛰어다니는 아이 · 대학생.
+     보도로 다니고 횡단보도로 길을 건넌다(차가 멈춘다). 뛰어다니는 아이는 가끔 무단 횡단을 한다 → 차에 치이면 다친다.
+   · 사람과 부딪히면 서로 밀려나며 휘청인다. 같은 사람을 자꾸 치거나 세게 부딪히면 다툼이 일어난다.
+   · 전기 자전거(시장님 선물, 충전소 옆 거치대): 길가 친구 10명을 모두 도와야 탈 수 있다. 빠르기 2배.
+     자전거로 사람을 치면 그 사람이 다치고 내 경험치(레벨)가 깎인다. ❤️는 차에 치일 때만 줄어든다.
+   ========================================================= */
+Object.assign(LOOKS, {
+  grandpa:   {shirt:'#8d6e63', pants:'#4e4e4e', skin:'#f0c8a0', hair:'#e6e6e6', hat:'#6d4c41'},
+  grandma2:  {shirt:'#e57373', pants:'#5a4a6a', skin:'#f2c9a0', hair:'#dcdcdc'},
+  mom:       {shirt:'#f48fb1', pants:'#37474f', skin:'#f2c9a0', hair:'#3a2a1d'},
+  kidBike:   {shirt:'#29b6f6', pants:'#2a3341', skin:'#f6d0a8', hair:'#2a1d14', hat:'#e53935', scale:.78},
+  kidRun:    {shirt:'#ff7043', pants:'#1e88e5', skin:'#f1c9a0', hair:'#2a1d14', scale:.76},
+  kidRun2:   {shirt:'#ab47bc', pants:'#43a047', skin:'#f6d0a8', hair:'#5a3a22', scale:.74},
+  collegian: {shirt:'#5c6bc0', pants:'#263238', skin:'#f0c8a0', hair:'#1d1d2b'},
+  collegian2:{shirt:'#26a69a', pants:'#3e2723', skin:'#e9bd92', hair:'#4a2f1d', hat:'#37474f'},
+});
+/* 사람마다 말투가 다르다: bump(살짝) · angry(다툼이 길어질수록 1→2→3) · sorry(사과를 받았을 때) · talk(그냥 말 걸 때) · ouch(다쳤을 때) */
+const PEDS = [
+  {id:'p_gpa', look:'grandpa', name:'할아버지', sp:.7, elder:true,
+   bump:['허허, 이 늙은이 넘어질 뻔했구먼.', '어이쿠, 지팡이 놓칠 뻔했네!', '에잉, 눈 좀 뜨고 다니게.'],
+   angry:['이 녀석! 어른한테 부딪히고 그냥 가는 게냐?', '허, 말대꾸까지 하는구먼! 요즘 아이들은 예의가 없어!', '에잉, 안전 지킴이를 불러야겠구먼! 괘씸한지고!'],
+   sorry:'그래그래, 사과할 줄 알면 됐다. 조심히 다니거라.', ouch:'아이고 허리야… 일어나질 못하겠구먼.',
+   talk:['허허, 우리 땐 전기가 귀했지. 아껴 쓰거라.', '저 큰 전구탑 불 켜지는 날만 기다린다네.', '횡단보도에서는 손을 들고 건너야 하는 게야.']},
+  {id:'p_gma', look:'grandma2', name:'할머니', sp:.72, elder:true,
+   bump:['아이고머니나! 장바구니 쏟을 뻔했네.', '에구, 할미 깜짝 놀랐다.', '아가, 천천히 가렴. 할미는 빨리 못 피한단다.'],
+   angry:['아이고, 또 부딪혔네! 할미 무릎 다 나가겠다!', '어허, 사과도 안 하고 그러면 쓰나!', '세상에, 이렇게 버릇없는 아이는 처음 보네!'],
+   sorry:'그래, 착하기도 하지. 할미도 앞을 잘 볼게.', ouch:'아이고… 다리가 너무 아프구나.',
+   talk:['손주 주려고 사탕 샀단다. 하나 줄까?', '냉장고 문은 빨리 닫아야 전기가 안 새지.', '비 오는 날엔 젖은 손으로 콘센트 만지지 말거라.']},
+  {id:'p_mom', look:'mom', name:'유모차 끄는 아주머니', sp:.85, stroller:true,
+   bump:['어머! 유모차에 아기 있어요!', '앗, 아기 깰 뻔했잖아요. 쉿!', '조심! 유모차 바퀴에 발 밟혀요.'],
+   angry:['아기가 깼잖아요! 어떻게 할 거예요?', '지금 그게 할 말이에요? 아기가 울잖아요!', '정말 속상하네요. 안전 지킴이를 불러야겠어요!'],
+   sorry:'사과해 줘서 고마워요. 우리 아기도 괜찮대요. 까꿍!', ouch:'아야… 유모차는요? 아기는 괜찮아요?',
+   talk:['쉿, 아기가 자고 있어요.', '아기 방 콘센트에는 안전 덮개를 꽂아 뒀어요.', '유모차는 보도 가장자리로 다녀요.']},
+  {id:'p_bike', look:'kidBike', name:'자전거 타는 아이', sp:2.5, bike:true, fast:true,
+   bump:['따릉! 미안미안, 브레이크가 늦었어!', '으악, 자전거 넘어질 뻔!', '앗, 비켜 줘서… 아니, 안 비켰구나!'],
+   angry:['야! 너 때문에 넘어질 뻔했잖아!', '뭐? 내 잘못이라고? 네가 갑자기 튀어나왔잖아!', '흥, 너랑 안 놀아! 자전거 체인 빠졌잖아!'],
+   sorry:'나도 미안! 나도 사람 많은 데선 천천히 탈게.', ouch:'으앙, 무릎 까졌어…',
+   talk:['내 자전거 멋지지? 헬멧도 썼어!', '자전거는 사람 많은 곳에선 내려서 끌어야 해.']},
+  {id:'p_run', look:'kidRun', name:'뛰어다니는 아이', sp:2.2, jay:true, fast:true,
+   bump:['앗 따거! 미안, 술래한테 쫓기는 중이야!', '으앗, 부딪혔다! 너 술래 아니지?', '헉헉, 비켜 줘!'],
+   angry:['아야! 왜 앞을 막고 있어!', '네가 먼저 부딪혔잖아! 사과해!', '흥, 엄마한테 다 이를 거야!'],
+   sorry:'히히, 나도 미안! 우리 같이 술래잡기 할래?', ouch:'으앙… 다리가 너무 아파…',
+   talk:['술래잡기 중이야! 나 잡아 봐!', '차도로 뛰어가면 지름길인데… 아, 위험하다고?']},
+  {id:'p_uni', look:'collegian', name:'대학생 형', sp:1.25,
+   bump:['앗, 미안! 휴대 전화 보느라 앞을 못 봤어.', '어이쿠, 커피 쏟을 뻔!', '헉, 이어폰 끼고 있어서 못 들었어.'],
+   angry:['저기, 일부러 그러는 거 아니지? 이게 몇 번째야?', '말이 좀 심하네. 형한테 그러면 안 되지.', '하… 수업 늦겠다. 너 때문에 시간만 가잖아.'],
+   sorry:'그래, 나도 걸으면서 휴대 전화 본 게 잘못이야. 서로 조심하자!', ouch:'윽… 발목을 접질린 것 같아.',
+   talk:['전기 전자 공학과 다녀. 전자석 공부 재밌지?', '걸으면서 휴대 전화 보면 위험해. 나도 고칠게.']},
+  {id:'p_uni2', look:'collegian2', name:'대학생 누나', sp:1.2,
+   bump:['꺅, 책 떨어질 뻔했어!', '앗, 괜찮니? 나도 앞을 잘 못 봤네.', '어머, 노트북 들고 있었는데!'],
+   angry:['너 일부러 그러는 거지? 책 다 젖었잖아!', '어휴, 사과 한마디가 그렇게 어렵니?', '됐어, 말이 안 통하네. 시간만 버렸다!'],
+   sorry:'사과해 줘서 고마워. 나도 앞을 잘 볼게!', ouch:'아야… 머리를 콩 부딪혔어. 좀 어지러워.',
+   talk:['도서관 가는 길이야. 과제가 산더미야!', 'LED 스탠드를 쓰면 전기가 덜 든대.']},
+  {id:'p_run2', look:'kidRun2', name:'까불이 꼬마', sp:2.1, jay:true, fast:true,
+   bump:['히히, 부딪혔다! 이번엔 네가 술래!', '앗, 미안! 너무 빨리 뛰었다.', '우왓, 깜짝이야!'],
+   angry:['아야! 너 때문에 넘어졌잖아!', '내가 뭘! 네가 비켰어야지!', '으앙! 너 미워!'],
+   sorry:'괜찮아! 대신 나랑 놀아 줘!', ouch:'으아앙… 무릎에서 피 나…',
+   talk:['나 엄청 빠르다? 봤지?', '공 따라 차도로 뛰어들면 안 된대.']},
+];
+/* 길가 친구(퀘스트 친구 · 동물)가 부딪혔을 때: 대사와 몸짓(jump 깡충 · fly 날아오름 · flee 도망 · spin 빙글) */
+const WALKER_REACT = {
+  w_cat:['냐아앙! (털을 곤두세우고 펄쩍 뛰었다)', '하악! 꼬리 밟을 뻔했다냥!', 'jump'],
+  w_dog:['멍멍! 왈왈! (꼬리를 흔들며 빙글빙글)', '낑! 깜짝 놀랐잖아 멍!', 'spin'],
+  w_squirrel:['찍찍! 도토리 떨어뜨렸잖아!', '찍! (쪼르르 도망갔다)', 'flee'],
+  w_frog:['개굴! (폴짝 높이 뛰어올랐다)', '개굴개굴! 연못으로 돌아갈 테다!', 'jump'],
+  w_bird:['구구구! (푸드덕 날아올랐다)', '구구! 깃털 빠지겠다!', 'fly'],
+  w_reporter:['앗, 취재 수첩! 특종인 줄 알았잖아요.', '부딪힘 사고 현장 취재 중… 농담이에요!', 'hop'],
+  w_student:['어이쿠, 숙제 노트 떨어뜨릴 뻔!', '하랑이 깜짝 놀랐네!', 'hop'],
+  w_grandma:['아이고, 손주 같은 녀석이 힘도 세구나.', '에구구, 조심하렴.', 'hop'],
+  w_tech:['어이쿠! 공구 상자 쏟을 뻔했다.', '허허, 안전모 쓰길 잘했네.', 'hop'],
+  w_bibi:['삐빅! 충돌 감지! 회피 경로 다시 계산 중…', '삐삐! 센서 점검 필요!', 'spin'],
+};
+const STREET = {cool:0, pair:new Map(), fights:[], quarrel:null, alarmT:null};
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function streetState(){ if (!SAVE.street || typeof SAVE.street !== 'object') SAVE.street = {delay:0, quarrels:0, mediated:0, helped:0, hq:null, hqDone:0}; return SAVE.street; }
+
+/* ----- 길 찾기: 맵 어디든 (큰길은 횡단보도로만, 주차장 바닥은 안 감) ----- */
+function npcPass(tx, ty){
+  const ch = tileAt(tx, ty); if (!ch || solidAt(tx, ty)) return false;
+  return ch !== '=' || onCrosswalk(tx + .5, ty + .5);
+}
+function npcPath(sx, sy){
+  const W = WORLD; let gx, gy;
+  for (let k = 0; k < 40; k++){ gx = Math.floor(Math.random() * W.w); gy = Math.floor(Math.random() * W.h); if (npcPass(gx, gy) && Math.hypot(gx - sx, gy - sy) > 6) break; gx = null; }
+  if (gx == null) return null;
+  const N = W.w * W.h, prev = new Int32Array(N).fill(-1), start = sy * W.w + sx; if (start < 0 || start >= N) return null;
+  prev[start] = start; const q = [start], goal = gy * W.w + gx;
+  for (let qi = 0; qi < q.length; qi++){
+    const cur = q[qi];
+    if (cur === goal){ const path = []; let p = cur; while (p !== start){ path.push(p); p = prev[p]; } return path.reverse().map(i => ({x:i % W.w + .5, y:((i / W.w) | 0) + .5})); }
+    const cx = cur % W.w, cy = (cur / W.w) | 0;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){
+      const nx = cx + dx, ny = cy + dy; if (nx < 0 || ny < 0 || nx >= W.w || ny >= W.h) continue;
+      const ni = ny * W.w + nx; if (prev[ni] !== -1 || !npcPass(nx, ny)) continue;
+      prev[ni] = cur; q.push(ni);
+    }
+  }
+  return null;
+}
+
+/* ----- 행인 만들기 · 걷기 ----- */
+function initPeds(world){
+  STREET.fights = [];
+  if (world.kind !== 'story'){ world.peds = []; return; }
+  const spots = [];
+  for (let k = 0; k < 600 && spots.length < PEDS.length; k++){ const x = Math.floor(Math.random() * world.w), y = Math.floor(Math.random() * world.h); if (npcPass(x, y)) spots.push([x + .5, y + .5]); }
+  world.peds = PEDS.map((d, i) => ({type:'ped', id:d.id, def:d, name:d.name, x:(spots[i] || [30.5, 24.5])[0], y:(spots[i] || [30.5, 24.5])[1], path:null, tx:null, ty:null, wait:Math.random() * 3, ry:Math.random() * 6, walk:0, moving:false,
+    hurt:0, injured:false, angry:0, bump:0, bumps:[], kx:0, ky:0, fight:null, check:false, say:null}));
+}
+function pedSpotFix(p){ if (!npcPass(Math.floor(p.x), Math.floor(p.y)) && tileAt(Math.floor(p.x), Math.floor(p.y)) !== '='){ const [x, y] = pedNearSafe(p); p.x = x; p.y = y; } }
+function pedNearSafe(p){
+  for (let r = 1; r <= 6; r++) for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++){
+    const x = Math.floor(p.x) + dx, y = Math.floor(p.y) + dy, ch = tileAt(x, y);
+    if (ch && ch !== '=' && !solidAt(x, y)) return [x + .5, y + .5];
+  }
+  return [p.x, p.y];
+}
+function pedPick(p){
+  pedSpotFix(p);
+  if (p.def.jay && Math.random() < .12){   /* 무단 횡단: 차도를 가로질러 바로 간다 */
+    for (let k = 0; k < 12; k++){
+      const a = Math.random() * Math.PI * 2, r = 3 + Math.random() * 5, x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r, tx = Math.floor(x), ty = Math.floor(y);
+      const ch = tileAt(tx, ty); if (!ch || solidAt(tx, ty) || ch === '=') continue;
+      let ok = true; const n = Math.ceil(r / .3); for (let i = 1; i <= n && ok; i++){ const sx = Math.floor(p.x + (x - p.x) * i / n), sy = Math.floor(p.y + (y - p.y) * i / n); ok = !!tileAt(sx, sy) && !solidAt(sx, sy); }
+      if (ok){ p.path = [{x, y}]; p.jayNow = true; return; }
+    }
+  }
+  p.jayNow = false; p.path = npcPath(Math.floor(p.x), Math.floor(p.y)); if (!p.path) p.wait = 1;
+}
+function pedHurt(p, why){
+  if (p.hurt > 0) return;
+  p.hurt = why === 'car' || why === 'bike' ? 999 : 6; p.injured = why === 'car' || why === 'bike'; p.moving = false; p.path = null; p.angry = 0; endFight(p);
+  if (why === 'car'){ const [sx, sy] = pedNearSafe(p); p.x = sx; p.y = sy; }
+  SFX.boom(); if (Math.hypot(player.x - p.x, player.y - p.y) < 14) fxShake(.18);
+}
+const pedSpeedNow = p => (p.moving ? p.def.sp : 0);
+const PERSONLIKE = w => w.def && w.def.kind === 'person';
+const entXY = e => (e.type === 'ped' ? [e.x, e.y] : [e.x + .5, e.y + .5]);
+function entMove(e, dx, dy){
+  if (e.type === 'ped'){ const nx = e.x + dx, ny = e.y + dy; const t = tileAt(Math.floor(nx), Math.floor(ny)); if (t && !solidAt(Math.floor(nx), Math.floor(ny))){ e.x = nx; e.y = ny; } }
+  else { const nx = e.x + .5 + dx, ny = e.y + .5 + dy; if (walkOK(nx, ny)){ e.x += dx; e.y += dy; } }
+}
+
+function updatePeds(dt){
+  const W = WORLD; if (!W || !W.peds) return;
+  STREET.cool = Math.max(0, STREET.cool - dt);
+  const playing = MODE === 'play' && W.kind === 'story';
+  for (const p of W.peds){
+    p.bump = Math.max(0, p.bump - dt); p.angry = Math.max(0, p.angry - dt);
+    if (p.say){ p.say.t -= dt; if (p.say.t <= 0) p.say = null; }
+    if (p.kx || p.ky){ entMove(p, p.kx * dt, p.ky * dt); const k = Math.pow(.02, dt); p.kx *= k; p.ky *= k; if (Math.abs(p.kx) + Math.abs(p.ky) < .05) p.kx = p.ky = 0; }
+    if (p.hurt > 0){ p.hurt -= dt; if (p.hurt <= 0 || (p.injured && p.hurt < 999 - 120)){ p.hurt = 0; p.injured = false; p.wait = 1.5; } continue; }
+    if (p.fight){ p.moving = false; continue; }
+    if (p.hospital){ continue; }
+    /* 차에 치이기: 횡단보도 밖 차도에 있을 때 */
+    for (const c of (W.cars || [])){
+      if (c.parked) continue;
+      const [cx, cy] = carXY(c), along = c.axis === 'x' ? p.x - cx : p.y - cy, perp = c.axis === 'x' ? p.y - cy : p.x - cx;
+      if (Math.abs(along) < .8 && Math.abs(perp) < .45){
+        pedHurt(p, 'car');
+        if (playing && Math.hypot(player.x - p.x, player.y - p.y) < 18){ toast(`🚑 ${p.name}가 차에 치였어요! 가서 도와줄까요? (가까이 가서 E)`, 'bad'); UI.waypoint = {x:Math.floor(p.x), y:Math.floor(p.y), label:'다친 사람 🆘'}; }
+        break;
+      }
+    }
+    if (p.hurt > 0) continue;
+    if (UI.dialog && STREET.talking === p){ p.moving = false; p.ry = angLerp(p.ry || 0, Math.atan2(player.x - p.x, player.y - p.y), .2); continue; }
+    if (p.wait > 0){ p.wait -= dt; p.moving = false; continue; }
+    if (!p.path || !p.path.length){ pedPick(p); if (!p.path) continue; }
+    const n = p.path[0], dx = n.x - p.x, dz = n.y - p.y, d = Math.hypot(dx, dz), sp = p.def.sp * dt;
+    if (d < .12){ p.path.shift(); if (!p.path.length){ p.path = null; p.wait = (p.def.fast ? .3 : 1) + Math.random() * 3; p.moving = false; p.jayNow = false; } continue; }
+    const s = Math.min(sp, d), nx = p.x + dx / d * s, nz = p.y + dz / d * s;
+    /* 횡단보도 앞: 차가 가까우면 기다린다 (무단 횡단하는 아이는 안 기다린다!) */
+    if (!p.jayNow && tileAt(Math.floor(nx), Math.floor(nz)) === '=' && tileAt(Math.floor(p.x), Math.floor(p.y)) !== '=' && (W.cars || []).some(c => !c.parked && Math.hypot(carXY(c)[0] - nx, carXY(c)[1] - nz) < 3.2)){ p.moving = false; continue; }
+    const tx = Math.floor(nx), tz = Math.floor(nz); if (!tileAt(tx, tz) || solidAt(tx, tz)){ p.path = null; p.wait = .5; continue; }
+    p.x = nx; p.y = nz; p.moving = true; p.walk += dt * (p.def.fast ? 1.6 : 1);
+    p.ry = angLerp(p.ry || 0, Math.atan2(dx, dz), 1 - Math.pow(.001, dt));
+  }
+  /* 길가 친구 몸짓(깡충 · 도망) */
+  for (const w of (W.walkers || [])){ if (w.hop > 0) w.hop = Math.max(0, w.hop - dt); if (w.kx || w.ky){ entMove(w, w.kx * dt, w.ky * dt); const k = Math.pow(.03, dt); w.kx *= k; w.ky *= k; if (Math.abs(w.kx) + Math.abs(w.ky) < .05) w.kx = w.ky = 0; } if (w.say){ w.say.t -= dt; if (w.say.t <= 0) w.say = null; } }
+  npcBumps(dt);
+  updateFights(dt);
+  if (playing && !uiBlocking()) bumpCheck(dt);
+  if (playing) updatePlayerKnock(dt);
+}
+/* 길가 친구가 부딪혔을 때 몸짓 */
+function walkerReact(w, nx, ny, strong){
+  const R = WALKER_REACT[w.id] || ['어이쿠!', '앗!', 'hop'], kind = R[2];
+  w.say = {t:2.2, txt:pick(R.slice(0, 2))};
+  w.hopT = kind === 'fly' ? 1.4 : kind === 'jump' ? .7 : .45; w.hop = w.hopT; w.hopH = kind === 'fly' ? 1.5 : kind === 'jump' ? .7 : .25;
+  const f = kind === 'flee' ? 4.5 : kind === 'fly' ? 1 : 2.2 * (strong ? 1.5 : 1);
+  w.kx = nx * f; w.ky = ny * f; w.tx = null; w.wait = kind === 'flee' ? .2 : 1.2;
+  if (kind === 'spin') w.ry = (w.ry || 0) + Math.PI;
+  SFX.tone(kind === 'fly' ? 900 : 520, .08, 'square', .035); SFX.tone(kind === 'fly' ? 1200 : 400, .08, 'square', .03, 0, .07);
+}
+
+/* ----- NPC끼리 부딪힘 · 다툼 ----- */
+function npcBumps(dt){
+  const W = WORLD, list = W.peds.filter(p => p.hurt <= 0 && !p.hospital).concat((W.walkers || []).filter(w => !walkerHidden(w)));
+  for (const [k, v] of STREET.pair) { const nv = v - dt; if (nv <= 0) STREET.pair.delete(k); else STREET.pair.set(k, nv); }
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++){
+    const a = list[i], b = list[j], [ax, ay] = entXY(a), [bx, by] = entXY(b), dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy);
+    if (d > .46 || d < 1e-4) continue;
+    const nx = dx / d, ny = dy / d, over = .46 - d;
+    entMove(a, -nx * over * .5, -ny * over * .5); entMove(b, nx * over * .5, ny * over * .5);
+    const key = a.id + '|' + b.id; if (STREET.pair.has(key)) continue; STREET.pair.set(key, 4);
+    const fastA = a.type === 'ped' ? pedSpeedNow(a) : 0, fastB = b.type === 'ped' ? pedSpeedNow(b) : 0, strong = fastA + fastB > 2;
+    const react = (e, sx, sy) => { if (e.type === 'ped'){ e.bump = .6; e.kx = sx * 1.6; e.ky = sy * 1.6; e.say = {t:2, txt:pick(e.def.bump)}; e.path = null; e.wait = .8; } else walkerReact(e, sx, sy, strong); };
+    react(a, -nx, -ny); react(b, nx, ny);
+    /* 세게 부딪힌 사람끼리는 다툰다. 빠른 아이가 어르신을 세게 치면 어르신이 넘어져 다친다 */
+    if (a.type === 'ped' && b.type === 'ped' && strong && !a.fight && !b.fight){
+      const elder = a.def.elder ? a : b.def.elder ? b : null, kid = elder === a ? b : a;
+      if (elder && kid.def.fast && Math.random() < .35){ pedHurt(elder, 'fall'); elder.hurt = 999; elder.injured = true; elder.say = {t:3, txt:elder.def.ouch}; kid.say = {t:3, txt:'앗… 어떡해!'}; nearToast(elder, `🆘 ${elder.name}가 넘어졌어요! 가서 도와줄까요?`); }
+      else startFight(a, b);
+    }
+  }
+}
+function nearToast(p, msg){ if (MODE === 'play' && Math.hypot(player.x - p.x, player.y - p.y) < 16){ toast(msg, 'bad'); UI.waypoint = {x:Math.floor(p.x), y:Math.floor(p.y), label:'🆘'}; } }
+function startFight(a, b){
+  const f = {a, b, t:0, line:0, next:0};
+  a.fight = f; b.fight = f; a.path = b.path = null; STREET.fights.push(f);
+  nearToast(a, `💢 ${a.name}와 ${b.name}가 다투고 있어요! 말려 줄까요? (가까이 가서 E)`);
+}
+function endFight(p){ const f = p && p.fight; if (!f) return; f.a.fight = null; f.b.fight = null; STREET.fights = STREET.fights.filter(x => x !== f); }
+function updateFights(dt){
+  for (const f of STREET.fights.slice()){
+    f.t += dt; f.next -= dt;
+    const {a, b} = f; a.ry = angLerp(a.ry || 0, Math.atan2(b.x - a.x, b.y - a.y), .2); b.ry = angLerp(b.ry || 0, Math.atan2(a.x - b.x, a.y - b.y), .2);
+    if (f.next <= 0){ const s = f.line % 2 ? b : a; s.say = {t:1.8, txt:'💢 ' + s.def.angry[Math.min(2, Math.floor(f.line / 2))]}; s.bump = .4; f.line++; f.next = 1.9; SFX.tone(150 + Math.random() * 60, .1, 'sawtooth', .025); }
+    if (f.t > 40){ a.say = {t:2, txt:'흥!'}; b.say = {t:2, txt:'흥!'}; endFight(a); a.wait = b.wait = 2; }   /* 아무도 안 말리면 씩씩대며 헤어진다 */
+  }
+}
+
+/* ----- 나와 부딪힘 ----- */
+function updatePlayerKnock(dt){
+  if (!player.kx && !player.ky) return;
+  const blk = (x, y) => (G3.ok ? blocked3(x, y) : blockedAt(x, y));
+  const nx = player.x + player.kx * dt, ny = player.y + player.ky * dt;
+  if (!blk(nx, player.y)) player.x = nx; if (!blk(player.x, ny)) player.y = ny;
+  const k = Math.pow(.02, dt); player.kx *= k; player.ky *= k; player.bump = Math.max(0, (player.bump || 0) - dt);
+  if (Math.abs(player.kx) + Math.abs(player.ky) < .05) player.kx = player.ky = 0;
+}
+function bumpCheck(dt){
+  if ((player.jz || 0) > .55) return;   /* 높이 뛰어오르면 머리 위로 지나간다 */
+  const riding = bikeOn(), mySp = player.moving ? 4.6 * rpgSpeed() * (riding ? 2 : 1) : 0;
+  const people = WORLD.peds.filter(p => p.hurt <= 0 && !p.hospital && !p.fight).concat((WORLD.walkers || []).filter(w => !walkerHidden(w)));
+  for (const p of people){
+    const isPed = p.type === 'ped', [px, py] = entXY(p);
+    const dx = px - player.x, dy = py - (player.y - .05), d = Math.hypot(dx, dy), R = riding ? .62 : .5;
+    if (d > R || d < 1e-4) continue;
+    const nx = dx / d, ny = dy / d, over = R - d;
+    player.x -= nx * over * .6; player.y -= ny * over * .6; entMove(p, nx * over * .4, ny * over * .4);
+    if (STREET.cool > 0 || (isPed && p.bump > 0)) continue;
+    STREET.cool = .7;
+    player.bump = .45; player.kx = -nx * 2.4; player.ky = -ny * 2.4;
+    if (!isPed){   /* 길가 친구 · 동물 */
+      if (riding && mySp > 1 && PERSONLIKE(p)){ p.say = {t:2.4, txt:'아야! 자전거로 치면 어떡해!'}; walkerReact(p, nx, ny, true); rpgPenalty(10, '자전거로 사람을 쳤어요'); continue; }
+      walkerReact(p, nx, ny, riding); continue;
+    }
+    const rel = mySp + pedSpeedNow(p);
+    p.bump = .6; p.kx = nx * 2.2; p.ky = ny * 2.2;
+    if (riding && mySp > 1) return bikeHitPerson(p);
+    const now = TIME; p.bumps = p.bumps.filter(t => now - t < 9); p.bumps.push(now);
+    if (rel > 5.2 || p.bumps.length >= 3) return startQuarrel(p);
+    SFX.tone(260, .08, 'square', .04); SFX.tone(200, .1, 'square', .03, 0, .06);
+    p.say = {t:2, txt:pick(p.def.bump)};
+  }
+}
+
+/* ----- 나와의 다툼: 사과하지 않으면 길어지고, 길어질수록 시간이 지체된다 ----- */
+function delayAlarm(on){
+  const el = $('#delayAlarm'); if (!el) return;
+  clearInterval(STREET.alarmT);
+  if (!on){ el.hidden = true; return; }
+  el.hidden = false;
+  const tick = () => { const Q = STREET.quarrel; if (!Q) return; if (!UI.dialog){ quarrelEnd(Q.p, false, true); return; } const s = Math.round((performance.now() - Q.t0) / 1000) + Q.extra; el.innerHTML = `⏰ 다툼 중 <b>${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}</b> · 활동 시간이 흘러가고 있어요!`; el.classList.toggle('hot', Q.round >= 1); };
+  tick(); STREET.alarmT = setInterval(tick, 500);
+}
+function startQuarrel(p){
+  p.angry = 30; p.bumps = []; p.say = {t:2.5, txt:'💢'}; p.path = null;
+  SFX.buzz(); fxShake(.12);
+  STREET.quarrel = {p, t0:performance.now(), round:0, extra:0}; STREET.talking = p;
+  streetState().quarrels++;
+  const L = t => ({who:p.name, text:t});
+  const ask = r => ({who:p.name, text:r === 0 ? '…할 말 없어?' : r === 1 ? '그래서, 어쩔 건데?' : '마지막으로 묻는다. 어떻게 할 거야?', choices:[
+    {label:'정말 죄송합니다! 앞을 잘 보고 다닐게요.', next:[L(p.def.sorry)], fn:() => quarrelEnd(p, true)},
+    {label:r === 0 ? '저도 일부러 그런 거 아니에요…' : '아니, 별로 안 세게 부딪혔잖아요.', fn:() => quarrelUp(p), next:quarrelNext(p, r + 1)},
+    {label:r === 0 ? '그쪽이 먼저 부딪혔잖아요!' : '흥, 저는 잘못 없어요!', fn:() => quarrelUp(p, true), next:quarrelNext(p, r + 1)},
+  ]});
+  STREET.ask = ask;
+  showDialog(p.name, [L(p.def.angry[0]), ask(0)], () => { if (STREET.quarrel) quarrelEnd(p, false, true); });
+  delayAlarm(true);
+}
+function quarrelNext(p, r){
+  const L = t => ({who:p.name, text:t});
+  if (r >= 3) return [L(p.def.angry[2]), {who:'안전이', text:'삐익! 거기 둘, 그만! 길 한가운데서 이렇게 오래 다투면 모두가 시간을 잃어요. 서로 사과하고 각자 갈 길 가요!'}, {who:'', text:'다툼이 너무 길어져 안전이가 말렸어요. 먼저 사과했다면 금방 끝났을 거예요.', }];
+  return [L(p.def.angry[Math.min(2, r)]), {who:'', text:`⏰ 다툼이 길어져 15초가 더 지체됐어요! 사과하면 바로 끝나요.`}, STREET.ask(r)];
+}
+function quarrelUp(p, rude){ const Q = STREET.quarrel; if (!Q) return; Q.round++; Q.extra += 15; p.bump = .5; SFX.buzz(); fxShake(.1); if (rude) rpgPenalty(5, '다툼'); }
+function quarrelEnd(p, sorry, closed){
+  const Q = STREET.quarrel; if (!Q) return;
+  STREET.quarrel = null; STREET.talking = null; delayAlarm(false);
+  const s = Math.round((performance.now() - Q.t0) / 1000) + Q.extra, st = streetState();
+  st.delay = (st.delay || 0) + s; persist();
+  p.angry = sorry ? 0 : 8; p.wait = 1; if (sorry){ award('safe', 2); p.say = {t:2, txt:'😊'}; }
+  if (!sorry && Q.round >= 3) rpgPenalty(10, '다툼이 길어졌어요');
+  setTimeout(() => toast(sorry && s < 15 ? `🙂 바로 사과해서 다툼이 금방 끝났어요 (${s}초).` : `⏰ 다툼으로 ${s}초가 지체됐어요. (지금까지 모두 ${st.delay}초)`, sorry && s < 15 ? 'ok' : 'bad'), closed ? 0 : 50);
+}
+function bikeHitPerson(p){
+  pedHurt(p, 'bike');
+  SFX.boom(); fxShake(.3); hitFlash();
+  player.moving = false; PATH3.nodes = null; KEYS.clear(); JOY.x = JOY.y = 0;
+  const lost = rpgPenalty(20, '자전거로 사람을 쳤어요');
+  STREET.talking = p;
+  showDialog(p.name, [
+    {who:p.name, text:p.def.ouch},
+    {who:p.name, text:'자전거로 사람을 치면 어떡해! 사람 사이에서는 내려서 끌고 가야지!'},
+    {who:'', text:`🚲 사람을 다치게 해서 경험치를 ${lost} 잃었어요. 다친 사람에게 말을 걸어 도와줘요.`},
+  ], () => { STREET.talking = null; });
+}
+
+/* ----- 행인에게 말 걸기: 다친 사람 돕기 · 다툼 말리기 · MRI 권하기 ----- */
+function talkPed(p){
+  STREET.talking = p;
+  const done = () => { STREET.talking = null; updateHUD(); };
+  if (p.hurt > 0 && p.injured) return helpInjured(p);
+  if (p.fight) return mediateFight(p.fight);
+  if (p.check) return recommendMRI(p);
+  if (p.angry > 0) return showDialog(p.name, [{who:p.name, text:'흥, 말 걸지 마!'}], done);
+  showDialog(p.name, [{who:p.name, text:pick(p.def.talk)}], done);
+}
+function helpInjured(p){
+  const L = t => ({who:p.name, text:t});
+  const q = {who:'', text:`${p.name}가 쓰러져 있어요. 어떻게 도울까요?`, choices:[
+    {label:'"움직이지 마세요!" 하고 어른께 알리고 119에 신고한다', next:[{who:'', text:'잘했어요! 다친 사람을 함부로 움직이면 더 다칠 수 있어요. 어른께 알리고 119에 신고하는 게 먼저예요.'}, L('고맙구나… 구급대원 선생님이 괜찮다고 하는구나.')], fn:() => { p.hurt = 0; p.injured = false; p.check = true; p.wait = 99; const st = streetState(); st.helped = (st.helped || 0) + 1; persist(); award('safe', 6); }},
+    {label:'얼른 일으켜서 걸어 보라고 한다', next:[{who:'', text:'잠깐! 뼈나 머리를 다쳤을 수도 있어요. 다친 사람을 억지로 일으키면 더 위험해요. 다시 골라 봐요.'}]},
+    {label:'모른 척하고 지나간다', next:[{who:'', text:'다친 사람을 그냥 지나치면 안 돼요. 어른께 알리기만 해도 큰 도움이 돼요. 다시 골라 봐요.'}]},
+  ]};
+  q.choices[1].next.push(q); q.choices[2].next.push(q);
+  showDialog(p.name, [L(p.def.ouch), q], () => { STREET.talking = null; if (p.check) recommendMRI(p); });
+}
+function mediateFight(f){
+  const {a, b} = f, A = t => ({who:a.name, text:t}), B = t => ({who:b.name, text:t});
+  const q = {who:'', text:'두 사람이 씩씩대며 다투고 있어요. 어떻게 할까요?', choices:[
+    {label:'"잠깐만요! 다친 데는 없으세요? 서로 한 번씩 사과해 볼까요?"', next:[A('…그래, 나도 앞을 잘 못 봤어. 미안해.'), B('나도 미안. 괜히 소리 질렀네.'), {who:'', text:'두 사람이 화해했어요! 먼저 다친 데가 없는지 묻고, 서로 사과하게 도우면 다툼이 금방 끝나요.'}], fn:() => { f.ok = true; }},
+    {label:'"누가 이기나 보자!" 하고 구경한다', next:[A(a.def.angry[2]), B(b.def.angry[2]), {who:'', text:'다툼이 더 커졌어요. 구경하거나 부추기면 안 돼요. 다시 골라 봐요.'}], fn:() => rpgPenalty(5, '다툼을 부추겼어요')},
+    {label:'"그쪽이 잘못했네요!" 한쪽 편을 든다', next:[B('뭐? 너까지 왜 그래!'), {who:'', text:'한쪽 편만 들면 다툼이 더 길어져요. 두 사람 모두의 이야기를 들어 봐요.'}]},
+  ]};
+  q.choices[1].next.push(q); q.choices[2].next.push(q);
+  showDialog(a.name, [A(a.def.angry[0]), B(b.def.angry[1]), q], () => {
+    STREET.talking = null;
+    if (!f.ok) return;
+    endFight(a); const st = streetState(); st.mediated = (st.mediated || 0) + 1; persist(); award('safe', 8);
+    a.say = {t:2, txt:'😊'}; b.say = {t:2, txt:'😊'};
+    const hurtOne = a.def.elder || a.def.id === 'p_uni2' ? a : b;   /* 부딪힌 사람 중 한 명이 머리를 콩 → MRI 이야기로 */
+    hurtOne.check = true; hurtOne.wait = 99; (hurtOne === a ? b : a).wait = 1;
+    setTimeout(() => { if (!uiBlocking()) recommendMRI(hurtOne); }, 80);
+  });
+}
+/* 숨은 퀘스트: 병원의 전자석 — MRI(자기 공명 영상 장치)를 권하고, 병원에서 직접 확인한다 */
+function recommendMRI(p){
+  STREET.talking = p;
+  const L = t => ({who:p.name, text:t});
+  const q = {who:p.name, text:'구급대원이 혹시 모르니 병원에서 MRI를 찍어 보라는데… MRI가 뭐니? 무섭구나.', choices:[
+    {label:'자기 공명 영상 장치예요. 아주 센 전자석으로 몸속을 찍어서, 칼로 열지 않고도 다친 곳을 볼 수 있어요.', fn:() => { p.mriOK = true; }, next:[L('전자석으로 몸속을 본다고? 신기하구나! 그럼 무섭지 않겠네.'), {who:p.name, text:'그런데 들어갈 때 조심할 게 있니?', choices:[
+      {label:'시계·열쇠 같은 쇠붙이는 빼야 해요. 센 전자석이 철을 끌어당기거든요.', next:[L('그렇구나! 전자석이 철을 끌어당기니까. 고맙다, 병원에 다녀올게!')], fn:() => { p.mriOK2 = true; }},
+      {label:'아무것도 안 빼도 돼요.', next:[L('정말? 전자석은 철을 끌어당긴다던데… 다시 말해 줄래?')]},
+    ]}]},
+    {label:'방사선을 엄청 쏘는 무서운 기계예요.', next:[L('어머, 그래? 그런데 MRI는 이름에 \'자기\'가 들어가던데… 다시 말해 줄래?')]},
+    {label:'그냥 커다란 영구 자석이에요.', next:[L('영구 자석이면 끄지도 못하겠네? 의사 선생님이 켜고 끈다던데… 다시 말해 줄래?')]},
+  ]};
+  q.choices[1].next.push(q); q.choices[2].next.push(q);
+  q.choices[0].next[1].choices[1].next.push(q.choices[0].next[1]);
+  showDialog(p.name, [q], () => {
+    STREET.talking = null;
+    if (!(p.mriOK && p.mriOK2)) return;
+    p.check = false; p.hospital = true; p.wait = 0; p.say = {t:3, txt:'🏥 병원 다녀올게!'};
+    const st = streetState(); if (st.hq !== 'mri') st.hq = 'mri'; persist(); award('em', 6);
+    UI.waypoint = {x:51, y:33, label:'병원 MRI 🧲'};
+    rpgToast('🔎 <b>숨은 퀘스트</b> · 병원의 전자석: 병원 옆 MRI(자기 공명 영상 장치)로 가 봐요!', 'item');
+    setTimeout(() => { p.x = 50.5; p.y = 31.5; pedSpotFix(p); p.hospital = false; p.wait = 20; }, 4000);
+  });
+}
+const streetMRIReady = () => streetState().hq === 'mri';
+function mriFinale(dev, onSolved){
+  const st = streetState(), first = !st.hqDone;
+  const D = t => ({who:'병원 의사 선생님', text:t});
+  const q = {who:'병원 의사 선생님', text:'MRI의 커다란 전자석은 전자석의 어떤 성질을 이용할까요?', choices:[
+    {label:'전기가 흐를 때만 자석이 되고, 전류로 세기를 아주 세게 조절할 수 있어요.', next:[D('정답! 검사할 때만 켜고, 전기를 많이 흘려 아주 센 자석을 만들지. 영구 자석으로는 이렇게 못 한단다.')], fn:() => { st.ok = true; }},
+    {label:'항상 자석이라서 끌 수 없어요.', next:[D('그건 영구 자석이란다. 전자석은 켜고 끌 수 있지. 다시 생각해 볼래?')]},
+    {label:'자석과는 관계없어요.', next:[D('이름에 \'자기\'가 들어 있잖니? 다시 생각해 볼래?')]},
+  ]};
+  q.choices[1].next.push(q); q.choices[2].next.push(q);
+  showDialog('병원 의사 선생님', [D('어서 오렴! 네가 MRI를 잘 설명해 줘서 환자분이 무서워하지 않고 검사를 받았단다.'), D('이게 자기 공명 영상 장치, MRI야. 안에 아주 커다란 전자석이 들어 있지.'), q], () => {
+    if (!st.ok) return;
+    st.ok = false; st.hq = null; st.hqDone = (st.hqDone || 0) + 1; persist();
+    if (first){ award('em', 20); award('safe', 10); rpgToast('🔎 <b>숨은 퀘스트 완료!</b> 병원의 전자석 (MRI)', 'item'); SFX.win(); }
+    else award('em', 5);
+    if (onSolved) onSolved();
+  });
+}
+/* 경험치 깎기: 많이 쌓인 능력치부터 */
+function rpgPenalty(amt, why){
+  const R = SAVE.rpg; if (!R) return 0;
+  const lv0 = rpgLevel(); let left = amt, lost = 0;
+  while (left > 0){
+    const k = STAT_KEYS.slice().sort((a, b) => (R.xp[b] || 0) - (R.xp[a] || 0))[0];
+    if (!(R.xp[k] > 0)) break;
+    const take = Math.min(left, R.xp[k], 5); R.xp[k] -= take; left -= take; lost += take;
+  }
+  persist(); updateRpgHUD();
+  if (lost) rpgToast(`−${lost} XP · ${why}`, 'xp minus');
+  if (rpgLevel() < lv0) toast(`📉 레벨이 Lv.${rpgLevel()}로 내려갔어요!`, 'bad');
+  return lost;
+}
+
+/* ----- 전기 자전거 ----- */
+function bikeState(){ if (!SAVE.bike || typeof SAVE.bike !== 'object') SAVE.bike = {got:false, on:false}; return SAVE.bike; }
+/* 자전거 조건: 길가 친구(동물 5 · 로봇 삐삐 · 사람 4) 10명을 모두 만나서 대화하기 */
+const friendMet = d => !!(SAVE.rpg && ((SAVE.rpg.talked && SAVE.rpg.talked[d.id]) || (SAVE.rpg.solved && SAVE.rpg.solved[d.id])));
+const helpedCount = () => WALKERS.filter(friendMet).length;
+const bikeUnlocked = () => helpedCount() >= WALKERS.length;
+const friendsLeft = () => WALKERS.filter(d => !friendMet(d)).map(d => (d.kind === 'person' ? '🧑' : WALKER_ICON[d.kind] || '') + ' ' + d.name);
+const bikeOn = () => !!(SAVE.bike && SAVE.bike.on && bikeUnlocked() && WORLD && WORLD.kind === 'story');
+const bikeMul = () => (bikeOn() && MODE === 'play' ? 2 : 1);
+function bikeGift(){
+  const b = bikeState(); if (b.got) return;
+  b.got = true; persist(); evSyncWorld(); updateBikeHUD();
+  showDialog('시장님', [
+    '정말 고마워요! 감사의 뜻으로 선물을 준비했어요. 짜잔, 전기 자전거예요!',
+    '페달을 밟으면 바퀴 속 전동기가 도와줘요. 전동기 안의 전자석이 전기가 흐를 때 자석이 되어 바퀴를 힘차게 돌리지요. 전기차와 같은 원리예요!',
+    '충전소 바로 옆에 전기 자전거 거치대를 세워 두었어요.',
+    '단, 자전거는 마을 이웃을 잘 아는 사람만 탈 수 있어요. 마을을 돌아다니는 동물 친구들, 꼬마 로봇 삐삐, 길가 사람들까지 10명을 모두 만나서 이야기해 보면 탈 수 있게 해 줄게요.',
+    `지금까지 만나서 이야기한 친구는 ${helpedCount()}/${WALKERS.length}명이에요. 자전거를 탈 때는 사람을 치지 않게 조심해요!`,
+  ], () => { UI.waypoint = {x:30, y:40, label:'전기 자전거 거치대'}; });
+}
+function bikeRack(){
+  const b = bikeState(), n = helpedCount();
+  if (!b.got) return;
+  if (b.on) return showDialog('전기 자전거 거치대', ['자전거를 거치대에 세웠어요. 걸어서 다녀요.'], () => { b.on = false; persist(); updateBikeHUD(); });
+  if (n < WALKERS.length) return showDialog('전기 자전거 거치대', [`🔒 길가 친구 10명(동물 · 로봇 · 사람)을 모두 만나서 이야기해야 탈 수 있어요. (지금 ${n}/${WALKERS.length}명)`, `아직 못 만난 친구: ${friendsLeft().join(', ')}`, '말풍선(💬)이 떠 있는 친구에게 다가가 E로 말을 걸어요. 지도(M)의 분홍 점이 친구들이에요.']);
+  showDialog('전기 자전거 거치대', ['🚲 전기 자전거를 꺼냈어요! 이제 2배 빠르게 달릴 수 있어요.', '사람과 부딪히면 그 사람이 다치고 경험치가 깎여요. 사람이 많은 곳에서는 화면 위 🚲 단추로 내려요.'], () => { b.on = true; persist(); updateBikeHUD(); SFX.win(); });
+}
+function toggleBike(){
+  const b = bikeState(); if (!b.got || MODE !== 'play' || uiBlocking()) return;
+  if (b.on){ b.on = false; persist(); updateBikeHUD(); toast('자전거에서 내렸어요. (끌고 다녀요)'); return; }
+  if (!bikeUnlocked()){ toast(`🔒 길가 친구 10명을 모두 만나 이야기해야 탈 수 있어요 (${helpedCount()}/${WALKERS.length}) · 남은 친구: ${friendsLeft().join(', ')}`, 'bad'); return; }
+  b.on = true; persist(); updateBikeHUD(); SFX.ping(); toast('🚲 출발! 사람을 조심해요.', 'ok');
+}
+function updateBikeHUD(){
+  const el = $('#bBike'); if (!el) return;
+  const b = bikeState(); el.hidden = !b.got;
+  el.textContent = b.on ? '🚲 내리기' : `🚲 타기${helpedCount() < WALKERS.length ? ` 🔒${helpedCount()}/10` : ''}`;
+  el.classList.toggle('on', !!b.on);
+}
+
+/* ----- 3D 그리기 ----- */
+function mkBike(){
+  const b = new VB(), wheel = (z) => { vbBox(b, -.03, .02, z - .3, .03, .62, z + .3, '#1d2228'); vbBox(b, -.035, .27, z - .05, .035, .37, z + .05, '#9aa3ad'); };
+  wheel(-.48); wheel(.48);
+  vbBox(b, -.04, .3, -.48, .04, .38, .48, '#e5483a');           // 아래 뼈대
+  vbBox(b, -.04, .3, .3, .04, .82, .38, '#e5483a');             // 앞 기둥
+  vbBox(b, -.26, .82, .3, .26, .88, .38, '#2a2f38');            // 손잡이
+  vbBox(b, -.04, .3, -.22, .04, .66, -.14, '#e5483a');          // 안장 기둥
+  vbBox(b, -.11, .66, -.3, .11, .72, -.06, '#1d2228');          // 안장
+  vbBox(b, -.1, .38, -.1, .1, .58, .14, '#ffd23f', 2);          // 배터리
+  vbBox(b, -.06, .25, .42, .06, .37, .54, '#3ee0ff', 3);        // 바퀴 전동기(전자석)
+  return b.mesh();
+}
+function mkStroller(){
+  const b = new VB();
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) vbBox(b, sx * .2 - .04, 0, sz * .22 - .07, sx * .2 + .04, .14, sz * .22 + .07, '#2a2f38');
+  vbBox(b, -.22, .14, -.3, .22, .48, .3, '#f8bbd0'); vbBox(b, -.23, .38, -.3, .23, .68, -.05, '#ec407a');
+  vbBox(b, -.2, .48, .28, .2, .52, .5, '#9aa3ad'); vbBox(b, -.2, .5, .48, .2, .9, .52, '#9aa3ad');
+  return b.mesh();
+}
+function personPose3(look, x, y, z, ry, pitch, walk){
+  const P = model('p:' + look, () => mkPerson(look)), sw = walk ? Math.sin(walk * 10) * .62 : 0;
+  const M = M4.mul(M4.trs(x, y, z, ry, P.s), M4.joint(0, 0, 0, pitch));
+  drawM(P.body, M);
+  drawM(P.leg, M4.mul(M, M4.joint(-.12, .74, 0, sw))); drawM(P.leg, M4.mul(M, M4.joint(.12, .74, 0, -sw)));
+  drawM(P.arm, M4.mul(M, M4.joint(-.37, 1.33, 0, -sw * .8 - (pitch ? 0 : 0)))); drawM(P.arm, M4.mul(M, M4.joint(.37, 1.33, 0, sw * .8)));
+  SHADOWS.push([x, y, z, .42 * P.s]);
+}
+function mkBikeRack(){
+  const b = new VB();
+  vbBox(b, -.7, 0, -.1, .7, .06, .1, '#6f7b88');
+  for (const x of [-.55, -.2, .15, .5]) vbBox(b, x - .03, 0, -.03, x + .03, .5, .03, '#9aa3ad');
+  vbBox(b, -.7, .45, -.04, .7, .5, .04, '#9aa3ad');
+  vbBox(b, -.12, .6, -.02, .12, .9, .02, '#25d17a', 2);
+  return b.mesh();
+}
+function drawPlayerBike3D(){
+  const a = player.ang || 0, gy = (player.h || 0) + (player.jz || 0);
+  drawM(model('bike', mkBike), M4.trs(player.x, gy, player.y, a, 1));
+  return gy + .42;
+}
+function drawPeds3D(t){
+  const rack = WORLD.objects.find(o => o.type === 'bikerack');
+  if (rack){ const cx = rack.x + .5, cz = rack.y + .5, gy = surfY(cx, cz); drawM(model('bikerack', mkBikeRack), M4.trs(cx, gy, cz, Math.PI / 2)); if (!bikeOn()) drawM(model('bike', mkBike), M4.trs(cx + .05, gy, cz, 0, .9)); sprAdd(cx, gy + 1.5 + Math.sin(t * 2.5) * .06, cz, iconBadge('mis', '🚲'), .36); }
+  for (const p of (WORLD.peds || [])){
+    const gy = surfY(p.x, p.y), hop = p.bump > 0 ? Math.sin(p.bump / .6 * Math.PI) * .18 : 0, wob = p.bump > 0 ? Math.sin(p.bump * 30) * .25 : 0;
+    if (p.hurt > 0){ personPose3(p.def.look, p.x, gy + .22, p.y, p.ry || 0, -Math.PI / 2 + .05, 0); continue; }
+    if (p.def.bike){
+      drawM(model('bike', mkBike), M4.trs(p.x, gy + hop, p.y, p.ry || 0, .8));
+      personPose3(p.def.look, p.x, gy + .36 + hop, p.y - Math.cos(p.ry || 0) * .05, p.ry || 0, wob * .5, p.moving ? p.walk : 0);
+      continue;
+    }
+    if (p.def.stroller) drawM(model('stroller', mkStroller), M4.trs(p.x + Math.sin(p.ry || 0) * .62, gy, p.y + Math.cos(p.ry || 0) * .62, p.ry || 0));
+    personPose3(p.def.look, p.x, gy + hop, p.y, p.ry || 0, wob * .35 + (p.def.sp > 2 && p.moving ? .18 : 0), p.moving ? p.walk : 0);
+  }
+}
+/* 화면 위 말풍선: 사람마다 다른 말 · 🆘 도움 요청 · 💢 다툼 · ❓ 병원 이야기 */
+function pedOverlay3D(){
+  if (!WORLD || !WORLD.peds) return;
+  const ox = CAM3.tx, oz = CAM3.tz, t = TIME;
+  for (const p of WORLD.peds){
+    if (Math.hypot(p.x - ox, p.y - oz) > 24) continue;
+    let txt = null, bg = '#ffffff';
+    if (p.hurt > 0 && p.injured){ txt = Math.sin(t * 4) > 0 ? '🆘 도와주세요!' : '🤕 ' + p.def.ouch.slice(0, 14); bg = '#ffd0cc'; }
+    else if (p.hurt > 0) txt = '🤕';
+    else if (p.say) { txt = p.say.txt; if (p.fight) bg = '#ffaaa1'; }
+    else if (p.fight){ txt = '💢'; bg = '#ffaaa1'; }
+    else if (p.check){ txt = '❓ 병원에 가 봐야 할까…'; bg = '#fff3b0'; }
+    else if (p.angry > 0){ txt = '💢'; bg = '#ffaaa1'; }
+    if (!txt) continue;
+    const pr = proj3(p.x, surfY(p.x, p.y) + (p.hurt > 0 ? 1.0 : 2.3) + (p.bump > 0 ? .15 : 0), p.y);
+    if (pr.ok) drawBubble(pr.x, pr.y - (p.fight ? Math.abs(Math.sin(t * 9)) * 4 : 0), txt, bg, '#1c2733');
+  }
+  for (const w of (WORLD.walkers || [])){
+    if (!w.say || walkerHidden(w)) continue;
+    const cx = w.x + .5, cz = w.y + .5; if (Math.hypot(cx - ox, cz - oz) > 24) continue;
+    const hop = w.hop > 0 ? Math.sin((1 - w.hop / w.hopT) * Math.PI) * w.hopH : 0;
+    const pr = proj3(cx, surfY(cx, cz) + (w.def.kind === 'person' ? 2.3 : 1.3) + hop, cz);
+    if (pr.ok) drawBubble(pr.x, pr.y, w.say.txt, '#ffffff', '#1c2733');
+  }
+}
+/* 2D 화면 */
+function pedEnts2D(S, list){
+  for (const p of (WORLD.peds || [])){
+    const px = p.x * S, py = (p.y + .32) * S;
+    list.push({y:p.y + .3, f:() => { if (p.hurt > 0) drawEmoji('🤕', px, py - S * .3, S * .6); else { drawPerson(px, py, S, p.def.look, 'down', p.moving ? p.walk : 0); if (p.def.bike) drawEmoji('🚲', px, py - S * .1, S * .5); if (p.def.stroller) drawEmoji('👶', px + S * .4, py - S * .2, S * .4); } }});
+  }
 }
 /* =========================================================
    6. 미니 게임 — 아이스크림 교재 활동을 게임으로 (게임 기반 학습)
@@ -5932,14 +6591,16 @@ function mgEnd(bolts, msg, extra){
   if (d.cleared && bolts > 0) d.cleared(st, bolts);
   persist(); checkMasters();
   bolts > 0 ? SND.ok() : SND.bad();
-  const next = !d.single && st < 2 && bolts > 0;
+  /* 활동 길에서는 다음 단계가 '같은 활동'일 때만 바로 이어 간다. 다른 활동이면 마을로 돌아가 인물의 안내를 받는다 */
+  const chain = typeof actChainOn === 'function' && actChainOn();
+  const next = !d.single && st < 2 && bolts > 0 && (!chain || actSameAct(d.id, st, st + 1));
   mgCard(`<div class="mg-ci">${bolts > 0 ? (bolts === 3 ? '🏆' : '🎉') : '💪'}</div><h3>${bolts > 0 ? (bolts === 3 ? '완벽해요!' : '성공!') : '아쉬워요, 다시 해 봐요!'}</h3>
     <div class="mg-big">${boltsHTML(bolts)}</div>${best > bolts ? `<p class="mg-small">최고 기록 ${boltsHTML(best)}</p>` : ''}
     <p>${msg || ''}</p>${bolts > 0 && d.learn && d.learn[st] ? `<div class="mg-learn"><b>📘 교재와 이어 보기</b><br>${d.learn[st]}</div>` : ''}${extra || ''}
-    <div class="row" style="justify-content:center;margin-top:12px">${next ? `<button class="btn primary" id="mgNext">${st + 2}단계로</button>` : ''}<button class="btn ${next ? '' : 'primary'}" id="mgAgain">다시 하기</button><button class="btn" id="mgList">게임 목록</button><button class="btn ghost" id="mgOut">마을로</button></div>`);
+    <div class="row" style="justify-content:center;margin-top:12px">${next ? `<button class="btn primary" id="mgNext">${st + 2}단계로</button>` : ''}<button class="btn" id="mgAgain">다시 하기</button>${chain ? '' : '<button class="btn" id="mgList">게임 목록</button>'}<button class="btn ${next ? 'ghost' : 'primary'}" id="mgOut">${chain && !next && bolts > 0 ? '마을로 돌아가기 ▶' : '마을로'}</button></div>`);
   if (next) $('#mgNext').onclick = () => mgStart(d.id, st + 1);
   $('#mgAgain').onclick = () => mgStart(d.id, st);
-  $('#mgList').onclick = () => { mgQuit(true); mgOpenGame(d.id); };
+  if ($('#mgList')) $('#mgList').onclick = () => { mgQuit(true); mgOpenGame(d.id); };
   $('#mgOut').onclick = () => mgQuit();
   if (d.afterEnd) d.afterEnd(st, bolts);
 }
@@ -8618,6 +9279,496 @@ function exitCustom(){
   if (CUSTOM.fromEditor) enterEditor(); else showTitle();
 }
 /* =========================================================
+   📘 활동 — 교과서(아이스크림) 활동 순서대로 이어지는 한 줄 길
+   - 활동마다 '맡은 사람(giver)'이 있다. 그 사람에게 말을 걸면 활동이 시작된다.
+   - 활동을 끝내면 맡은 사람이 정리해 주고, 다음에 만날 사람을 알려 준다.
+   - 다음 사람은 머리 위에 ! 가 뜨고 제자리에서 폴짝폴짝 뛴다. 노란 화살표가 길을 알려 준다.
+   ========================================================= */
+const ACTS = [
+  {id:'a1', icon:'🔍', title:'교실에서 전자석 찾기', place:'m_detect', placeName:'광장의 🔍 전자석 탐정 게임기', giver:'volt', games:[['detect', 0]],
+   book:'전자석을 사용하는 예 조사하기 — 모둠별로 교실에서 전자석을 사용하는 예를 찾아봅시다.',
+   intro:['혹시 전자석으로 책을 공중에 띄우는 제품 뉴스 봤어요? 자석인데 떴다가 내려왔다가 한대요!', '전자석은 생각보다 가까이에 숨어 있어요. 먼저 교실에서 전자석을 사용하는 물건을 찾아봐요. 스피커, 선풍기, 컴퓨터…!'],
+   done:['교실 곳곳에 전자석이 숨어 있었죠? 소리를 내는 스피커, 바람을 만드는 선풍기 속에도요.'],
+   check:{q:'스피커와 선풍기에 공통으로 들어 있는 것은?', o:['전자석', '건전지', '나침반'], a:0, why:'스피커는 전자석으로 판을 떨게 해 소리를 내고, 선풍기는 전동기 속 전자석으로 날개를 돌려요.'}},
+  {id:'a2', icon:'📺', title:'생활 속 전자석과 성질', place:'m_tv', placeName:'해님네 집 📺 텔레비전', giver:'sun', games:[['detect', 1], ['detect', 2]],
+   book:'영상에서 전자석을 사용하는 예를 알아보고 전자석의 어떤 성질을 이용하는지 살펴봅시다. · 새롭게 알게 된 점 공유하기',
+   intro:['안녕! 우리 집 세탁기, 헤어드라이어, 로봇 청소기에도 전자석이 있대. 정말일까?', '떨어지는 기기들을 전자석의 성질 칸에 넣어 줘. 그다음엔 공중 부양 제품도 직접 띄워 보고, 새롭게 알게 된 점을 써 줘!'],
+   done:['드론, 세탁기, 자기 공명 영상 장치, 전기 자동차까지! 전자석이 이렇게 많은 곳에 쓰이다니 놀랐어.', '그런데 그 기기들이 이용한 성질, 정확히 기억나? 볼트 박사님께 다시 정리해 달라고 하자.'],
+   check:{q:'로봇 청소기 바퀴를 돌리는 전동기에는 무엇이 들어 있을까요?', o:['영구 자석만', '전자석', '아무 자석도 없다'], a:1, why:'전동기 속 전자석에 전기가 흐르면 자석이 되어 바퀴를 돌려요.'}},
+  {id:'a3', icon:'🧲', title:'전자석의 성질 떠올리기', place:'m_exp', placeName:'공장 지대 전자석 실험실의 🧪 실험대', giver:'volt', games:[['mag', 0], ['mag', 1], ['mag', 2]],
+   book:'전자석의 성질을 떠올려 봅시다. — 전기가 흐를 때만 자석이 된다 · 자석의 세기를 바꿀 수 있다 · 극의 방향을 바꿀 수 있다',
+   intro:['조사한 기기들이 어떤 성질을 이용했는지 알려면, 전자석의 성질부터 떠올려야 해요.', '스위치를 켜고 끄고, 전지를 하나 더 연결하고, 전지 방향을 바꿔 봐요. 세 가지 성질을 모두 찾아요!'],
+   done:['정리해 볼까요? ① 전기가 흐를 때만 자석이 된다 ② 전지 수로 세기를 바꿀 수 있다 ③ 전지 방향으로 극을 바꿀 수 있다.', '이 세 가지가 실제로 일하는 곳이 고철장이에요. 크레인이 하루 종일 전기를 쓰고 있대요!'],
+   check:{q:'전자석의 극의 방향을 바꾸려면?', o:['전지를 하나 더 연결한다', '전지의 방향을 바꾼다', '스위치를 끈다'], a:1, why:'전지 방향을 바꾸면 전류의 방향이 바뀌어 극이 바뀌어요.'}},
+  {id:'a4', icon:'🏗️', title:'전자석 기중기', place:'m_crane', placeName:'고철장 🕹️ 크레인 조종석', giver:'boss', games:[['crane', 0]],
+   book:'조사한 예는 전자석의 어떤 성질을 이용한 것인지 설명해 봅시다. — 전자석 기중기는 전기가 흐를 때만 자석이 되는 성질로 무거운 철을 들어 옮긴다.',
+   intro:['고철장에 온 걸 환영한다! 크레인 끝의 둥근 판이 바로 전자석이지.', '철 고철만 골라 철 고철함에 옮겨 줘. 무거운 건 전지 2개로 세게, 가벼운 건 1개로! 전기는 아껴야 한다!'],
+   done:['고맙다! 켜서 들고, 꺼서 내려놓고, 무게에 맞게 세기를 바꾸고. 전자석 기중기는 그 성질로 일하는 거야.', '그런데 매번 사람이 크레인을 몰 순 없잖아? 저기 자동 크레인 두뇌 자동이가 고집을 부리고 있어. 가서 좀 도와줘!'],
+   check:{q:'전자석 기중기가 철을 원하는 곳에 내려놓을 수 있는 까닭은?', o:['전기를 끊으면 자석의 성질이 사라져서', '철이 가벼워서', '극이 바뀌어서'], a:0, why:'전자석은 전기가 흐를 때만 자석이 돼요.'}},
+  {id:'a5', icon:'🛝', title:'AI 크레인 두뇌 만들기', place:'m_tree', placeName:'AI 연구소 🖥️ 크레인 두뇌 컴퓨터', giver:'auto', games:[['slide', 0], ['slide', 1], ['slide', 2]], ai:true,
+   book:'(AI 프로그램 개발) 전자석 기중기가 스스로 판단하도록 예/아니요 질문 길(의사결정트리)을 만들고, 처음 보는 고철로 시험해 고치기',
+   intro:['삐릭! 내 규칙은 완벽하다! 번쩍이면 철! 크면 무겁다!', '…알루미늄 캔이 섞였다고? 흥, 그럼 네가 내 두뇌를 새로 짜 봐라. 질문으로 나눠서 처음 보는 고철도 맞히면 인정하지!'],
+   done:['삐릭… 처음 보는 고철도 맞혔다고? 내 규칙이 틀렸다는 걸 인정한다. 겉모습보다 재료를 물어야 했다.', 'AI도 틀릴 수 있다. 틀리면 고치고, 사람이 시험해 봐야 안다! 그런데 저기 도로에 초록 전기차가 헐떡이며 달리던데… 붙잡아서 이야기를 들어 봐라.'],
+   check:{q:'질문 길이 처음 보는 고철에서 틀렸다. 무엇을 해야 할까?', o:['시험 고철의 답을 외워 넣는다', '틀린 고철을 보고 질문을 고쳐 다시 시험한다', '그냥 그대로 쓴다'], a:1, why:'처음 보는 데이터로 시험하고, 틀린 까닭을 찾아 고치는 것이 AI를 만드는 과정이에요.'}},
+  {id:'a6', icon:'⚡', title:'전기 자동차와 충전소', giver:'evdriver', ev:true,
+   book:'영상 속 전자석 예: 전기 자동차 — 전동기 속 전자석. 시장님께 충전소가 필요한 까닭(에너지 절약 · 전자석)과 세울 곳(안전)을 설득하기',
+   done:['충전소 덕분에 배터리가 쑥쑥 차고 있어! 전기차는 전기 에너지를 효율적으로 쓰는 탈것이란다.', '그런데 효율적으로 쓰는 것만큼 안전하게 쓰는 것도 중요해. 안전 마을의 안전이가 집집마다 위험한 곳을 찾고 있대. 도와주겠니?']},
+  {id:'a7', icon:'🏠', title:'전기를 효율적·안전하게 쓰는 방법 조사', place:'m_home', placeName:'안전 마을 🏠 우리 집 안전 탐정 게임기', giver:'guard', games:[['home', 0], ['home', 1]],
+   book:'모둠별로 전기를 효율적이고 안전하게 사용하는 방법을 조사해 봅시다.',
+   intro:['안전 지킴이 안전이예요! 집집마다 전기를 위험하게 쓰거나 낭비하는 곳이 숨어 있어요.', '거실, 부엌, 욕실을 살피며 바른 사용인지, 위험한지, 낭비인지 판단해 주세요. 위험을 내버려 두면 불이 나요!'],
+   done:['멀티탭 문어발, 젖은 손, 안 보는 TV… 위험과 낭비를 잘 찾았어요!', '그런데 마을에는 집이 수백 채예요. 사람 혼자서 다 살필 수는 없어요. 볼트 박사님이 AI 안전 로봇을 준비하고 계세요. 연구소로 가 봐요!'],
+   check:{q:'하나의 콘센트에 플러그를 여러 개 꽂아 쓰면?', o:['바른 사용', '위험', '낭비'], a:1, why:'한꺼번에 많은 전기가 흘러 열이 나고 불이 날 수 있어요.'}},
+  {id:'a8', icon:'🤖', title:'AI 안전 로봇 가르치기', place:'m_nb', placeName:'AI 연구소 🖥️ 안전 로봇 컴퓨터', giver:'volt', games:[['robot', 0], ['robot', 1], ['robot', 2]], ai:true,
+   book:'(AI 프로그램 개발) 조사한 방법을 바른 사용·위험·낭비 데이터로 만들어 로봇을 학습시키고, 처음 보는 장면으로 시험해 고치기',
+   intro:['견습생이 조사한 방법이 로봇의 학습 데이터가 돼요. 문장마다 바른 사용·위험·낭비 이름표를 붙여 가르쳐요.', '관계없는 문장과 개인정보는 빼고, 처음 보는 장면으로 시험해요. 틀리면 로봇 탓보다 데이터부터 살펴봐요!'],
+   done:['로봇이 처음 보는 장면도 판단하게 됐어요! 하지만 로봇도 틀릴 수 있으니 마지막 확인은 사람이 해요.', '이제 우리가 배운 것을 마을 사람들에게 알릴 차례예요. 안전 마을의 달님이 역할놀이를 준비하고 있대요!'],
+   check:{q:'로봇이 위험한 장면을 바른 사용이라고 했다. 가장 먼저 살필 것은?', o:['로봇에게 준 학습 데이터', '태블릿 밝기', '로봇의 이름'], a:0, why:'비슷한 예시가 부족하거나 이름표가 틀렸는지 데이터부터 살펴요.'}},
+  {id:'a9', icon:'📣', title:'다양한 방법으로 표현하기', place:'m_stage', placeName:'달님네 집 📣 역할놀이 무대', giver:'moon', games:[['campaign', 0], ['campaign', 1]],
+   book:'전기를 효율적이고 안전하게 사용하는 방법을 다양한 활동(역할놀이 · 과학 글쓰기 · 그림 그리기)으로 표현해 봅시다.',
+   intro:['나 달님이야! 우리 집 콘센트가 문어발이었던 거 기억나? 다른 집도 그럴지 몰라.', '"만약 ~라면, ~한다. 왜냐하면 ~" 수칙 카드를 만들고, 역할놀이 만화로 마을에 알려 줘!'],
+   done:['네 만화 덕분에 이웃들이 플러그를 머리 잡고 뽑기 시작했어!', '별님이 마트에서 가전제품을 고르는데 에너지 소비 효율 등급이 헷갈린대. 별님네 집에 가 봐!'],
+   check:{q:'전기를 절약하려고 플러그를 뽑을 때 안전한 방법은?', o:['전선을 잡아당긴다', '플러그의 머리 부분을 잡고 뽑는다', '젖은 손으로 뽑는다'], a:1, why:'전선을 당기면 피복이 벗겨져 감전되거나 불이 날 수 있어요.'}},
+  {id:'a10', icon:'🏷️', title:'효율 등급과 까닭 정리', place:'m_mart', placeName:'별님네 집 🏷️ 가전제품 카탈로그', giver:'star', games:[['home', 2]],
+   book:'에너지 소비 효율 등급이 높은 전기 기구 선택하기 · 전기를 효율적이고 안전하게 사용해야 하는 까닭을 이야기해 봅시다.',
+   intro:['나는 별님! 냉장고를 새로 사야 하는데 1등급, 3등급… 뭘 골라야 할까?', '예산 안에서 한 달 전기 요금이 가장 적게 드는 걸 골라 줘. 그리고 전기를 아끼고 안전하게 써야 하는 까닭도 정리해 줘!'],
+   done:['전기를 절약할 수 있고, 감전 사고나 화재를 막을 수 있고, 안전하고 지속가능한 사회를 만들 수 있어서! 이제 확실히 알겠어.', '마을 전력이 다 찼대! 볼트 박사님이 점등식을 준비하고 계셔. 광장으로 가 보자!'],
+   check:{q:'전기를 효율적이고 안전하게 써야 하는 까닭이 아닌 것은?', o:['전기를 절약할 수 있어서', '감전 사고나 화재를 막을 수 있어서', '전기 요금을 더 많이 내려고'], a:2, why:'절약 · 안전 · 지속가능한 사회가 까닭이에요.'}},
+];
+const actById = id => ACTS.find(a => a.id === id);
+const actIdxOf = id => ACTS.findIndex(a => a.id === id);
+const ACT_WHO = {volt:'볼트 박사', sun:'해님', boss:'무쇠 사장님', auto:'자동이', evdriver:'전기차 운전자', guard:'안전이', moon:'달님', star:'별님', mayor:'시장님'};
+const ACT_WHERE = {volt:'AI 연구소 앞', sun:'안전 마을 해님네 집', boss:'공장 지대 고철장', auto:'고철장 크레인 옆', evdriver:'도로를 달리는 초록 전기차', guard:'안전 마을 입구', moon:'안전 마을 달님네 집', star:'안전 마을 별님네 집', mayor:'시청 옆'};
+
+function actState(){ if (!SAVE.act || typeof SAVE.act !== 'object') SAVE.act = {}; return SAVE.act; }
+function actDone(a){
+  if (a.ev) return !!(SAVE.evq && SAVE.evq.step >= 2);
+  return a.games.every(([g, s]) => {
+    if (g === 'crane') return mgCleared('crane', 0) || !!(SAVE.badges && SAVE.badges.em2);
+    if (mgCleared(g, s)) return true;
+    if (g === 'detect' && s === 1) return DEVICES.every(d => SAVE.dex[d.id] && SAVE.dex[d.id].done);   /* 마을 곳곳 기기 도감으로 해도 된다 */
+    if (g === 'home' && s <= 1) return SCENES.every(sc => SAVE.judged[sc.id]);                       /* 안전 마을 장면 14개로 해도 된다 */
+    return false;
+  });
+}
+/* 순서대로: 앞 활동을 끝내야 다음 활동이 '지금 할 일'이 된다 */
+function actIdx(){ for (let i = 0; i < ACTS.length; i++) if (!actDone(ACTS[i])) return i; return ACTS.length; }
+const actCur = () => (SAVE.met && SAVE.met.volt ? ACTS[actIdx()] || null : null);
+const actAllDone = () => actIdx() >= ACTS.length;
+const actReached = id => !!(SAVE.met && SAVE.met.volt) && actIdx() >= actIdxOf(id);
+/* 지금 만나야 할 사람: 처음엔 볼트 박사, 다 끝나면 점등식을 위해 볼트 박사 */
+function actGiverNow(){
+  if (!SAVE.met || !SAVE.met.volt) return 'volt';
+  const a = actCur(); if (!a) return SAVE.story && SAVE.story.finale ? null : 'volt';
+  if (a.ev){ const st = SAVE.evq ? SAVE.evq.step : 0; return st >= 1 ? 'mayor' : 'evcar'; }
+  return actTold(a) ? 'place' : a.giver;
+}
+/* 이야기를 들었으면 다음 신호는 '장소': 직접 걸어가서 E로 시작한다 */
+const actTold = a => !!(a && a.place && actState().told && actState().told[a.id]);
+function actPlaceNow(){ const a = actCur(); return a && actTold(a) ? a.place : null; }
+function actPlaceObj(){ const id = actPlaceNow(); return id && WORLD && WORLD.objects ? WORLD.objects.find(o => o.id === id) : null; }
+function actGiverObj(id = actGiverNow()){ return id && WORLD && WORLD.objects ? WORLD.objects.find(o => o.type === 'npc' && o.id === id) : null; }
+function actWaypoint(){
+  const id = actGiverNow(); if (!id) { UI.waypoint = null; return; }
+  if (id === 'evcar'){ if (typeof evGuide === 'function') evGuide(); return; }
+  if (id === 'place'){ const p = actPlaceObj(); if (p) UI.waypoint = {x:p.x, y:p.y, label:p.name}; return; }
+  const o = actGiverObj(id); if (o) UI.waypoint = {x:o.x, y:o.y, label:ACT_WHO[id] || o.name};
+}
+/* 화면 위 목표 줄 */
+function actObjective(){
+  if (!SAVE.met || !SAVE.met.volt) return '<b>시작</b> AI 연구소 앞의 볼트 박사와 이야기하기';
+  const a = actCur();
+  if (!a) return SAVE.story.finale ? '<b>점등식 성공!</b> 모든 활동을 마쳤어요. [📘 활동]에서 다시 해 볼 수 있어요.' : '<b>모든 활동 완료!</b> 곧 점등식이 시작돼요.';
+  const id = actGiverNow(), who = id === 'evcar' ? '달리는 초록 전기차를 붙잡기' : id === 'place' ? `📍 ${a.placeName}(으)로 가서 E` : `${ACT_WHO[id]}에게 말 걸기`;
+  return `<b>활동 ${actIdx() + 1}/${ACTS.length}</b> ${a.icon} ${esc(a.title)} · ${id === 'place' ? '' : '👤 '}${who}`;
+}
+
+/* 활동 길이 켜져 있나 (로그인한 학생이 이야기 마을에서 볼트 박사를 만난 뒤) */
+const actChainOn = () => !!(WORLD && WORLD.kind === 'story' && SAVE.met && SAVE.met.volt);
+function actOf(g, s){ return ACTS.find(a => a.games && a.games.some(([x, y]) => x === g && y === s)); }
+function actSameAct(g, s1, s2){ const a = actOf(g, s1), b = actOf(g, s2); return !!a && a === b; }
+/* 끝낸 활동 다시 하기: 그 활동의 단계만 */
+function actReplay(a){
+  if (!a.games) return;
+  if (a.games.length === 1){ MG.from = 'act'; mgStart(a.games[0][0], a.games[0][1]); return; }
+  const p = openPanel(`<h2>${a.icon} ${esc(a.title)} 다시 하기</h2><p class="sub">📘 ${esc(a.book)}</p>
+    <div class="row" style="gap:8px">${a.games.map(([g, s]) => { const d = mgDef(g); return `<button class="btn" data-rp="${g}:${s}">${d.icon} ${esc(d.title)}${d.single ? '' : ` ${s + 1}단계`} ${boltsHTML(mgBolts(g, s))}</button>`; }).join('')}</div>`);
+  p.querySelectorAll('[data-rp]').forEach(b => b.onclick = () => { const [g, s] = b.dataset.rp.split(':'); MG.from = 'act'; mgStart(g, +s); });
+}
+
+/* ----- 활동 시작 ----- */
+function actLaunch(a){
+  if (a.ev){ closePanelSilently(); if (MODE !== 'play') enterStory(); evGuide(); return; }
+  const next = a.games.find(([g, s]) => !(g === 'crane' ? actDone(a) : mgCleared(g, s))) || a.games[0];
+  const [g, s] = next;
+  if (!mgOpen(g, s)){ mgOpenGame(g); return; }
+  MG.from = 'act'; mgStart(g, s);
+}
+/* 맡은 사람에게 말을 걸었을 때 */
+function actTalk(a, o){
+  const started = a.games && a.games.some(([g, s]) => mgCleared(g, s));
+  const lines = (started ? [`${a.title}, 이어서 해 볼까?`] : a.intro).map(t => ({who:o.name, text:t}));
+  lines.push({who:o.name, text:`📘 교과서 활동 · ${a.book}`});
+  lines.push({who:o.name, text:`📍 ${a.placeName}(으)로 가 봐요. 그 앞에서 E(또는 살펴보기)를 누르면 시작돼요. 노란 화살표와 바닥의 빛나는 동그라미가 길을 알려 줄 거예요!`, choices:[
+    {label:'알겠어요, 가 볼게요!', fn:() => { const S = actState(); S.told = S.told || {}; S.told[a.id] = true; persist(); }},
+    {label:'어디라고요? 다시 말해 주세요', next:[{who:o.name, text:`${a.placeName}이에요. 화살표를 따라가요!`}], fn:() => { const S = actState(); S.told = S.told || {}; S.told[a.id] = true; persist(); }},
+  ]});
+  showDialog(o.name, lines, () => { actWaypoint(); updateHUD(); if (actTold(a)) toast(`📍 ${a.placeName}(으)로 가요!`, 'ok'); });
+}
+/* 마을의 장소(게임기 · 실험대 · 컴퓨터 …)에서 E를 눌렀을 때 */
+function actAtPlace(objId){
+  const A = ACTS.find(a => a.place === objId);
+  if (!A) return false;
+  if (actDone(A)){ actReplay(A); return true; }
+  const cur = actCur();
+  if (!cur || cur.id !== A.id){
+    const id = actGiverNow();
+    showDialog('안내', [cur ? `아직 이 활동 차례가 아니에요. 지금은 「${cur.title}」 차례예요. ${id === 'evcar' ? '달리는 초록 전기차를 붙잡아요!' : id === 'place' ? `${cur.placeName}(으)로 가요.` : `${ACT_WHERE[id]}의 ${ACT_WHO[id]}에게 가 봐요.`}` : '먼저 AI 연구소 앞의 볼트 박사와 이야기해요.'], () => actWaypoint());
+    return true;
+  }
+  if (!actTold(A)){
+    showDialog('안내', [`여기가 「${A.title}」 하는 곳이에요. 먼저 ${ACT_WHERE[A.giver]}의 ${ACT_WHO[A.giver]}에게 이야기를 들어요!`], () => { const o = actGiverObj(A.giver); if (o) UI.waypoint = {x:o.x, y:o.y, label:ACT_WHO[A.giver]}; });
+    return true;
+  }
+  UI.waypoint = null; actLaunch(A); return true;
+}
+/* 맡은 사람이 아닌 사람에게 말을 걸면, 하던 말 끝에 지금 만날 사람을 알려 준다 */
+function actHintLine(o){
+  const a = actCur(); if (!a) return null;
+  const id = actGiverNow(); if (id === o.id) return null;
+  if (id === 'place') return {who:o.name, text:`「${a.title}」 하러 가는 중이지? ${a.placeName}(으)로 가 봐요!`};
+  if (id === 'evcar') return {who:o.name, text:'지금은 도로를 달리는 초록 전기차를 붙잡아 운전자의 이야기를 들어 볼 차례예요. 차 앞은 위험하니 옆이나 뒤에서!'};
+  return {who:o.name, text:`지금 할 활동은 「${a.title}」이에요. ${ACT_WHERE[id] ? ACT_WHERE[id] + '의 ' : ''}${ACT_WHO[id]}에게 가 봐요!`};
+}
+
+/* ----- 활동을 끝냈을 때: 맡은 사람이 정리 → 확인 질문 → 다음 사람 안내 ----- */
+function actSync(){
+  const S = actState(), i = actIdx();
+  if (S.idx == null || !SAVE.met || !SAVE.met.volt){ S.idx = i; return; }
+  if (i > S.idx){
+    const doneAct = ACTS[i - 1];
+    S.idx = i; persist();
+    if (SAVE.story && Array.isArray(SAVE.story.queue)) storyEnqueue('act:' + doneAct.id);
+  } else if (i < S.idx) S.idx = i;
+}
+function actDoneBeat(id){
+  const a = actById(id); if (!a) return;
+  const whoId = a.ev ? 'evdriver' : a.giver, who = ACT_WHO[whoId];
+  const lines = [{who, text:`🎉 「${a.title}」 활동 완료!`}, ...a.done.map(t => ({who, text:t}))];
+  if (a.check){
+    const c = a.check;
+    lines.push({who, text:`확인 질문! ${c.q}`, choices:c.o.map((op, k) => ({label:op, fn:() => { const r = actState(); r.check = r.check || {}; if (r.check[a.id] == null) r.check[a.id] = k === c.a; persist(); k === c.a ? SND.ok() : SND.bad(); },
+      next:[{who, text:`${k === c.a ? '⭕ 맞아요!' : '❌ 아쉬워요.'} ${c.why}`}]}))});
+  }
+  const nx = actCur(), nid = actGiverNow();
+  if (nx){
+    lines.push({who, text:nid === 'evcar' ? '👉 다음 활동: 「' + nx.title + '」 — 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아요!' : `👉 다음 활동: 「${nx.title}」 — ${ACT_WHERE[nid]}의 ${josa(ACT_WHO[nid], '을', '를')} 만나요! 노란 화살표를 따라가요.`});
+  }
+  showDialog(who, lines, () => { actWaypoint(); updateHUD(); });
+}
+
+/* ----- 활동 목록 (Q) ----- */
+function openActs(){
+  const i = actIdx(), met = SAVE.met && SAVE.met.volt;
+  const row = (a, k) => {
+    const done = actDone(a), cur = met && k === i, lock = !done && !cur;
+    const who = a.ev ? '전기차 운전자 → 시장님' : ACT_WHO[a.giver];
+    return `<div class="act-row ${done ? 'done' : ''} ${cur ? 'cur' : ''} ${lock ? 'lock' : ''}">
+      <div class="act-n">${done ? '✅' : cur ? '▶' : '🔒'}</div>
+      <div class="act-b"><b>${k + 1}. ${a.icon} ${esc(a.title)}</b>${a.ai ? ' <span class="ls-star">AI 개발</span>' : ''}<p>📘 ${esc(a.book)}</p><small>👤 ${esc(who)}</small></div>
+      <div class="act-r">${done && a.games ? `<button class="btn small" data-replay="${a.id}">다시 하기</button>` : cur && MODE === 'play' ? '<button class="btn small primary" data-go>길 안내</button>' : ''}</div></div>`;
+  };
+  const p = openPanel(`<h2>📘 활동</h2>
+    <p class="sub">교과서 활동 순서대로 하나씩 해요. <b>맡은 사람(👤)에게 말을 걸면</b> 활동할 장소를 알려 줘요. 그 장소까지 걸어가 E를 누르면 시작되고, 끝나면 다음에 만날 사람을 알려 줘요. 다음 사람은 머리 위에 <b>!</b>가 뜨고 폴짝폴짝 뛰어요.</p>
+    ${met ? '' : '<div class="okbox" style="margin-bottom:10px">먼저 AI 연구소 앞의 <b>볼트 박사</b>와 이야기해요.</div>'}
+    <div class="act-list">${ACTS.map(row).join('')}</div>
+    <div class="row" style="margin-top:12px;gap:8px"><button class="btn" id="actRec">🗂️ 배움 기록</button></div>`, {wide:true});
+  p.querySelectorAll('[data-replay]').forEach(b => b.onclick = () => actReplay(actById(b.dataset.replay)));
+  const go = p.querySelector('[data-go]'); if (go) go.onclick = () => { closePanel(); actWaypoint(); toast('노란 화살표를 따라가요!'); };
+  p.querySelector('#actRec').onclick = openPortfolio;
+}
+
+/* ----- 미니 게임 결과 기록 (평가 증거) ----- */
+function mgLogArr(){ if (!Array.isArray(SAVE.mgLog)) SAVE.mgLog = []; return SAVE.mgLog; }
+const lsPlain = h => String(h || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+const _actMgEnd = mgEnd;
+mgEnd = function(bolts, msg, extra){
+  const d = MG.cur, st = MG.st, ended = MG.ended;
+  _actMgEnd(bolts, msg, extra);
+  if (!d || ended) return;
+  const log = mgLogArr();
+  log.push({g:d.id, st, b:bolts, msg:lsPlain(msg).slice(0, 220), t:Date.now()});
+  if (log.length > 150) log.splice(0, log.length - 150);
+  persist();
+};
+
+/* ----- 배움 기록 ----- */
+function portfolioText(){
+  const lines = [`전기 마스터 타운 · 배움 기록`, `학생: ${ACC && ACC.label ? ACC.label : (SAVE.nickname || '')}`, `저장한 때: ${new Date().toLocaleString('ko-KR')}`, `레벨: Lv.${rpgLevel()} ${rpgTitle()}`, ''];
+  const chk = actState().check || {}, log = mgLogArr();
+  ACTS.forEach((a, k) => {
+    const done = actDone(a);
+    lines.push(`■ 활동 ${k + 1}. ${a.title} — ${done ? '완료' : k === actIdx() ? '하는 중' : '아직'}`);
+    if (a.check && chk[a.id] != null) lines.push(`- 확인 질문: ${chk[a.id] ? '맞힘' : '틀림'} (${a.check.q})`);
+    for (const [g, s] of a.games || []){
+      const es = log.filter(e => e.g === g && e.st === s); if (!es.length) continue;
+      const d = mgDef(g), last = es[es.length - 1];
+      lines.push(`- ${d ? d.icon + ' ' + d.title + (d.single ? '' : ` ${s + 1}단계`) : g}: ${es.length}번 도전 · 최근 ⚡${last.b} ${last.msg}`);
+    }
+    if (a.id === 'a5'){ const runs = (SAVE.treeRuns || []).filter(t => t.kind === 'test'); if (runs.length) lines.push(`- 새 고철 시험: ${runs.length}번 · 처음 ${Math.round(runs[0].acc * 100)}% → 가장 좋을 때 ${Math.round(Math.max(...runs.map(x => x.acc)) * 100)}%`); }
+    if (a.ev && SAVE.evq && SAVE.evq.step >= 2) lines.push(`- 시장님 설득: ${SAVE.evq.miss ? `다시 말한 횟수 ${SAVE.evq.miss}번` : '한 번에 성공'}`);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+function portfolioHTMLDoc(){
+  const body = esc(portfolioText()).replace(/^■ (.*)$/gm, '<h2>$1</h2>').replace(/\n/g, '<br>');
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>배움 기록</title><style>body{font-family:system-ui,sans-serif;max-width:720px;margin:24px auto;padding:0 16px;line-height:1.7;color:#1c2733}h2{font-size:17px;margin:16px 0 4px;border-bottom:2px solid #f5c542}</style></head><body>${body}</body></html>`;
+}
+async function savePortfolio(){
+  const name = `배움기록_${((ACC && ACC.label) || '학생').replace(/[^\w가-힣-]/g, '')}.html`;
+  const blob = new Blob([portfolioHTMLDoc()], {type:'text/html'});
+  const dl = await mgDownloads();
+  if (dl){
+    try { await dl.save({filename:name, data:blob}); toast('배움 기록을 저장했어요.', 'ok'); }
+    catch (e){ if (!e || e.code !== 'declined') toast('이 화면에서는 저장할 수 없어요. [글 복사]를 써요.', 'bad'); }
+    return;
+  }
+  if (window.claude) return toast('이 화면에서는 저장할 수 없어요. [글 복사]를 써요.', 'bad');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('배움 기록 파일을 내려받았어요.', 'ok');
+}
+function openPortfolio(){
+  const p = openPanel(`<h2>🗂️ 배움 기록</h2>
+    <p class="sub">활동마다 확인 질문과 게임 결과가 모여요. <b>파일로 저장</b>하거나 <b>글 복사</b>로 패들렛에 제출해요.</p>
+    <pre class="ls-pf">${esc(portfolioText())}</pre>
+    <div class="row" style="gap:8px"><button class="btn primary" id="pfSave">💾 파일로 저장</button><button class="btn" id="pfCopy">📋 글 복사</button><button class="btn ghost" id="pfBack">← 활동 목록</button></div>`, {wide:true});
+  p.querySelector('#pfSave').onclick = savePortfolio;
+  p.querySelector('#pfCopy').onclick = () => cpCopy(portfolioText());
+  p.querySelector('#pfBack').onclick = openActs;
+}
+/* =========================================================
+   👤 학생 로그인 · 학생별 기록 · 교사 계기판
+   - 학급 서버(Railway의 server.js)에서 열면: 기록이 서버에 저장돼서 어느 기기에서든 이어 하고, 교사 계기판에 모인다.
+   - 파일·게시본으로 열면: 이 기기 안에 학생별로 따로 저장된다. 계기판은 이 기기의 학생만 보여 준다.
+   ========================================================= */
+const ACC = {id:null, label:'', token:null, server:false, ready:false, syncT:null, dirty:false};
+const TEACHER_HASH = 'eb61b0b69df5042ed4be1cac89b0ce9fe673ca7d387d7d54fbe3f5dc2d157105';   /* 교사 코드의 해시 (코드 자체는 적지 않는다) */
+const ACC_LIST_KEY = 'emt.accounts.v1', ACC_LAST_KEY = 'emt.lastLogin.v1', LEGACY_KEY = 'emt.save.v1';
+
+async function sha256hex(s){
+  if (window.crypto && crypto.subtle){
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+  let h1 = 0x811c9dc5, h2 = 0x1234567;   /* 아주 오래된 브라우저용 대체 (로컬 저장 비밀번호에만 쓴다) */
+  for (const ch of s){ const c = ch.codePointAt(0); h1 = Math.imul(h1 ^ c, 16777619) >>> 0; h2 = Math.imul(h2 + c, 2246822519) >>> 0; }
+  return 'x' + h1.toString(16) + h2.toString(16);
+}
+const normCode = s => String(s || '').replace(/\s+/g, '');
+const accId = (cls, no) => `${String(cls || '').trim() || '우리반'}-${no}`;
+function lsGet(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v){ try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+function localAccounts(){ try { return JSON.parse(lsGet(ACC_LIST_KEY) || '{}') || {}; } catch (e) { return {}; } }
+
+/* 저장 요약: 교사 계기판에 보여 줄 것만 */
+function accSummary(){
+  let lv = 1, title = '';
+  try { lv = rpgLevel(); title = rpgTitle(); } catch (e) {}
+  const done = ACTS.filter(a => actDone(a)).map(a => a.id), cur = actCur();
+  const chk = (SAVE.act && SAVE.act.check) || {};
+  let mc = {em:0, es:0}; try { mc = masterCounts(); } catch (e) {}
+  return {lv, title, done, cur:cur ? cur.id : null, met:!!(SAVE.met && SAVE.met.volt), finale:!!(SAVE.story && SAVE.story.finale),
+    checkOk:Object.values(chk).filter(Boolean).length, checkN:Object.keys(chk).length, bolts:mgTotal(), em:mc.em, es:mc.es,
+    delay:(SAVE.street && SAVE.street.delay) || 0, quarrels:(SAVE.street && SAVE.street.quarrels) || 0, helped:((SAVE.street && SAVE.street.helped) || 0) + ((SAVE.street && SAVE.street.mediated) || 0), hq:(SAVE.street && SAVE.street.hqDone) || 0, t:Date.now()};
+}
+
+/* ----- 서버 ----- */
+async function api(path, body){
+  const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body || {})});
+  let j = null; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw Object.assign(new Error((j && j.error) || '서버 오류'), {status:r.status, code:j && j.code});
+  return j;
+}
+async function detectServer(){
+  if (location.protocol !== 'http:' && location.protocol !== 'https:') return false;
+  try {
+    const c = new AbortController(), t = setTimeout(() => c.abort(), 2500);
+    const r = await fetch('api/ping', {signal:c.signal, cache:'no-store'}); clearTimeout(t);
+    if (!r.ok) return false; const j = await r.json(); return !!(j && j.emt);
+  } catch (e) { return false; }
+}
+
+/* ----- 저장 (ui.js의 persist가 부른다) ----- */
+function accPersist(){
+  if (!ACC.id) return;
+  lsSet(SAVE_KEY, JSON.stringify(SAVE));
+  if (!ACC.server) { lsSet('emt.sum.v1:' + ACC.id, JSON.stringify(accSummary())); return; }
+  ACC.dirty = true; clearTimeout(ACC.syncT); ACC.syncT = setTimeout(accPush, 2500);
+}
+async function accPush(){
+  if (!ACC.server || !ACC.token || !ACC.dirty) return;
+  ACC.dirty = false;
+  try { await api('api/save', {token:ACC.token, save:SAVE, sum:accSummary()}); $('#accSync') && ($('#accSync').textContent = '☁️ 저장됨'); }
+  catch (e){
+    ACC.dirty = true; if ($('#accSync')) $('#accSync').textContent = '⚠️ 저장 대기';
+    if (e.status === 401){ ACC.token = null; toast('다시 로그인해 주세요. (기록은 이 기기에 남아 있어요)', 'bad'); }
+    else { clearTimeout(ACC.syncT); ACC.syncT = setTimeout(accPush, 10000); }
+  }
+}
+window.addEventListener('pagehide', () => {
+  if (ACC.server && ACC.token && ACC.dirty && navigator.sendBeacon){
+    try { navigator.sendBeacon('api/save', new Blob([JSON.stringify({token:ACC.token, save:SAVE, sum:accSummary()})], {type:'application/json'})); ACC.dirty = false; } catch (e) {}
+  }
+});
+
+/* ----- 로그인 화면 ----- */
+function showLogin(msg){
+  ACC.ready = false;
+  const last = (() => { try { return JSON.parse(lsGet(ACC_LAST_KEY) || 'null'); } catch (e) { return null; } })() || {};
+  const el = $('#login'); el.hidden = false; $('#title').hidden = true;
+  $('#lgCls').value = last.cls || ''; $('#lgNo').value = last.no || ''; $('#lgName').value = last.name || ''; $('#lgPin').value = '';
+  $('#lgMode').textContent = ACC.server ? '☁️ 학급 서버에 저장돼요. 어느 기기에서든 이어서 할 수 있어요.' : '💾 이 기기에 학생별로 따로 저장돼요.';
+  $('#lgMsg').textContent = msg || ''; $('#lgMsg').className = msg ? 'bad' : '';
+  setTimeout(() => { const i = last.no ? $('#lgPin') : $('#lgNo'); if (i) i.focus(); }, 50);
+}
+async function doLogin(){
+  const cls = $('#lgCls').value.trim().slice(0, 10), no = parseInt($('#lgNo').value, 10), name = $('#lgName').value.trim().slice(0, 12), pin = $('#lgPin').value.trim();
+  const say = (m, ok) => { $('#lgMsg').textContent = m; $('#lgMsg').className = ok ? 'ok' : 'bad'; };
+  if (!(no >= 1 && no <= 99)) return say('번호를 1~99 사이 숫자로 써요.');
+  if (!name) return say('이름(또는 별명)을 써요.');
+  if (!/^\d{4}$/.test(pin)) return say('비밀번호는 숫자 4자리예요.');
+  const id = accId(cls, no), btn = $('#lgGo'); btn.disabled = true; say('들어가는 중…', true);
+  try {
+    let save = null, fresh = false;
+    if (ACC.server){
+      const j = await api('api/login', {cls, no, name, pin});
+      ACC.token = j.token; save = j.save; fresh = !!j.created;
+      const local = (() => { try { return JSON.parse(lsGet('emt.save.v1:' + id) || 'null'); } catch (e) { return null; } })();
+      if (local && local._t && (!save || !save._t || local._t > save._t)) save = local;   /* 서버에 못 올린 최근 기록이 이 기기에 있으면 그것을 쓴다 */
+    } else {
+      const L = localAccounts(), h = await sha256hex(id + ':' + pin);
+      if (L[id]){
+        if (L[id].name !== name) throw new Error('이 번호는 다른 이름으로 만들어져 있어요. 번호와 이름을 확인해요.');
+        if (L[id].hash !== h) throw new Error('비밀번호가 맞지 않아요. 잊었으면 선생님께 말해요.');
+      } else {
+        fresh = true; L[id] = {cls, no, name, hash:h, created:Date.now()};
+        if (!lsSet(ACC_LIST_KEY, JSON.stringify(L))) throw new Error('이 기기에는 저장할 수 없어요.');
+      }
+      try { save = JSON.parse(lsGet('emt.save.v1:' + id) || 'null'); } catch (e) {}
+      if (!save && fresh){   /* 로그인 기능 전에 이 기기에서 하던 기록이 있으면 처음 만든 학생에게 넘겨준다 */
+        const old = lsGet(LEGACY_KEY);
+        if (old && !Object.values(L).some(a => a.legacy)){ try { save = JSON.parse(old); L[id].legacy = true; lsSet(ACC_LIST_KEY, JSON.stringify(L)); } catch (e) {} }
+      }
+    }
+    lsSet(ACC_LAST_KEY, JSON.stringify({cls, no, name}));
+    ACC.id = id; ACC.label = `${cls ? cls + ' ' : ''}${no}번 ${name}`;
+    SAVE_KEY = 'emt.save.v1:' + id;
+    applySave(save); SAVE.nickname = name;
+    ACC.ready = true; persist();
+    $('#login').hidden = true; btn.disabled = false;
+    afterLogin(fresh);
+  } catch (e){
+    btn.disabled = false;
+    say(e.code === 'name' ? '이 번호는 다른 이름으로 만들어져 있어요. 번호와 이름을 확인해요.' : e.code === 'pin' ? '비밀번호가 맞지 않아요. 잊었으면 선생님께 말해요.' : e.status === 429 ? '너무 여러 번 시도했어요. 1분 뒤에 다시 해요.' : (e.message || '들어가지 못했어요.'));
+  }
+}
+function applySave(s){
+  SAVE = Object.assign(DEFAULT_SAVE(), s && typeof s === 'object' ? s : {});
+  for (const k of LABEL_KEYS) if (!Array.isArray(SAVE.train[k])) SAVE.train[k] = [];
+  SAVE.story = Object.assign({init:false, openingSeen:false, chapter:0, done:{}, queue:[], finale:false}, SAVE.story || {});
+  if (!Array.isArray(SAVE.story.queue)) SAVE.story.queue = [];
+  if (!SAVE.story.done || typeof SAVE.story.done !== 'object') SAVE.story.done = {};
+  rpgNormalize();
+}
+function afterLogin(fresh){
+  HP.inv = 0; UI.waypoint = null;
+  rpgSync(true); storyInit(); updateRpgHUD();
+  loadWorld(buildStoryWorld());
+  if (G3.ok && SAVE.pos){ player.x = SAVE.pos.x; player.y = SAVE.pos.y; }
+  showTitle();
+  $('#accName').textContent = ACC.label;
+  $('#accSync').textContent = ACC.server ? '☁️ 학급 서버' : '💾 이 기기';
+  toast(fresh ? `${ACC.label}, 환영해요!` : `${ACC.label}, 다시 왔군요!`, 'ok');
+}
+function logout(){
+  if (ACC.server && ACC.dirty) accPush();
+  ACC.id = null; ACC.token = null; ACC.label = '';
+  closePanelSilently(); if (MODE !== 'title') showTitle();
+  showLogin();
+}
+async function accBoot(){
+  ACC.server = await detectServer();
+  showLogin();
+}
+
+/* ----- 교사 계기판 ----- */
+const DASH = {code:null, rows:null, timer:null};
+function openTeacherGate(){
+  const p = openPanel(`<h2>📊 교사 계기판</h2><p class="sub">선생님만 들어올 수 있어요. 교사 코드를 입력하세요.</p>
+    <div class="row" style="gap:8px"><input id="tcCode" type="password" placeholder="교사 코드" autocomplete="off" style="width:220px"><button class="btn primary" id="tcGo">들어가기</button></div><p id="tcMsg" class="ls-tip"></p>`);
+  const go = async () => {
+    const code = normCode(p.querySelector('#tcCode').value);
+    if (!code) return;
+    if (ACC.server){
+      try { const j = await api('api/teacher', {code}); DASH.code = code; DASH.rows = j.students; openDashboard(); }
+      catch (e){ p.querySelector('#tcMsg').textContent = e.status === 429 ? '너무 여러 번 시도했어요. 1분 뒤에 다시 해요.' : '코드가 맞지 않아요.'; }
+      return;
+    }
+    if (await sha256hex(code) === TEACHER_HASH){ DASH.code = code; DASH.rows = null; openDashboard(); }
+    else p.querySelector('#tcMsg').textContent = '코드가 맞지 않아요.';
+  };
+  p.querySelector('#tcGo').onclick = go;
+  p.querySelector('#tcCode').onkeydown = e => { if (e.key === 'Enter') go(); };
+  setTimeout(() => { const i = p.querySelector('#tcCode'); if (i) i.focus(); }, 50);
+}
+function localRows(){
+  const L = localAccounts();
+  return Object.entries(L).map(([id, a]) => {
+    let sum = null; try { sum = JSON.parse(lsGet('emt.sum.v1:' + id) || 'null'); } catch (e) {}
+    return {id, cls:a.cls, no:a.no, name:a.name, sum, updated:sum ? sum.t : a.created};
+  });
+}
+function ago(t){
+  if (!t) return '-';
+  const s = (Date.now() - t) / 1000;
+  return s < 60 ? '방금' : s < 3600 ? `${Math.floor(s / 60)}분 전` : s < 86400 ? `${Math.floor(s / 3600)}시간 전` : new Date(t).toLocaleDateString('ko-KR');
+}
+async function dashRefresh(){
+  if (!ACC.server){ DASH.rows = localRows(); return; }
+  try { const j = await api('api/teacher', {code:DASH.code}); DASH.rows = j.students; } catch (e) {}
+}
+async function openDashboard(){
+  if (!DASH.code) return openTeacherGate();
+  if (!DASH.rows) await dashRefresh();
+  const rows = (DASH.rows || []).slice().sort((a, b) => String(a.cls).localeCompare(String(b.cls), 'ko') || a.no - b.no);
+  const cnt = ACTS.map(a => rows.filter(r => r.sum && r.sum.done && r.sum.done.includes(a.id)).length);
+  const head = `<tr><th>반</th><th>번호</th><th>이름</th><th>레벨</th><th>진행</th>${ACTS.map((a, k) => `<th title="${esc(a.title)}">${k + 1}<br><span style="font-size:15px">${a.icon}</span></th>`).join('')}<th>확인 질문</th><th title="다툼으로 지체된 시간 (다툼 횟수)">⏰ 다툼 지체</th><th title="다친 사람 돕기 · 다툼 말리기 / 숨은 퀘스트(MRI)">🤝 도움 · 🔎</th><th>마지막</th>${ACC.server ? '<th></th>' : ''}</tr>`;
+  const body = rows.map(r => {
+    const s = r.sum || {}, done = s.done || [], n = done.length;
+    return `<tr><td>${esc(r.cls || '')}</td><td>${r.no}</td><td>${esc(r.name)}</td><td><b>Lv.${s.lv || 1}</b><br><small>${esc(s.title || '')}</small></td>
+      <td><div class="dash-bar"><i style="width:${Math.round(n / ACTS.length * 100)}%"></i></div><small>${n}/${ACTS.length}${s.finale ? ' 🎆' : ''}</small></td>
+      ${ACTS.map(a => `<td class="dash-c">${done.includes(a.id) ? '✅' : s.cur === a.id ? '🔸' : ''}</td>`).join('')}
+      <td>${s.checkN ? `${s.checkOk}/${s.checkN}` : '-'}</td><td>${s.delay ? `<b style="color:${s.delay >= 60 ? '#ff9b90' : 'inherit'}">${s.delay}초</b><br><small>${s.quarrels || 0}번</small>` : '-'}</td><td>${s.helped || 0} · ${s.hq ? '🔎' + s.hq : '-'}</td><td><small>${ago(r.updated)}</small></td>
+      ${ACC.server ? `<td><button class="btn small ghost" data-pin="${esc(r.id)}" title="비밀번호를 지우면 학생이 다음 로그인 때 새로 정해요">🔑 초기화</button></td>` : ''}</tr>`;
+  }).join('');
+  const p = openPanel(`<h2>📊 교사 계기판</h2>
+    <p class="sub">${ACC.server ? '학급 서버에 저장된 모든 학생' : '이 기기에서 로그인한 학생만 보여요. 학급 서버 주소로 열면 반 전체가 모여요.'} · ✅ 성공한 활동 · 🔸 지금 하는 활동 · 학생 ${rows.length}명</p>
+    <div class="row" style="gap:8px;margin-bottom:8px"><button class="btn small" id="dsRe">↻ 새로 고침</button><button class="btn small ghost" id="dsCsv">📋 표 복사</button><button class="btn small ghost" id="dsBack">← 교사용 안내</button></div>
+    <div class="tblwrap"><table class="tbl dash">${head}${body || `<tr><td colspan="${ACTS.length + 10}">아직 로그인한 학생이 없어요.</td></tr>`}
+      <tr class="dash-sum"><td colspan="5"><b>활동별 성공한 학생</b></td>${cnt.map(c => `<td class="dash-c"><b>${c}</b></td>`).join('')}<td colspan="${ACC.server ? 5 : 4}"></td></tr></table></div>
+    <details style="margin-top:10px"><summary>활동 번호 보기</summary><ol style="line-height:1.7;margin:8px 0">${ACTS.map(a => `<li>${a.icon} ${esc(a.title)}${a.ai ? ' (AI 개발)' : ''}</li>`).join('')}</ol></details>`, {wide:true, onClose:() => { clearInterval(DASH.timer); DASH.timer = null; }});
+  p.querySelector('#dsRe').onclick = async () => { await dashRefresh(); openDashboard(); };
+  p.querySelector('#dsBack').onclick = () => { clearInterval(DASH.timer); DASH.timer = null; openGuide(); };
+  p.querySelector('#dsCsv').onclick = () => cpCopy(['반\t번호\t이름\t레벨\t진행\t' + ACTS.map((a, k) => `${k + 1}.${a.title}`).join('\t'), ...rows.map(r => { const s = r.sum || {}, d = s.done || []; return `${r.cls || ''}\t${r.no}\t${r.name}\t${s.lv || 1}\t${d.length}/${ACTS.length}\t` + ACTS.map(a => d.includes(a.id) ? 'O' : '').join('\t'); })].join('\n'));
+  p.querySelectorAll('[data-pin]').forEach(b => b.onclick = async () => {
+    if (!confirm('이 학생의 비밀번호를 지울까요? 학생이 다음에 로그인할 때 새 비밀번호를 정해요. 기록은 그대로예요.')) return;
+    try { await api('api/teacher/reset', {code:DASH.code, id:b.dataset.pin}); toast('비밀번호를 지웠어요.', 'ok'); } catch (e) { toast('하지 못했어요.', 'bad'); }
+  });
+  clearInterval(DASH.timer);
+  if (ACC.server) DASH.timer = setInterval(async () => { if (!$('#panel .dash')) { clearInterval(DASH.timer); return; } await dashRefresh(); if ($('#panel .dash')) openDashboard(); }, 20000);
+}
+/* =========================================================
    6. 시작 · 게임 루프 · 입력 연결
    ========================================================= */
 function frame(now){
@@ -8627,7 +9778,7 @@ function frame(now){
     if (G3.ok){
       if (MODE === 'editor') renderEditor3D(dt);
       else if (WORLD){
-        if (MODE === 'play'){ if (!uiBlocking()) updatePlayer3D(dt); else { player.moving = false; PATH3.nodes = null; } }
+        if (MODE === 'play'){ if (!uiBlocking()) updatePlayer3D(dt); else { player.moving = false; PATH3.nodes = null; } updateJump(dt); }
         if (MODE === 'patrol') updateRobot(dt);
         if (MODE === 'crane') updateCrane3D(dt);
         updateWalkers(dt); updatePet(dt);
@@ -8640,7 +9791,7 @@ function frame(now){
     }
     else if (MODE === 'editor') renderEditor();
     else if (WORLD){
-      if (MODE === 'play'){ if (!uiBlocking()) updatePlayer(dt); else player.moving = false; }
+      if (MODE === 'play'){ if (!uiBlocking()) updatePlayer(dt); else player.moving = false; updateJump(dt); }
       if (MODE === 'patrol') updateRobot(dt);
       updateWalkers(dt);
       updateCars(dt); carHitCheck(dt); evUpdate();
@@ -8674,11 +9825,13 @@ window.addEventListener('keydown', e => {
   if (UI.modal) return;
   if ((MODE === 'play' || MODE === 'patrol' || MODE === 'editor') && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
   if (MODE === 'play'){
+    if (e.code === 'Space'){ e.preventDefault(); if (!e.repeat) playerJump(); return; }
     if (act){ if (!e.repeat) onAction(); return; }
-    if (e.code === 'KeyQ' && !e.repeat){ if (WORLD.kind === 'story') openQuests(); return; }
+    if (e.code === 'KeyQ' && !e.repeat){ if (WORLD.kind === 'story') openActs(); return; }
     if (e.code === 'KeyM' && !e.repeat){ MINI.big = !MINI.big; MINI.base = null; return; }
     if (e.code === 'KeyI' && !e.repeat){ openBag(); return; }
-    if (e.code === 'KeyG' && !e.repeat){ openGames(); return; }
+    if (e.code === 'KeyB' && !e.repeat){ toggleBike(); return; }
+
     if (G3.ok && e.code === 'KeyV' && !e.repeat){ toggleView(); return; }
     if (G3.ok && (e.code === 'KeyZ' || e.code === 'KeyC') && !e.repeat){ rotateView(e.code === 'KeyZ' ? 1 : -1); return; }
   }
@@ -8733,10 +9886,10 @@ $('#panel').addEventListener('click', e => { if (e.target.closest('[data-close]'
 
 /* HUD */
 $('#bQuest').onclick = () => { if (WORLD.kind === 'story') openQuests(); else toast('친구 맵에서는 화면 위의 진행 상황을 봐요.'); };
-$('#bLab').onclick = openLabHub;
 $('#bMenu').onclick = openMenu;
 $('#bBag').onclick = openBag;
-$('#bGames').onclick = openGames;
+$('#bBike').onclick = toggleBike;
+
 $('#minimap').onclick = () => { MINI.big = !MINI.big; MINI.base = null; };
 $('#bSkipPatrol').onclick = finishRobot;
 $('#bCustomExit').onclick = exitCustom;
@@ -8761,11 +9914,13 @@ $('#cbSkip').onclick = () => cr3AutoDone();
 
 /* 처음 화면 */
 $('#mStart').onclick = () => { SND.tick(); enterStory(); };
-$('#mLab').onclick = openLabHub;
 $('#mEditor').onclick = () => enterEditor('title');
-$('#mImport').onclick = openImport;
 $('#mGuide').onclick = openGuide;
-$('#mGames').onclick = () => { SND.tick(); openGames(); };
+$('#mActs').onclick = () => { SND.tick(); openActs(); };
+$('#mLogout').onclick = logout;
+$('#lgForm').onsubmit = e => { e.preventDefault(); doLogin(); };
+$('#lgTeacher').onclick = openGuide;
+$('#jumpBtn').addEventListener('pointerdown', e => { e.preventDefault(); playerJump(); });
 
 /* 미니 게임 화면 */
 (() => {
@@ -8810,6 +9965,7 @@ function boot(){
   loadWorld(buildStoryWorld());
   showTitle();
   requestAnimationFrame(frame);
+  accBoot();
 }
 const HOT = window.claude && window.claude.hot;
 if (HOT && typeof HOT.ready === 'function') HOT.ready(boot); else boot();

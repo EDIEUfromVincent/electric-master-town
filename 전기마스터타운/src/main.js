@@ -8,7 +8,7 @@ function frame(now){
     if (G3.ok){
       if (MODE === 'editor') renderEditor3D(dt);
       else if (WORLD){
-        if (MODE === 'play'){ if (!uiBlocking()) updatePlayer3D(dt); else { player.moving = false; PATH3.nodes = null; } }
+        if (MODE === 'play'){ if (!uiBlocking()) updatePlayer3D(dt); else { player.moving = false; PATH3.nodes = null; } updateJump(dt); }
         if (MODE === 'patrol') updateRobot(dt);
         if (MODE === 'crane') updateCrane3D(dt);
         updateWalkers(dt); updatePet(dt);
@@ -21,7 +21,7 @@ function frame(now){
     }
     else if (MODE === 'editor') renderEditor();
     else if (WORLD){
-      if (MODE === 'play'){ if (!uiBlocking()) updatePlayer(dt); else player.moving = false; }
+      if (MODE === 'play'){ if (!uiBlocking()) updatePlayer(dt); else player.moving = false; updateJump(dt); }
       if (MODE === 'patrol') updateRobot(dt);
       updateWalkers(dt);
       updateCars(dt); carHitCheck(dt); evUpdate();
@@ -55,11 +55,13 @@ window.addEventListener('keydown', e => {
   if (UI.modal) return;
   if ((MODE === 'play' || MODE === 'patrol' || MODE === 'editor') && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
   if (MODE === 'play'){
+    if (e.code === 'Space'){ e.preventDefault(); if (!e.repeat) playerJump(); return; }
     if (act){ if (!e.repeat) onAction(); return; }
-    if (e.code === 'KeyQ' && !e.repeat){ if (WORLD.kind === 'story') openQuests(); return; }
+    if (e.code === 'KeyQ' && !e.repeat){ if (WORLD.kind === 'story') openActs(); return; }
     if (e.code === 'KeyM' && !e.repeat){ MINI.big = !MINI.big; MINI.base = null; return; }
     if (e.code === 'KeyI' && !e.repeat){ openBag(); return; }
-    if (e.code === 'KeyG' && !e.repeat){ openGames(); return; }
+    if (e.code === 'KeyB' && !e.repeat){ toggleBike(); return; }
+
     if (G3.ok && e.code === 'KeyV' && !e.repeat){ toggleView(); return; }
     if (G3.ok && (e.code === 'KeyZ' || e.code === 'KeyC') && !e.repeat){ rotateView(e.code === 'KeyZ' ? 1 : -1); return; }
   }
@@ -114,10 +116,10 @@ $('#panel').addEventListener('click', e => { if (e.target.closest('[data-close]'
 
 /* HUD */
 $('#bQuest').onclick = () => { if (WORLD.kind === 'story') openQuests(); else toast('친구 맵에서는 화면 위의 진행 상황을 봐요.'); };
-$('#bLab').onclick = openLabHub;
 $('#bMenu').onclick = openMenu;
 $('#bBag').onclick = openBag;
-$('#bGames').onclick = openGames;
+$('#bBike').onclick = toggleBike;
+
 $('#minimap').onclick = () => { MINI.big = !MINI.big; MINI.base = null; };
 $('#bSkipPatrol').onclick = finishRobot;
 $('#bCustomExit').onclick = exitCustom;
@@ -142,11 +144,13 @@ $('#cbSkip').onclick = () => cr3AutoDone();
 
 /* 처음 화면 */
 $('#mStart').onclick = () => { SND.tick(); enterStory(); };
-$('#mLab').onclick = openLabHub;
 $('#mEditor').onclick = () => enterEditor('title');
-$('#mImport').onclick = openImport;
 $('#mGuide').onclick = openGuide;
-$('#mGames').onclick = () => { SND.tick(); openGames(); };
+$('#mActs').onclick = () => { SND.tick(); openActs(); };
+$('#mLogout').onclick = logout;
+$('#lgForm').onsubmit = e => { e.preventDefault(); doLogin(); };
+$('#lgTeacher').onclick = openGuide;
+$('#jumpBtn').addEventListener('pointerdown', e => { e.preventDefault(); playerJump(); });
 
 /* 미니 게임 화면 */
 (() => {
@@ -191,6 +195,7 @@ function boot(){
   loadWorld(buildStoryWorld());
   showTitle();
   requestAnimationFrame(frame);
+  accBoot();
 }
 const HOT = window.claude && window.claude.hot;
 if (HOT && typeof HOT.ready === 'function') HOT.ready(boot); else boot();

@@ -10,18 +10,20 @@ const CHAPTERS = [
   {id:2, day:'D-4',   title:'고철장 소동'},
   {id:3, day:'D-3',   title:'자동이의 고집'},
   {id:4, day:'D-2',   title:'집집마다 숨은 위험'},
-  {id:5, day:'D-1',   title:'우리 동네 안전 지도'},
+  {id:5, day:'D-1',   title:'로봇 순찰대'},
   {id:6, day:'D-DAY', title:'점등식'},
   {id:7, day:'',      title:'에필로그'},
 ];
 function currentChapter(){
   const q = Q();
   if (!q.met) return 0;
-  if (!(q.em1 && q.em4)) return 1;
-  if (!q.em2) return 2;
-  if (!q.em3) return 3;
-  if (!(q.es1 && q.es2)) return 4;
-  if (!q.es3) return 5;
+  /* 장은 활동 순서를 따라간다: 1 전자석 찾기·성질(활동 1~3) · 2 기중기(4) · 3 AI 크레인·전기차(5~6) · 4 집 안 안전(7) · 5 AI 로봇(8) · 6 표현·까닭(9~10) */
+  const i = actIdx();
+  if (i < 3) return 1;
+  if (i < 4) return 2;
+  if (i < 6) return 3;
+  if (i < 7) return 4;
+  if (i < 8) return 5;
   if (!SAVE.story.finale) return 6;
   return 7;
 }
@@ -53,28 +55,34 @@ function chapterCutscene(n){
   const sub = `마을 전력 ${Math.round(stability() * 100)}%`;
   const C = {
     2:{day:'D-4', title:'고철장 소동', sub, cam:{x:40, y:6.5}, slides:[
-      {who:'', text:'전자석 기기 10개를 모두 찾아낸 견습생에게 볼트 박사의 무전이 날아옵니다.'},
-      {who:'볼트 박사', text:'견습생, 급한 연락이에요! 고철장의 재활용 공장이 멈췄대요. 고철 더미에 철이 아닌 쓰레기가 섞여 있어서요.'},
+      {who:'', text:'전자석의 세 가지 성질을 떠올린 견습생에게 볼트 박사의 무전이 날아옵니다.'},
+      {who:'볼트 박사', text:'견습생, 급한 일이에요! 고철장의 재활용 공장이 멈췄대요. 고철 더미에 철이 아닌 쓰레기가 섞여 있어서요.'},
       {who:'볼트 박사', text:'게다가 크레인 전자석이 하루 종일 세게 켜져 있어서 마을 전기가 쭉쭉 새고 있어요. 무쇠 사장님을 도와주세요!'},
     ]},
     3:{day:'D-3', title:'자동이의 고집', sub, cam:{x:39, y:7}, slides:[
       {who:'무쇠 사장님', text:'고맙다, 견습생! 철을 골라내니 공장이 다시 돌아간다. 그런데 매번 사람이 크레인을 몰 수는 없잖아?'},
       {who:'자동이', text:'삐릭! 그럴 땐 내가 있다! 내 규칙은 완벽하다. 번쩍이면 철! 크면 무겁다!'},
       {who:'무쇠 사장님', text:'그 규칙대로 하다가 알루미늄 캔이 줄줄이 섞였잖아…'},
-      {who:'볼트 박사', text:'자동이의 두뇌를 우리가 새로 짜 줘야겠어요. AI 연구소 왼쪽 컴퓨터로 오세요. 질문으로 정확하게 나눠 봐요!'},
+      {who:'볼트 박사', text:'자동이의 두뇌를 우리가 새로 짜 줘야겠어요. 크레인 옆의 자동이에게 말을 걸어요. 질문으로 정확하게 나눠 봐요!'},
     ]},
     4:{day:'D-2', title:'집집마다 숨은 위험', sub, cam:{x:14, y:7}, slides:[
       {who:'', text:'자동이가 새 두뇌로 척척 일하자 고철장의 전기 사용량이 뚝 떨어졌어요. 하지만 마을 불빛은 아직 불안해요.'},
       {who:'안전이', text:'견습생! 이번에는 집집마다 살펴봐야 해요. 전기를 위험하게 쓰거나 낭비하는 집이 많거든요.'},
       {who:'안전이', text:'해님네, 달님네, 별님네 집 안의 장면을 보고 바른 사용인지, 위험한지, 낭비인지 판단해 주세요.'},
     ]},
-    5:{day:'D-1', title:'우리 동네 안전 지도', sub, cam:{x:38, y:28}, slides:[
-      {who:'', text:'점등식 전날 밤. 연구소 컴퓨터에 이웃 마을 이장님들의 메시지가 도착했어요.'},
-      {who:'볼트 박사', text:'견습생, 안전 로봇의 순찰이 성공했어요! 그런데 이웃 마을들도 전기 안전이 걱정이래요. 그래서 우리가 안전 지도를 만들어 보내기로 했어요.'},
-      {who:'볼트 박사', text:'광장의 맵 만들기 공방에서 우리 모둠 마을을 짓고, 상황 카드를 놓고, 로봇을 순찰시켜 봐요.'},
-      {who:'볼트 박사', text:'로봇이 틀리는 장면이 있다면 그 까닭을 찾아 로봇을 더 똑똑하게 고쳐 줘요. 틀린 걸 고치는 것도 마스터의 일이에요!'},
+    5:{day:'D-1', title:'로봇 순찰대', sub, cam:{x:38, y:28}, slides:[
+      {who:'안전이', text:'세 집의 위험과 낭비를 모두 살폈어요! 고마워요, 견습생.'},
+      {who:'안전이', text:'그런데 마을에는 집이 수백 채예요. 사람 혼자서 다 살필 수는 없어요.'},
+      {who:'볼트 박사', text:'그래서 AI 안전 로봇이 필요해요! 견습생이 판단한 장면들이 로봇의 학습 데이터가 돼요.'},
+      {who:'볼트 박사', text:'단, 로봇은 가르친 만큼만 알아요. 연구소 앞으로 와서 나에게 말을 걸어요. 이름표를 붙여 가르치고, 처음 보는 장면으로 시험하고, 틀리면 데이터부터 고쳐 줘요.'},
     ]},
-    6:{day:'D-DAY', title:'점등식', sub:'마을 전력 100%', cam:{x:53.5, y:24}, slides:[
+    6:{day:'D-DAY', title:'점등식 날 아침', sub, cam:{x:53.5, y:24}, slides:[
+      {who:'', text:'점등식 날 아침. 안전 로봇이 마을을 순찰하고, 전력 계기판이 거의 다 찼어요.'},
+      {who:'볼트 박사', text:'견습생, 마지막 부탁이에요. 이웃 마을들도 전기 안전이 걱정이래요. 우리가 배운 것을 알려 줘요!'},
+      {who:'안전이', text:'안전 마을의 달님이 역할놀이로 알리는 걸 도와 달래요. 별님은 에너지 소비 효율 등급이 헷갈린대요.'},
+      {who:'볼트 박사', text:'이번에는 로봇 없이 스스로 판단해 봐요. AI가 없어도 판단할 수 있어야 진짜 마스터니까요. 다 마치면 점등식을 시작해요!'},
+    ]},
+    fin:{day:'D-DAY', title:'점등식', sub:'마을 전력 100%', cam:{x:53.5, y:24}, slides:[
       {who:'', text:'점등식 저녁. 마을 사람들이 광장의 큰 전구탑 앞에 모였어요.'},
       {who:'볼트 박사', text:'발전소 계기판이 안정 구간이에요! 고철장은 필요한 만큼만 전기를 쓰고, 집집마다 위험과 낭비를 줄였고, 안전 로봇이 마을을 순찰하고 있어요.'},
       {who:'무쇠 사장님', text:'자동이도 새 두뇌로 척척이다!'},
@@ -108,21 +116,14 @@ function outroBeat(key){
   }
   return null;
 }
-const OUTRO_KEYS = ['em1', 'es1'];
+const OUTRO_KEYS = [];
 
 /* ===== 인물 대사 (이야기 진행에 따라 달라져요) ===== */
 function npcLines(id){
   const q = Q(), ch = currentChapter();
   if (id === 'volt'){
-    if (ch <= 1 && !q.em1) return ['먼저 공장 지대의 전자석 실험실로 가 봐요. 찌릿!', '실험 전에 어떻게 될까? 예상부터 골라야 해요. 예상이 맞았는지 틀렸는지가 공부의 시작이에요.'];
-    if (ch <= 1) return [`전자석 기기 10개 중 ${q.dexDone}개를 찾았어요.`, '마을 곳곳에서 ? 표시가 떠 있는 기기를 찾아, 어떤 성질을 이용하는지 맞혀 봐요. 깜빡임의 범인 후보도 숨어 있을지 몰라요.'];
-    if (ch === 2) return ['고철장의 무쇠 사장님이 기다리고 있어요. 철이 아닌 쓰레기가 섞여서 공장이 멈췄대요.', '크레인 조종석에서 철 고철만 골라 철 고철함에 옮겨 줘요. 전기는 아껴서요!'];
-    if (ch === 3) return ['자동이가 아직도 번쩍이면 철, 크면 무겁다고 우기고 있어요.', 'AI 연구소 왼쪽 컴퓨터에서 자동이의 새 두뇌를 만들어 줘요. 질문으로 나눠서 정확하게요!'];
-    if (ch === 4 && !q.es1) return ['이제 마을 집들을 살펴볼 차례예요. 안전 지킴이가 안내해 줄 거예요.', '해님네, 달님네, 별님네 집 안의 장면을 하나씩 판단해 봐요.'];
-    if (ch === 4) return ['이제 AI 안전 로봇을 가르칠 차례예요. 연구소 오른쪽 컴퓨터에서 예시 문장을 넣어 학습시키고, 시험 마을 순찰을 보내 봐요.', '로봇이 틀리면 데이터부터 살펴봐요. 틀린 까닭을 찾는 게 가장 중요해요.'];
-    if (ch === 5) return ['광장의 맵 만들기 공방에서 우리 모둠 마을을 지어 안전 지도를 만들어요.', '상황 카드를 3개 이상 놓고 내 로봇을 순찰시켜 봐요. 로봇이 틀린 장면은 데이터를 고쳐서 다시 도전해요!'];
-    if (ch === 6) return ['모든 준비가 끝났어요! 곧 점등식이 시작돼요.'];
-    return ['점등식은 대성공이에요! 마을 불빛이 환하죠?', 'AI는 틀릴 수 있어서 사람이 확인해야 한다는 것, 잊지 마요.', '이웃 마을의 안전 지도(친구 맵 코드)를 불러와 내 로봇으로 순찰시켜 봐도 좋아요.'];
+    if (SAVE.story.finale) return ['점등식은 대성공이에요! 마을 불빛이 환하죠?', 'AI는 틀릴 수 있어서 사람이 확인해야 한다는 것, 잊지 마요.'];
+    return [`찌릿! 마을 전력이 ${Math.round(stability() * 100)}%까지 올라왔어요.`];
   }
   if (id === 'boss'){
     if (!q.em2) return ['고철장에 온 걸 환영한다! 여긴 마을 재활용 공장에 보낼 고철을 모으는 곳이야.', '그런데 큰일이야. 철 말고도 알루미늄 캔, 플라스틱, 종이 상자가 마구 섞여서 공장이 멈췄어!', '크레인 끝의 둥근 판이 전자석이지. 철만 골라 오른쪽 철 고철함에 넣어 줘. 전기를 세게 켜면 마을 불이 더 깜빡이니까 아껴 써야 해!'];
@@ -168,6 +169,7 @@ function storySync(){
   }
   const ch = currentChapter();
   if (ch > S.chapter){ S.chapter = ch; if (ch >= 2 && ch <= 6) storyEnqueue('ch:' + ch); }
+  if (actAllDone() && !S.finale && S.chapter >= 6 && !S.finQ){ S.finQ = true; storyEnqueue('fin'); }
   persist();
 }
 function storyPoll(){
@@ -181,6 +183,8 @@ function runBeat(id){
     showDialog('', b.lines, () => { const m = MISSIONS.find(x => x.key === b.wp); if (m) setWaypointFor(m); });
     return;
   }
+  if (id.startsWith('act:')){ actDoneBeat(id.slice(4)); return; }
+  if (id === 'fin'){ const def = chapterCutscene('fin'); if (def) showCutscene(def, () => afterChapter('fin')); return; }
   if (id.startsWith('ch:')){
     const n = +id.slice(3), def = chapterCutscene(n); if (!def) return;
     showCutscene(def, () => afterChapter(n));
@@ -188,20 +192,21 @@ function runBeat(id){
 }
 function afterChapter(n){
   updateHUD();
-  if (n === 6){
+  if (n === 'fin'){
     SAVE.story.finale = true; persist(); updateHUD(); rpgSync();
     toast('점등식 성공! 마을이 환하게 밝아졌어요.', 'ok');
     UI.pending.push(() => openCert());
     return;
   }
   const c = CHAPTERS[n]; showBanner(c.day, c.title);
-  const m = nextMission(); if (m && m !== 'done') setWaypointFor(m);
+  actWaypoint();
 }
 function startPrologue(){
   const S = SAVE.story;
   const go = () => showDialog('볼트 박사', LINES.voltIntro, () => {
-    SAVE.met.volt = true; S.chapter = Math.max(S.chapter, 1); persist();
-    setWaypointFor(nextMission()); updateHUD(); showBanner('D-5', '깜빡이는 마을');
+    SAVE.met.volt = true; S.chapter = Math.max(S.chapter, 1); actState().idx = actIdx(); persist();
+    updateHUD(); showBanner('D-5', '깜빡이는 마을');
+    const v = actGiverObj('volt'), a = actCur(); if (v && a && a.giver === 'volt') actTalk(a, v); else actWaypoint();
   });
   if (!S.openingSeen){ S.openingSeen = true; persist(); showCutscene(OPENING, go); } else go();
 }

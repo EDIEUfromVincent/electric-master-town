@@ -175,14 +175,16 @@ function mgEnd(bolts, msg, extra){
   if (d.cleared && bolts > 0) d.cleared(st, bolts);
   persist(); checkMasters();
   bolts > 0 ? SND.ok() : SND.bad();
-  const next = !d.single && st < 2 && bolts > 0;
+  /* 활동 길에서는 다음 단계가 '같은 활동'일 때만 바로 이어 간다. 다른 활동이면 마을로 돌아가 인물의 안내를 받는다 */
+  const chain = typeof actChainOn === 'function' && actChainOn();
+  const next = !d.single && st < 2 && bolts > 0 && (!chain || actSameAct(d.id, st, st + 1));
   mgCard(`<div class="mg-ci">${bolts > 0 ? (bolts === 3 ? '🏆' : '🎉') : '💪'}</div><h3>${bolts > 0 ? (bolts === 3 ? '완벽해요!' : '성공!') : '아쉬워요, 다시 해 봐요!'}</h3>
     <div class="mg-big">${boltsHTML(bolts)}</div>${best > bolts ? `<p class="mg-small">최고 기록 ${boltsHTML(best)}</p>` : ''}
     <p>${msg || ''}</p>${bolts > 0 && d.learn && d.learn[st] ? `<div class="mg-learn"><b>📘 교재와 이어 보기</b><br>${d.learn[st]}</div>` : ''}${extra || ''}
-    <div class="row" style="justify-content:center;margin-top:12px">${next ? `<button class="btn primary" id="mgNext">${st + 2}단계로</button>` : ''}<button class="btn ${next ? '' : 'primary'}" id="mgAgain">다시 하기</button><button class="btn" id="mgList">게임 목록</button><button class="btn ghost" id="mgOut">마을로</button></div>`);
+    <div class="row" style="justify-content:center;margin-top:12px">${next ? `<button class="btn primary" id="mgNext">${st + 2}단계로</button>` : ''}<button class="btn" id="mgAgain">다시 하기</button>${chain ? '' : '<button class="btn" id="mgList">게임 목록</button>'}<button class="btn ${next ? 'ghost' : 'primary'}" id="mgOut">${chain && !next && bolts > 0 ? '마을로 돌아가기 ▶' : '마을로'}</button></div>`);
   if (next) $('#mgNext').onclick = () => mgStart(d.id, st + 1);
   $('#mgAgain').onclick = () => mgStart(d.id, st);
-  $('#mgList').onclick = () => { mgQuit(true); mgOpenGame(d.id); };
+  if ($('#mgList')) $('#mgList').onclick = () => { mgQuit(true); mgOpenGame(d.id); };
   $('#mgOut').onclick = () => mgQuit();
   if (d.afterEnd) d.afterEnd(st, bolts);
 }

@@ -591,6 +591,11 @@ function findNear3(){
     const d = Math.hypot(w.x + .5 - player.x, w.y + .5 - player.y), lim = CAM3.fp ? 2.2 : 1.8;
     if (d < lim && (CAM3.fp ? d * .9 : d) < bd){ bd = CAM3.fp ? d * .9 : d; best = w; }
   }
+  for (const p of (WORLD.peds || [])){
+    if (p.hospital) continue;
+    const d = Math.hypot(p.x - player.x, p.y - player.y), lim = p.injured || p.fight ? 2.4 : 1.6;
+    if (d < lim && d * (p.injured || p.fight || p.check ? .6 : 1) < bd){ bd = d * (p.injured || p.fight || p.check ? .6 : 1); best = p; }
+  }
   return best;
 }
 function updatePlayer3D(dt){
@@ -617,7 +622,7 @@ function updatePlayer3D(dt){
     }
   }
   if (m > .05){
-    const sp = (C.fp ? 4.0 : 4.6) * dt * Math.min(1, m) * rpgSpeed(), ox = player.x, oz = player.y;
+    const sp = (C.fp ? 4.0 : 4.6) * dt * Math.min(1, m) * rpgSpeed() * bikeMul(), ox = player.x, oz = player.y;
     if (!blocked3(player.x + mx * sp, player.y)) player.x += mx * sp;
     if (!blocked3(player.x, player.y + mz * sp)) player.y += mz * sp;
     const moved = Math.hypot(player.x - ox, player.y - oz);
@@ -787,7 +792,8 @@ function drawObjects3D(env, dt){
     if (o.type === 'npc'){
       const near = playing && Math.hypot(player.x - cx, player.y - cz) < 3.2;
       const ry = faceTo(o, (talk === o || near) ? player.x : null, player.y, dt, 0);
-      if (o.look === 'robot') robot3(cx, gy, cz, ry, t); else person3(o.look, cx, gy, cz, ry, 0);
+      const hop = playing && o.id === actGiverNow() && talk !== o ? Math.abs(Math.sin(t * 5.5)) * .38 : 0;   /* 다음에 만날 사람은 폴짝폴짝 */
+      if (o.look === 'robot') robot3(cx, gy + hop, cz, ry, t); else person3(o.look, cx, gy + hop, cz, ry, 0);
     } else if (o.type === 'device'){
       const done = objDone(o), icon = story ? DEVICES.find(d => d.id === o.dev).icon : (o.icon || '⚡');
       let iy = 1.35;
@@ -841,7 +847,10 @@ function drawObjects3D(env, dt){
   if (playing && !CAM3.fpActive && !(MODE === 'crane' && CR3.from === 'title')){
     if (talk) player.ang = angLerp(player.ang || 0, Math.atan2(talk.x + .5 - player.x, talk.y + .5 - player.y), 1 - Math.pow(.002, dt));
     setCut(VOXU, null);
-    if (!(HP.inv > 0 && Math.floor(TIME * 12) % 2)) person3('player', player.x, player.h || 0, player.y, player.ang || 0, player.moving ? player.walk : 0, hasEquipped('gloves'));
+    if (!(HP.inv > 0 && Math.floor(TIME * 12) % 2)){
+      const py = bikeOn() ? drawPlayerBike3D() : (player.h || 0) + (player.jz || 0) + (player.bump > 0 ? Math.sin(player.bump / .45 * Math.PI) * .12 : 0);
+      person3('player', player.x, py, player.y, player.ang || 0, player.moving && !player.jz ? player.walk : 0, hasEquipped('gloves'));
+    }
   }
 }
 function drawFlats(env, U){
@@ -933,6 +942,7 @@ function overlay3D(){
     const W = WORLD, t = TIME, ox = CAM3.fpActive ? player.x : CAM3.tx, oz = CAM3.fpActive ? player.y : CAM3.tz;
     if (!UI.dialog && !UI.cutscene) for (const o of W.objects){
       if (o.type === 'deco' || o.type === 'sign') continue;
+      if (W.kind === 'story' && ((o.type === 'device' && !actReached('a2')) || (o.type === 'scene' && !actReached('a7')) || (o.type === 'mission' && o.id !== actPlaceNow()))) continue;   /* 활동 순서가 오기 전에는 표시를 숨긴다 */
       const cx = o.x + .5, cz = o.y + .5; if (Math.hypot(cx - ox, cz - oz) > 24) continue;
       const hy = surfY(cx, cz) + (o.type === 'npc' ? 2.35 : o.type === 'device' ? (o.dev === 'maglev' || o.dev === 'ev' ? 2.55 : 2.0) : o.type === 'mission' ? 2.45 : o.type === 'test' ? (testRevealed() ? 1.85 : 1.2) : 1.85);
       const p = proj3(cx, hy, cz); if (!p.ok || p.x < -40 || p.x > CW + 40 || p.y < -40 || p.y > CH + 40) continue;
@@ -958,13 +968,15 @@ function overlay3D(){
       if (p.ok) drawBubble(p.x, p.y, `${lb.icon} ${lb.name} ${Math.round(b.p * 100)}%`, '#ffffff', '#1c2733');
     }
     if (MODE === 'play' && NEAR && !uiBlocking()){
-      const talkable = NEAR.type === 'npc' || NEAR.type === 'walker';
-      const name = talkable ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
-      const hy = NEAR.type === 'walker' ? (NEAR.def.kind === 'person' ? 2.85 : 1.8) : NEAR.type === 'npc' ? 2.95 : 2.55;
-      const p = proj3(NEAR.x + .5, surfY(NEAR.x + .5, NEAR.y + .5) + hy, NEAR.y + .5);
+      const ped = NEAR.type === 'ped', talkable = NEAR.type === 'npc' || NEAR.type === 'walker' || ped;
+      const name = ped && NEAR.injured ? `${NEAR.name} 도와주기` : ped && NEAR.fight ? '다툼 말리기' : talkable ? `${josa(NEAR.name, '과', '와')} 이야기` : NEAR.type === 'sign' ? '표지판 읽기' : NEAR.name;
+      const hy = ped ? (NEAR.hurt > 0 ? 1.6 : 2.85) : NEAR.type === 'walker' ? (NEAR.def.kind === 'person' ? 2.85 : 1.8) : NEAR.type === 'npc' ? 2.95 : 2.55;
+      const ox = ped ? NEAR.x : NEAR.x + .5, oz = ped ? NEAR.y : NEAR.y + .5;
+      const p = proj3(ox, surfY(ox, oz) + hy, oz);
       if (p.ok) drawLabel(p.x, p.y, `${IS_TOUCH ? '' : 'E · '}${name}`);
     }
     if (MODE === 'play' && !uiBlocking()) evOverlay3D();
+    if (MODE === 'play' && !UI.cutscene) pedOverlay3D();
     if (MODE === 'play' && !uiBlocking()) waypoint3D();
     if (MODE === 'play' && !uiBlocking() && hasEquipped('compass')) compass3D();
     if (CAM3.fpActive && !uiBlocking()){

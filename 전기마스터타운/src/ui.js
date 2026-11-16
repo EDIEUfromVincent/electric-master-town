@@ -6,10 +6,10 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&l
 const IS_TOUCH = ('ontouchstart' in window) || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
 
 /* ----- 저장 (이 기기 브라우저) ----- */
-const SAVE_KEY = 'emt.save.v1';
+let SAVE_KEY = 'emt.save.v1:__none';   /* 로그인하면 학생별 열쇠로 바뀐다 (account.js) */
 const DEFAULT_SAVE = () => ({met:{}, exp:{}, badges:{}, dex:{}, judged:{}, tree:null, treeRuns:[], treeNote:'',
   train:{good:[], danger:[], waste:[]}, model:null, robotRuns:[], lastTest:{}, robotNote:'', crane:{},
-  pos:null, nickname:'', sound:true, maps:[], rpg:null, hp:5, evq:null, mg:{}, notes:{}, works:[], mgTree:null, mgTree1:null, mgTreeDraft:null,
+  pos:null, nickname:'', sound:true, maps:[], rpg:null, hp:5, evq:null, mg:{}, notes:{}, works:[], mgTree:null, mgTree1:null, mgTreeDraft:null, act:{}, mgLog:[], bike:null, street:null,
   story:{init:false, openingSeen:false, chapter:0, done:{}, queue:[], finale:false}});
 let SAVE = DEFAULT_SAVE();
 function loadSave(){
@@ -23,7 +23,7 @@ function loadSave(){
 let saveTimer = null;
 function persist(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); } catch (e) {} }, 120);
+  saveTimer = setTimeout(() => { if (!ACC.id) return; SAVE._t = Date.now(); accPersist(); }, 120);
 }
 
 /* ----- 소리 ----- */
@@ -85,6 +85,7 @@ function setWaypointFor(m){
 }
 function objectiveHTML(){
   const q = Q();
+  if (typeof actObjective === 'function') return actObjective();
   if (!q.met) return '<b>프롤로그</b> AI 연구소의 볼트 박사와 이야기하기';
   const m = nextMission();
   if (m === 'done') return SAVE.story.finale
@@ -95,6 +96,7 @@ function objectiveHTML(){
 }
 function checkMasters(){
   rpgSync();
+  actSync();
   storySync();
   const c = masterCounts();
   if (c.em === 4 && !SAVE.badges.emMaster){
@@ -174,7 +176,7 @@ function celebrate(title, icon, text){
   if (uiBlocking()) UI.pending.push(run); else run();
 }
 function updateHUD(){
-  updateHpHUD();
+  updateHpHUD(); if (typeof updateBikeHUD === 'function') updateBikeHUD();
   const c = masterCounts();
   $('#pillEM').innerHTML = `🧲 전자석 마스터 <b>${c.em}/4</b>`; $('#pillEM').classList.toggle('done', c.em === 4);
   $('#pillES').innerHTML = `⚡ 전기 안전 마스터 <b>${c.es}/3</b>`; $('#pillES').classList.toggle('done', c.es === 3);
@@ -225,12 +227,15 @@ function onAction(){
 function interact(o){
   SND.tick();
   if (o.type === 'evcar') return evCatch();
+  if (o.type === 'bikerack') return bikeRack();
+  if (o.type === 'ped') return talkPed(o);
   if (o.type === 'walker') return talkWalker(o);
   if (WORLD.kind === 'custom') return interactCustom(o);
   if (o.type === 'npc') return talkNPC(o);
   if (o.type === 'sign') return showDialog('표지판', [o.text]);
   if (o.type === 'device'){
     const dev = DEVICES.find(d => d.id === o.dev);
+    if (dev.id === 'mri' && streetMRIReady()) return mriFinale(dev, () => { SAVE.dex[dev.id] = {done:true}; persist(); updateHUD(); checkMasters(); });
     return openDeviceQuiz(dev, () => { SAVE.dex[dev.id] = {done:true}; persist(); updateHUD(); checkMasters(); if (Q().em4) toast('전자석 도감 완성!', 'ok'); }, SAVE.dex[dev.id] && SAVE.dex[dev.id].done);
   }
   if (o.type === 'scene'){
@@ -249,13 +254,16 @@ function talkNPC(o){
   SAVE.met[o.id] = true; persist();
   if (o.id === 'mayor') return evMayorTalk();
   if (o.id === 'evdriver') return evDriverTalk();
-  const lines = npcLines(o.id);
-  showDialog(o.name, lines, () => {
-    if (o.id === 'volt'){ const m = nextMission(); if (m && m !== 'done') setWaypointFor(m); }
-    updateHUD();
-  });
+  const a = actCur();
+  if (a && !a.ev && a.giver === o.id) return actTalk(a, o);
+  const lines = npcLines(o.id).slice(), hint = actHintLine(o); if (hint) lines.push(hint);
+  showDialog(o.name, lines, () => { if (hint) actWaypoint(); updateHUD(); });
 }
 function openMission(act){
+  /* 마을의 실험대·게임기·컴퓨터도 활동 순서를 따른다: 걸어와서 E로 시작 */
+  const mo = WORLD.objects.find(x => x.type === 'mission' && x.act === act);
+  if (mo && actAtPlace(mo.id)) return;
+  if (act === 'editor' && !actReached('a9')) return showDialog('안내', ['맵 만들기 공방은 「다양한 방법으로 표현하기」 활동부터 열려요.']);
   if (act === 'exp') return mgOpenGame('mag');
   if (act === 'crane') return openCraneMenu();
   if (act === 'tree') return mgOpenGame('slide');
@@ -310,7 +318,8 @@ function openTestInfo(t){
 }
 
 /* ----- 미션·연구소·메뉴 패널 ----- */
-function openQuests(){
+function openQuests(){ return openActs(); }
+function openQuestsOld(){
   const q = Q();
   const row = m => {
     const done = q[m.key];
@@ -349,16 +358,18 @@ function openLabHub(){
 function openMenu(){
   const p = openPanel(`<h2>메뉴</h2><div class="menu" style="max-width:420px">
     <button class="btn primary" data-m="resume">계속하기</button>
-    <button class="btn" data-m="quest">미션 보기</button>
+    <button class="btn" data-m="quest">📘 활동 보기</button>
     <button class="btn" data-m="cert">마스터 인증서</button>
     <button class="btn" data-m="guide">교사용 안내</button>
     <button class="btn" data-m="sound">${SAVE.sound ? '소리 끄기' : '소리 켜기'}</button>
-    <button class="btn" data-m="title">처음 화면으로</button></div>
-    <p class="note" style="margin-top:14px">조작: <kbd>W A S D</kbd>·화살표 이동, <kbd>E</kbd>·<kbd>스페이스</kbd> 살펴보기, <kbd>Q</kbd> 미션, <kbd>M</kbd> 지도 크게, <kbd>Esc</kbd> 닫기</p>`);
+    <button class="btn" data-m="title">처음 화면으로</button>
+    <button class="btn ghost" data-m="logout">👤 학생 바꾸기 (${esc(ACC.label || '')})</button></div>
+    <p class="note" style="margin-top:14px">조작: <kbd>W A S D</kbd>·화살표 이동, <kbd>스페이스</kbd> 점프, <kbd>E</kbd> 말 걸기·살펴보기, <kbd>Q</kbd> 활동, <kbd>M</kbd> 지도 크게, <kbd>Esc</kbd> 닫기</p>`);
   p.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
     const m = b.dataset.m;
     if (m === 'resume') closePanel();
-    else if (m === 'quest') openQuests();
+    else if (m === 'quest') openActs();
+    else if (m === 'logout') logout();
     else if (m === 'cert') openCert();
     else if (m === 'guide') openGuide();
     else if (m === 'sound'){ SAVE.sound = !SAVE.sound; persist(); b.textContent = SAVE.sound ? '소리 끄기' : '소리 켜기'; }
@@ -366,49 +377,42 @@ function openMenu(){
   });
 }
 function openGuide(){
-  openPanel(`<h2>교사용 안내</h2>
+  const gp = openPanel(`<h2>교사용 안내</h2>
+    <div class="okbox" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px"><span><b>📊 교사 계기판</b> · 학생별 레벨과 성공한 활동을 한눈에 봐요. 교사 코드가 있어야 들어갈 수 있어요.</span><button class="btn small primary" id="gdDash">계기판 열기</button></div>
     <p class="sub">전기 마스터 타운은 초6 과학 '전기의 이용'([6과15-03], [6과15-04])과 실과 '인공지능이 만들어지는 과정 체험'([6실05-05])을 잇는 AI 프로그램 개발 수업용 게임이에요. 학생은 코드를 쓰지 않고 AI의 판단 방법을 설계·학습·시험·개선해요.</p>
-    <h3>6차시 흐름과 이야기(장)</h3>
-    <p class="sub">이야기는 '점등식까지 D-5'예요. 마을 전기가 모자라 가로등이 깜빡이고, 학생은 전자석과 AI로 낭비와 위험을 찾아 점등식 날 큰 전구탑을 켜요. 장(D-5~D-DAY)이 차시와 같은 걸음으로 흘러요.</p>
-    <div class="tblwrap"><table class="tbl"><thead><tr><th>차시</th><th>이야기 장</th><th>단계</th><th>게임에서 하는 일</th></tr></thead><tbody>
-      <tr><td>1</td><td>프롤로그 · D-5 깜빡이는 마을</td><td>도구 학습 · 문제 발견</td><td>오프닝 컷신, 볼트 박사의 부탁, 전자석 실험실(예상 → 실험), 전자석 도감</td></tr>
-      <tr><td>2</td><td>D-4 고철장 소동</td><td>문제 분석</td><td>고철장 크레인 직접 조종, 판단 기준(특징) 찾기, 종이 트리 초안</td></tr>
-      <tr><td>3 ★</td><td>D-3 자동이의 고집</td><td>해결안 도출 · 구현</td><td>옛 자동 크레인 '자동이'의 틀린 규칙을 AI 크레인 두뇌(의사결정트리)로 고치기 → 새 고철 시험 → 디버깅</td></tr>
-      <tr><td>4 ★</td><td>D-2 집집마다 숨은 위험</td><td>해결안 도출 · 구현</td><td>안전 마을 점검, AI 안전 로봇 데이터 구성 → 학습 → 시험 마을 순찰</td></tr>
-      <tr><td>5</td><td>D-1 우리 동네 안전 지도</td><td>문제 해결 · 개선</td><td>틀린 까닭 분석·데이터 보완·재학습, 맵 만들기로 우리 동네 안전 지도 짓기, 로봇 순찰</td></tr>
-      <tr><td>6</td><td>D-DAY 점등식</td><td>공유 · 성찰</td><td>맵 코드 교환, 친구 맵 순찰(처음 보는 데이터), 모든 미션을 마치면 점등식 컷신과 인증서</td></tr>
+    <h3>👤 학생 로그인과 기록</h3>
+    <p class="sub">처음 화면 전에 학생이 <b>반 · 번호 · 이름 · 비밀번호(숫자 4자리)</b>로 들어와요. 처음 들어오면 자동으로 만들어져요. 학급 서버 주소로 열면 기록이 서버에 저장되어 어느 기기에서든 이어 하고, 계기판에 반 전체가 모여요. 파일로 열면 기록이 그 기기 안에 학생별로 따로 저장돼요. 비밀번호를 잊은 학생은 계기판의 [🔑 초기화]로 지우면 다음 로그인 때 새로 정해요.</p>
+    <h3>📘 활동 순서 — 교과서 활동 순서 그대로</h3>
+    <p class="sub">활동은 한 줄로 이어져요. <b>맡은 사람에게 말을 걸면 활동할 장소를 알려 주고, 학생이 그 장소(바닥에 빛나는 동그라미)까지 직접 걸어가 E를 누르면 활동이 시작</b>되고, 끝나면 그 사람이 정리해 주고 확인 질문을 한 뒤 <b>다음에 만날 사람</b>을 알려 줘요. 다음 사람은 머리 위에 ! 가 뜨고 폴짝폴짝 뛰며, 노란 화살표가 길을 안내해요. 앞 활동을 끝내야 다음 활동이 열려요. 학생은 [📘 활동](Q 키)에서 순서와 진행을 봐요.</p>
+    <div class="tblwrap"><table class="tbl"><thead><tr><th>#</th><th>활동</th><th>교과서 활동</th><th>맡은 사람</th><th>게임</th></tr></thead><tbody>
+      ${ACTS.map((a, k) => `<tr><td>${k + 1}</td><td>${a.icon} <b>${esc(a.title)}</b>${a.ai ? '<br><small>AI 개발</small>' : ''}</td><td>${esc(a.book)}</td><td>${a.ev ? '전기차 운전자 → 시장님' : ACT_WHO[a.giver]}</td><td>${a.ev ? '전기차 붙잡기 · 시장님 설득' : a.games.map(([g, s]) => { const d = mgDef(g); return d ? `${d.icon} ${esc(d.title)}${d.single ? '' : ` ${s + 1}단계`}` : g; }).join('<br>')}</td></tr>`).join('')}
     </tbody></table></div>
-    <h3>🎮 미니 게임 — 교재 활동을 게임으로</h3>
-    <p class="sub">아이스크림 교재 활동 하나를 게임 하나로 바꿨어요. 게임마다 3단계이고 단계마다 ⚡ 1~3개를 받아요. 앞 단계를 깨면 다음 단계가 열려요. 화면 위 [🎮 미니 게임] 단추(<kbd>G</kbd>), 미션 창의 [🎮 게임], 마을의 실험대·컴퓨터·게임기, 처음 화면에서 열 수 있어요. 같은 미션을 마을 탐험으로 해도, 게임으로 해도 인정돼요.</p>
-    <p class="sub">미니 게임도 마을과 같은 <b>블록 3D 화면</b>에서 해요. 카메라가 마을 남쪽의 게임 무대로 날아가요: 실험실 실험대의 작은 전자석 기중기, 블록 교실 · 거실 · 부엌과 욕실, 질문 미끄럼틀 나무판, AI 연구소의 로봇과 분류 칸, 무대 위 3컷 역할놀이. 물건을 화면에서 바로 눌러 고르고, WebGL이 없는 옛 기기에서는 같은 규칙의 2D 판으로 자동으로 바뀌어요. 게임마다 ❤️ · 콤보 · 점수 · 마지막 10초 초읽기 · 효과음 · 불꽃과 화면 흔들림이 있어 긴장감 있게 해요.</p>
-    <div class="tblwrap"><table class="tbl"><thead><tr><th>게임</th><th>교재 활동</th><th>1 · 2 · 3단계</th><th>이어지는 미션</th></tr></thead><tbody>
-      <tr><td>🧲 전자석 실험 게임</td><td>전자석의 성질 떠올리기 (스위치 · 전지 2개 · 전지 방향과 나침반)</td><td>켜고 끄기(흔들리는 코일로 움직이는 수조에 클립 넣기) · 세기(주문 러시: 인내심 막대) · 극의 방향(나침반 속사 · 다가오는 자석 자동차 막기)</td><td>전자석 실험실 (3단계 모두)</td></tr>
-      <tr><td>🔍 전자석 탐정</td><td>전자석을 사용하는 예 조사하기</td><td>교실 곳곳에 흩어진 전자석 예시 모형 12개 찾기(콤보) · 떨어지는 기기를 성질 칸으로 · 공중 부양 제품(오르내리는 목표 높이) + 새롭게 알게 된 점</td><td>전자석 도감 (2단계)</td></tr>
-      <tr><td>🏗️ 고철장 크레인 조종</td><td>전자석 기중기</td><td>3D 고철장 조종석 (실수가 적을수록 ⚡)</td><td>크레인 조종</td></tr>
-      <tr><td>🛝 질문 미끄럼틀</td><td>전자석 기중기의 판단 → AI 크레인 두뇌</td><td>질문 하나로 나누기 · 질문 길 만들기 · 새 고철 트럭 시험(예상 먼저). 고철마다 '어느 통으로 갈까?'를 예측하면 점수·콤보, 통 위 꼬마 전자석이 결정대로 집어 봄</td><td>AI 크레인 두뇌 (3단계 8개 중 7개 이상)</td></tr>
-      <tr><td>🏠 우리 집 안전 탐정</td><td>전기를 안전하게 사용하고 절약하는 방법</td><td>거실 점검 · 부엌·욕실 점검(위험을 내버려 두면 불이 나고, 낭비하면 전기 요금이 올라감) · 에너지 라벨 마트 + 까닭 3가지 영수증</td><td>안전 마을 점검 (2단계)</td></tr>
-      <tr><td>🤖 로봇 훈련소</td><td>바른 사용 · 위험 · 낭비 판단 → AI 안전 로봇</td><td>라벨 붙이기(카드가 컨베이어로 점점 빨리) · 데이터 고르기(상관없는 문장 · 개인정보 버리기) · 시험하고 고치기</td><td>AI 안전 로봇 (3단계)</td></tr>
-      <tr><td>📣 전기 안전 캠페인</td><td>표현하기 (과학 글쓰기 · 역할놀이 · 그림)</td><td>만약 ~라면 수칙 카드 · 역할놀이 3컷 대본 · 우리 동네 안전 지도(맵 만들기) + 갤러리 · 공유 글 복사</td><td>우리 동네 맵 (2단계)</td></tr>
-    </tbody></table></div>
-    <p class="note">AI 프로그램 개발 흐름이 게임 단계에 그대로 들어 있어요. 질문 미끄럼틀은 <b>규칙 세우기 → 다듬기 → 처음 보는 데이터로 시험</b>, 로봇 훈련소는 <b>라벨 붙이기 → 데이터 고르기 → 시험하고 고치기</b>예요. 로봇 훈련소의 정확도는 학생이 붙인 라벨로 실제로 학습해서 계산해요(바른 라벨 12개로 배우면 처음 보는 문장 9개 중 8개, 라벨 2개가 틀리면 6개). ⚡과 경험치는 동기 부여용이고, 평가는 결과 카드의 기록 · 영수증 · 수칙 카드 · 3컷 만화 · 새롭게 알게 된 점으로 해요.</p>
+    <p class="sub">AI 프로그램 개발은 5번(AI 크레인 두뇌: 규칙 세우기 → 다듬기 → 처음 보는 고철로 시험)과 8번(AI 안전 로봇: 라벨 붙이기 → 데이터 고르기 → 시험하고 고치기)이에요. 수업 실천 성찰에 이 두 활동이 든 차시를 추천해요. 2번은 마을 곳곳 기기 10개 도감으로, 7번은 안전 마을 장면 14개 판단으로 대신해도 인정돼요.</p>
+    <p class="note">미니 게임은 마을과 같은 블록 3D 화면에서 하고, 게임마다 ❤️ · 콤보 · 점수 · 마지막 10초 초읽기 · 효과음이 있어요. ⚡과 경험치는 동기 부여용이고, 평가는 [🗂️ 배움 기록](확인 질문 · 게임 결과)과 결과물(수칙 카드 · 3컷 만화 · 영수증 · 새롭게 알게 된 점)로 해요.</p>
     <h3>길 건너기 안전(❤️)과 전기차 충전소 퀘스트</h3>
     <p>마을 도로에는 차가 다녀요. 차는 <b>횡단보도 위의 사람에게만</b> 멈추고, 횡단보도 밖에서 부딪히면 ❤️(5개) 하나를 잃어요. ❤️가 0이 되면 병원 앞에서 깨어나고(진행은 그대로) 40초마다 하나씩 다시 차요. 눌러서 가기도 횡단보도로만 길을 건너요.</p>
-    <p><b>⚡ 전기차 충전소 프로젝트</b>(미션 창 아래): ① 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아 운전자 이야기를 듣고 ② 시청 옆 시장님께 <b>왜 필요한지</b>(전기차는 에너지를 아낀다 · 전동기 속 전자석의 실제 예)와 <b>어디에 세울지</b>(깃발 세 곳 중 안전하고 편리한 곳)를 설득해요. 틀린 근거를 고르면 시장님이 반박하고 다시 물어요. 설득하면 남쪽 주차장 입구에 충전소가 생겨요. [6과15-03]의 전자석 이용 예와 [6과15-04]의 효율·안전을 근거로 말하는 활동이에요.</p>
+    <p><b>⚡ 전기차 충전소 프로젝트</b>(6번 활동): ① 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아 운전자 이야기를 듣고 ② 시청 옆 시장님께 <b>왜 필요한지</b>(전기차는 에너지를 아낀다 · 전동기 속 전자석의 실제 예)와 <b>어디에 세울지</b>(깃발 세 곳 중 안전하고 편리한 곳)를 설득해요. 틀린 근거를 고르면 시장님이 반박하고 다시 물어요. 설득하면 남쪽 주차장 입구에 충전소가 생겨요. [6과15-03]의 전자석 이용 예와 [6과15-04]의 효율·안전을 근거로 말하는 활동이에요.</p>
+    <h3>🚲 전기 자전거와 거리의 행인</h3>
+    <p>충전소가 세워지면 시장님이 <b>전기 자전거</b>를 선물하고(바퀴 속 전동기의 전자석), 충전소 옆에 거치대가 생겨요. <b>길가 친구 10명(동물 5 · 로봇 삐삐 · 사람 4)을 모두 만나 대화해야</b> 탈 수 있고, 타면 빠르기가 2배예요(🚲 단추, <kbd>B</kbd>).</p>
+    <p>할아버지·할머니·유모차 끄는 아주머니·자전거 타는 아이·뛰어다니는 아이·대학생 같은 <b>행인 8명</b>과 길가 친구들이 <b>맵 곳곳을 돌아다녀요</b>. 사람마다 말투가 달라요. 부딪히면 서로 밀려나고, 동물은 펄쩍 뛰거나 날아오르거나 도망가요. <b>행인끼리도 부딪히고</b>, 세게 부딪히면 둘이 다투거나(💢) 어르신이 넘어져 다쳐요. 뛰어다니는 아이는 가끔 무단 횡단을 하다 차에 치여요.</p>
+    <p><b>내가 부딪혀 다툼이 나면</b> 화면 위에 <b>⏰ 다툼 시간 알람</b>이 떠요. 사과하면 바로 끝나지만, 말대꾸할 때마다 15초씩 더 지체되고 세 번째에는 안전이가 말려요. 지체된 시간은 교사 계기판의 '⏰ 다툼 지체'에 쌓여요. <b>자전거로 사람을 치면</b> 그 사람이 다치고 경험치가 20 깎여요. ❤️는 차에 치일 때만 줄어요.</p>
+    <p><b>🔎 숨은 퀘스트 · 병원의 전자석</b>: 다친 사람(🆘)이나 다투는 사람(💢)에게 가서 E를 누르면 도울 수 있어요. 바르게 도우면(움직이지 않게 하고 119 · 서로 사과하게 돕기) 그 사람이 MRI 검사를 걱정해요. MRI가 <b>센 전자석으로 몸속을 찍는 장치</b>이고 쇠붙이를 빼야 한다고 설명해 주면, 병원 옆 MRI에서 의사 선생님의 질문(MRI 전자석이 이용하는 성질)에 답해 퀘스트를 마쳐요. 교과서 '전자석을 사용하는 예'(자기 공명 영상 장치)와 이어져요.</p>
     <h3>이야기와 인물</h3>
     <p><b>볼트 박사</b>(AI 연구소장) · <b>무쇠 사장님</b>(고철장) · <b>자동이</b>(번쩍이면 철, 크면 무겁다고 우기는 옛 자동 크레인 두뇌) · <b>안전이</b>(안전 지킴이) · <b>해님·달님·별님</b>(안전 마을 아이들). 자동이는 "AI도 틀릴 수 있다, 틀리면 고친다, 사람이 시험해 봐야 안다"를 이야기로 보여 주는 인물이에요. 화면 위 '마을 전력' 게이지는 미션을 마칠수록 오르고, 가로등이 연구소에서 가까운 곳부터 하나씩 켜져요.</p>
     <p class="note">컷신은 <kbd>Esc</kbd>나 [건너뛰기]로 넘길 수 있어요. 이야기 진행(점등식)은 평가에 반영하지 않고, 평가는 트리·학습 데이터·오류 분석 기록과 활동지로 해요.</p>
     <h3>RPG 요소 (레벨 · 가방 · 길가 친구)</h3>
     <p>학생은 미션·도감·장면 판단·친구 돕기로 경험치를 얻어 레벨이 올라요(🎒 버튼이나 <kbd>I</kbd> 키로 가방). 능력치는 🧲 전자석 이해 · 🛡️ 안전 감각 · 🌱 절약 감각 · 🤖 AI 다루기 네 가지예요. 마을을 돌아다니는 행인과 동물 10명에게 말을 걸면 교과서 활동과 이어진 질문(효율 등급, LED, 플러그 뽑기, 젖은 손, 문어발, 안전 덮개, 효율·안전하게 써야 하는 까닭, 교실 속 전자석, 공중 부양 제품, 전자석 기중기, AI 확인)을 하고, 맞히면 보너스 경험치와 도구를 얻어요. 심부름 2개(안전 덮개 찾기, 다 쓴 건전지 모으기)도 있어요.</p>
     <p class="note">도구를 찾을 때만 확률(운)이 들어가요. 미션 성공 기준·정답·평가에는 운이나 레벨이 끼어들지 않아요. 크레인 두뇌는 학생 화면에 '질문 길(스무고개)'로 나오고, 질문은 재료·무게·크기·색 네 가지 특징만 고를 수 있으며 한 길에서 같은 특징을 두 번 묻지 못해요.</p>
-    <h3>저장과 공유</h3>
-    <p>진행 상황·트리·학습 데이터·맵은 <b>이 기기의 브라우저</b>에 자동 저장돼요. 다른 기기로 옮기거나 친구와 나눌 때는 맵 만들기의 <b>맵 코드</b>를 패들렛 등에 붙여 넣어요. 공용 기기라면 수업이 끝날 때 처음 화면의 '진행 초기화'를 눌러요.</p>
+    <h3>저장</h3>
+    <p>기록은 로그인한 학생별로 자동 저장돼요. 공용 기기에서는 수업이 끝날 때 처음 화면의 [학생 바꾸기]를 눌러 다음 학생이 로그인하게 해요.</p>
     <h3>개인정보와 안전</h3>
     <p>학습 문장·상황 카드·모둠 이름에 실명, 학교, 연락처를 쓰지 않도록 지도해 주세요. 숫자가 길게 이어지거나 '학교'가 들어간 문장은 프로그램이 경고해요. 위험 장면은 게임 속에서만 다루고 실제 콘센트로 따라 하지 않도록 지도해요.</p>
     <h3>AI 모델에 대해</h3>
     <p>AI 크레인 두뇌는 학생이 짠 규칙을 그대로 따르는 의사결정트리예요. AI 안전 로봇은 장면을 설명하는 문장의 낱말과 글자 조각이 각 무리에 얼마나 자주 나왔는지 세어 판단하는 간단한 분류 모델(나이브 베이즈)이에요. 그래서 데이터가 적거나 치우치면 틀려요. 그 오류 자체가 성찰 소재예요.</p>
     <h3>조작</h3>
-    <p>키보드: <kbd>W A S D</kbd>·화살표 이동, <kbd>E</kbd>·<kbd>스페이스</kbd> 살펴보기, <kbd>Q</kbd> 미션, <kbd>M</kbd> 지도 크게, <kbd>G</kbd> 미니 게임(게임마다 첫 화면에 조작이 나와요, <kbd>Esc</kbd> 그만하기). 태블릿: 왼쪽 조이스틱으로 이동, 오른쪽 버튼으로 살펴보기.</p>
+    <p>키보드: <kbd>W A S D</kbd>·화살표 이동, <kbd>스페이스</kbd> 점프, <kbd>E</kbd>·<kbd>Enter</kbd> 말 걸기·살펴보기, <kbd>Q</kbd> 활동, <kbd>M</kbd> 지도 크게(게임마다 첫 화면에 조작이 나와요, <kbd>Esc</kbd> 그만하기). 태블릿: 왼쪽 조이스틱으로 이동, 오른쪽 버튼으로 살펴보기·점프.</p>
     <p>3D 화면: 화면을 끌면 카메라가 돌고, 휠·두 손가락으로 가까이·멀리 볼 수 있어요. 땅이나 물체를 짧게 누르면 그곳까지 걸어가요. <kbd>Z</kbd>·<kbd>C</kbd> 카메라 돌리기, <kbd>V</kbd> 1인칭·3인칭 바꾸기. 맵 만들기에서는 끌어서 칠하고, 오른쪽 버튼으로 끌거나 <kbd>Q</kbd>·<kbd>E</kbd>로 돌리고, <kbd>W A S D</kbd>로 옮겨요. 크레인 조종과 AI 크레인 두뇌 시험은 고철장의 3D 크레인으로 해요(<kbd>←</kbd><kbd>→</kbd> 이동, <kbd>스페이스</kbd> 자석, <kbd>1</kbd><kbd>2</kbd> 전지 개수, <kbd>Esc</kbd> 그만하기). 오래된 기기에서 3D가 켜지지 않으면 예전 2D 화면으로 자동으로 바뀌어요.</p>`, {wide:true});
+  gp.querySelector('#gdDash').onclick = () => (DASH.code ? openDashboard() : openTeacherGate());
 }
 function openCert(){
   const q = Q(), c = masterCounts();

@@ -215,9 +215,11 @@ function initWalkers(world){
 const walkerHidden = w => w.def.drop === 'bibi' && hasEquipped('bibi');
 function walkOK(x, y){
   const tx = Math.floor(x), ty = Math.floor(y), ch = tileAt(tx, ty);
-  return !!ch && ch !== '=' && !solidAt(tx, ty);
+  return !!ch && (ch !== '=' || onCrosswalk(x, y)) && !solidAt(tx, ty);
 }
 function pickWalkTarget(w){
+  /* 맵 여기저기: 먼 곳을 골라 길을 따라 간다 (가끔은 근처만 어슬렁) */
+  if (Math.random() < .75 && typeof npcPath === 'function'){ const P = npcPath(Math.floor(w.x + .5), Math.floor(w.y + .5)); if (P && P.length){ w.path = P; w.tx = P[0].x; w.ty = P[0].y; return; } }
   const d = w.def, cx = w.x + .5, cz = w.y + .5;
   for (let k = 0; k < 10; k++){
     const a = Math.random() * Math.PI * 2, r = .4 + Math.random() * d.r, x = d.home[0] + Math.cos(a) * r, y = d.home[1] + Math.sin(a) * r;
@@ -229,6 +231,7 @@ function pickWalkTarget(w){
   w.wait = 1.5;
 }
 function updateWalkers(dt){
+  updatePeds(dt);
   const W = WORLD; if (!W || !W.walkers || !W.walkers.length) return;
   const talk = UI.dialog ? dialogNPC() : null;
   for (const w of W.walkers){
@@ -238,9 +241,12 @@ function updateWalkers(dt){
     if (w.wait > 0){ w.wait -= dt; w.moving = false; continue; }
     if (w.tx == null){ pickWalkTarget(w); if (w.tx == null) continue; }
     const dx = w.tx - cx, dz = w.ty - cz, d = Math.hypot(dx, dz), sp = (w.def.kind === 'person' ? 1.1 : w.def.kind === 'bird' ? 1.5 : 1.25) * dt;
-    if (d < .08){ w.tx = null; w.wait = 1.2 + Math.random() * 3; w.moving = false; continue; }
+    if (d < .08){
+      if (w.path && w.path.length > 1){ w.path.shift(); w.tx = w.path[0].x; w.ty = w.path[0].y; continue; }
+      w.path = null; w.tx = null; w.wait = 1.2 + Math.random() * 3; w.moving = false; continue;
+    }
     const s = Math.min(sp, d), nx = cx + dx / d * s, nz = cz + dz / d * s;
-    if (!walkOK(nx, nz)){ w.tx = null; w.wait = .8; continue; }
+    if (!walkOK(nx, nz)){ w.tx = null; w.path = null; w.wait = .8; continue; }
     w.x = nx - .5; w.y = nz - .5; w.moving = true; w.walk += dt;
     w.ry = angLerp(w.ry || 0, Math.atan2(dx, dz), 1 - Math.pow(.001, dt));
   }
@@ -346,9 +352,10 @@ function drawRpg3D(t){
   for (const w of (W.walkers || [])){
     if (walkerHidden(w)) continue;
     const cx = w.x + .5, cz = w.y + .5, gy = surfY(cx, cz), walk = w.moving ? w.walk : 0;
-    if (w.def.kind === 'person') person3(w.def.look, cx, gy, cz, w.ry || 0, walk);
-    else if (w.def.kind === 'robot') robot3(cx, gy, cz, w.ry || 0, t, .62);
-    else animal3(w.def.kind, cx, gy, cz, w.ry || 0, walk, t);
+    const hop = w.hop > 0 ? Math.sin((1 - w.hop / w.hopT) * Math.PI) * w.hopH : 0;   /* 부딪혀서 깡충 · 날아오름 */
+    if (w.def.kind === 'person') person3(w.def.look, cx, gy + hop, cz, w.ry || 0, walk);
+    else if (w.def.kind === 'robot') robot3(cx, gy + hop, cz, w.ry || 0, t, .62);
+    else animal3(w.def.kind, cx, gy + hop, cz, w.ry || 0, hop ? 0 : walk, t);
   }
   for (const p of questPickups()){
     const gy = surfY(p.x, p.y);
@@ -356,9 +363,11 @@ function drawRpg3D(t){
     SHADOWS.push([p.x, gy, p.y, .22]);
   }
   if (PET.on) robot3(PET.x, surfY(PET.x, PET.y), PET.y, PET.ry, t, .5);
+  drawPeds3D(t);
 }
 /* 2D 화면(3D를 못 쓸 때)에서 친구들 그리기 */
 function rpgEnts2D(S, list, x0, x1, y0, y1){
+  pedEnts2D(S, list);
   for (const w of (WORLD.walkers || [])){
     if (walkerHidden(w) || w.x < x0 - 2 || w.x > x1 + 2 || w.y < y0 - 2 || w.y > y1 + 2) continue;
     const px = (w.x + .5) * S, py = (w.y + .82) * S;

@@ -254,6 +254,9 @@ function buildStoryWorld(){
   objects.push({type:'mission', id:'m_build', act:'editor', x:39, y:33, name:'맵 만들기 공방',       emoji:'🧱'});
   objects.push({type:'mission', id:'m_detect', act:'g_detect', x:45, y:27, name:'전자석 탐정 게임기',  emoji:'🔍'});
   objects.push({type:'mission', id:'m_home', act:'g_home', x:12, y:15, name:'우리 집 안전 탐정 게임기', emoji:'🏠'});
+  objects.push({type:'mission', id:'m_tv',    act:'p_tv',    x:10, y:5,  name:'해님네 텔레비전',      emoji:'📺'});
+  objects.push({type:'mission', id:'m_stage', act:'p_stage', x:19, y:5,  name:'달님네 역할놀이 무대',  emoji:'📣'});
+  objects.push({type:'mission', id:'m_mart',  act:'p_mart',  x:7,  y:14, name:'별님네 가전제품 카탈로그', emoji:'🏷️'});
   for (const n of NPCS) objects.push({type:'npc', id:n.id, x:n.x, y:n.y, name:n.name, look:n.look});
   objects.push({type:'npc', id:'mayor', x:50, y:18, name:'시장님', look:'mayor'});
   objects.push({type:'sign', id:'sgCity', x:43, y:18, text:'🏛️ 시청 — 시장님(오른쪽)이 마을 일을 의논해요.'});
@@ -294,7 +297,7 @@ const LINES = {
     '그래서 두 가지를 배워야 해요. 전자석이 어떻게 일하는지, 그리고 전기를 안전하게 아껴 쓰는 방법이요.',
     '마을이 너무 넓어서 사람 혼자서는 다 못 살펴요. 그래서 AI를 직접 가르쳐 도움을 받을 거예요. 단, AI는 틀릴 수 있으니 우리가 꼭 확인해야 해요!',
     '마을 사람들과 동물 친구들도 도움이 필요해요. 말을 걸어 도와주면 경험치와 도구를 얻을 수 있어요. 가방은 화면 위 🎒 버튼이나 I 키예요.',
-    '화면 위 [미션]이나 Q 키를 누르면 할 일이 보여요. 노란 화살표를 따라 공장 지대의 전자석 실험실부터 가 봐요!',
+    '화면 위 [📘 활동]이나 Q 키를 누르면 할 일이 보여요. 활동을 마칠 때마다 다음에 만날 사람을 알려 줄게요. 그 사람은 머리 위에 ! 가 뜨고 폴짝폴짝 뛰어요!',
   ],
   boss: [
     '고철장에 온 걸 환영해요! 저기 크레인 끝에 달린 둥근 판이 바로 전자석이에요.',

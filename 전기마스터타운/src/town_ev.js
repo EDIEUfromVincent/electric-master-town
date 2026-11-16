@@ -66,7 +66,7 @@ const EVOBJ = {type:'evcar', name:'전기차 붙잡기', x:0, y:0};
 const EV_FLAGS = [[31, 39, '① 주차장 입구 옆'], [20, 13, '② 연못 옆'], [19, 12, '③ 꽃밭 놀이터 한가운데']];
 function evq(){ if (!SAVE.evq || typeof SAVE.evq !== 'object') SAVE.evq = {step:0, intro:false, miss:0}; return SAVE.evq; }
 const evCar = () => ((WORLD && WORLD.cars) || []).find(c => c.quest);
-const evOn = () => !!(WORLD && WORLD.kind === 'story' && SAVE.met && SAVE.met.volt);
+const evOn = () => !!(WORLD && WORLD.kind === 'story' && typeof actReached === 'function' && actReached('a6'));
 /* 붙잡기: 차의 옆이나 뒤에서 가까이 가면 'E · 전기차 붙잡기'가 뜬다 (앞에 서면 부딪힌다!) */
 function evNear(near){
   const q = evq(), c = evCar();
@@ -149,6 +149,7 @@ function evBuild(){
   award('eco', 25); award('em', 15);
   UI.waypoint = {x:31, y:40, label:'충전소'};
   toast(`⚡ 전기차 충전소 완공! 주차장 입구에 충전소가 생겼어요.${EVQ.miss ? '' : ' 한 번에 설득 성공! 🏅'}`, 'ok');
+  setTimeout(() => bikeGift(), 900);   /* 시장님의 선물: 전기 자전거 */
   checkMasters();
 }
 /* 퀘스트 단계에 맞게 마을을 꾸민다 (불러올 때 · 단계가 바뀔 때) */
@@ -162,6 +163,7 @@ function evSyncWorld(){
   }
   if (q.step === 1) EV_FLAGS.forEach(([x, y, label], i) => WORLD.objects.push({type:'deco', kind:'evflag', id:'evflag' + i, n:i, label, x, y, ev:true}));
   if (q.step >= 2) WORLD.objects.push({type:'deco', kind:'charger', id:'evcharger', x:31, y:40, ev:true});
+  if (q.step >= 2 && SAVE.bike && SAVE.bike.got) WORLD.objects.push({type:'bikerack', id:'bikerack', x:30, y:40, name:'전기 자전거 거치대', ev:true});
   rebuildSolidMap();
 }
 function evQuestCard(){
