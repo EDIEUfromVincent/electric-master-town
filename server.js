@@ -4,7 +4,8 @@
 //  - 기록은 DATA_DIR(기본 ./data, Railway에서는 볼륨 /data)에 학생마다 JSON 파일 하나로 저장한다
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000, ROOT = __dirname;
-const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'));
+// Railway에 /data 볼륨을 붙이면 자동으로 그곳에 저장한다 (재배포해도 기록이 남는다)
+const DATA_DIR = path.resolve(process.env.DATA_DIR || (fs.existsSync('/data') ? '/data' : path.join(ROOT, 'data')));
 const STU_DIR = path.join(DATA_DIR, 'students');
 fs.mkdirSync(STU_DIR, {recursive:true});
 // 교사 코드: 환경 변수 TEACHER_CODE가 있으면 그것을, 없으면 기본 코드의 해시를 쓴다 (공백은 무시)
