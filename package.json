@@ -1,0 +1,8 @@
+{
+  "name": "electric-master-town",
+  "version": "1.0.0",
+  "private": true,
+  "description": "전기 마스터 타운 — 초6 과학 '전기의 이용' AI 프로그램 개발 수업용 3D 블록 마을 게임",
+  "scripts": { "start": "node server.js", "build": "bash 전기마스터타운/build.sh" },
+  "engines": { "node": ">=18" }
+}

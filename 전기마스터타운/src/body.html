@@ -1,0 +1,147 @@
+<div id="app">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <canvas id="world" aria-label="전기 마스터 타운 게임 화면"></canvas>
+
+  <div id="hud" hidden>
+    <div class="top">
+      <div>
+        <div class="pills">
+          <span class="pill" id="pillEM">🧲 전자석 마스터 <b>0/4</b></span>
+          <span class="pill" id="pillES">⚡ 전기 안전 마스터 <b>0/3</b></span>
+          <span class="pill" id="pillPower" title="마을 전력 안정도: 미션을 마칠수록 올라요">💡 마을 전력 <b>10%</b></span>
+          <span class="pill" id="hpBar" title="❤️ 목숨: 횡단보도 밖에서 차에 부딪히면 줄어요">❤️❤️❤️❤️❤️</span>
+        </div>
+        <div id="objective"></div>
+      </div>
+      <div id="hudBtns">
+        <button class="btn small volt" id="bGames" title="미니 게임 (G)">🎮 미니 게임</button>
+        <button class="btn small" id="bBag" title="가방 (I)">🎒 Lv.1</button>
+        <button class="btn small" id="bQuest">미션 <kbd>Q</kbd></button>
+        <button class="btn small" id="bLab">AI 연구소</button>
+        <button class="btn small" id="bMenu">메뉴</button>
+      </div>
+    </div>
+    <canvas id="minimap" width="180" height="132" title="지도 (M: 크게 보기)"></canvas>
+    <div id="camBtns">
+      <button class="btn small" id="bCamL" title="카메라 왼쪽으로 돌리기 (Z)" aria-label="카메라 왼쪽으로 돌리기">⟲</button>
+      <button class="btn small" id="bView" title="1인칭 · 3인칭 바꾸기 (V)">1인칭</button>
+      <button class="btn small" id="bCamR" title="카메라 오른쪽으로 돌리기 (C)" aria-label="카메라 오른쪽으로 돌리기">⟳</button>
+    </div>
+    <div id="patrolBar" hidden><span id="patrolText">AI 안전 로봇 순찰 중…</span><button class="btn small volt" id="bSkipPatrol">결과 바로 보기</button></div>
+    <div id="customBar" hidden><span id="customText"></span><button class="btn small" id="bCustomExit">나가기</button></div>
+  </div>
+
+  <div id="touch" hidden>
+    <div id="joy"><div id="joyKnob"></div></div>
+    <button id="actBtn">살펴<br>보기</button>
+  </div>
+
+  <div id="craneBar" hidden>
+    <div class="cb-top">
+      <b id="cbTitle">고철장 크레인 조종</b>
+      <span class="meter">전기 사용량 <b id="cbE">0</b></span>
+      <span class="meter"><span id="cbNLabel">옮긴 철</span> <b id="cbN">0</b>/<span id="cbNMax">4</span></span>
+      <button class="btn small" id="cbExit">그만하기 <kbd>Esc</kbd></button>
+    </div>
+    <div id="cbMsg" class="cb-msg"></div>
+    <div class="cb-ctrl" id="cbCtrl">
+      <button class="btn hold" id="cbL" aria-label="왼쪽으로">◀</button><button class="btn hold" id="cbR" aria-label="오른쪽으로">▶</button>
+      <button class="btn primary" id="cbMag">자석 켜기</button>
+      <button class="btn on" id="cbB1">전지 1개</button><button class="btn" id="cbB2">전지 2개</button>
+    </div>
+    <div class="cb-ctrl" id="cbAuto" hidden><button class="btn" id="cbFast">빠르게</button><button class="btn" id="cbSkip">결과 바로 보기</button></div>
+    <div id="cbDone"></div>
+  </div>
+
+  <div id="toast" hidden></div>
+  <div id="rpgToasts" aria-live="polite"></div>
+  <div id="levelUp" hidden><b>레벨 업!</b><span class="lu-lv"></span><span class="lu-tt"></span></div>
+  <div id="banner" hidden><span class="b-day"></span><span class="b-title"></span></div>
+
+  <div id="cutscene" hidden>
+    <div class="cs-bar top"></div>
+    <div class="cs-card" id="csCard"><div class="cs-day"></div><div class="cs-title"></div><div class="cs-sub"></div></div>
+    <div class="cs-bar bottom">
+      <div class="cs-box">
+        <div class="cs-who" id="csWho"></div>
+        <div class="cs-line" id="csLine"></div>
+        <div class="cs-foot"><span>클릭 · <kbd>E</kbd> · <kbd>스페이스</kbd> 다음</span><button class="btn small ghost" id="csSkip">건너뛰기 <kbd>Esc</kbd></button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dialog" hidden>
+    <div class="who"></div>
+    <div class="line"></div>
+    <div class="choices" id="dlgChoices" hidden></div>
+    <div class="foot"><span>클릭 · <kbd>E</kbd> · <kbd>스페이스</kbd></span><button class="btn small primary" id="dlgNext">다음 ▶</button></div>
+  </div>
+
+  <div id="editor" hidden>
+    <div id="edTop">
+      <input id="edTitle" maxlength="20" placeholder="맵 이름" aria-label="맵 이름">
+      <input id="edTeam" maxlength="12" placeholder="모둠 이름 (실명 X)" aria-label="모둠 이름">
+      <button class="btn small" id="edNew">새 맵</button>
+      <button class="btn small" id="edSave">저장</button>
+      <button class="btn small" id="edOpen">불러오기</button>
+      <button class="btn small" id="edCode">맵 코드</button>
+      <button class="btn small" id="edCheck">맵 점검</button>
+      <button class="btn small primary" id="edPlay">플레이</button>
+      <button class="btn small volt" id="edPatrol">로봇 순찰</button>
+      <button class="btn small" id="edExit">나가기</button>
+      <span id="edStatus"></span>
+    </div>
+    <div id="edPal"></div>
+    <div id="edArea"></div>
+    <div id="edCam">
+      <span class="ed-cam-tip">끌어서 칠하기 · 오른쪽 끌기 돌리기 · 휠 확대 · 두 손가락 움직이기</span>
+      <button class="btn small" data-ec="l" title="왼쪽으로 돌리기 (Q)" aria-label="왼쪽으로 돌리기">⟲</button>
+      <button class="btn small" data-ec="r" title="오른쪽으로 돌리기 (E)" aria-label="오른쪽으로 돌리기">⟳</button>
+      <button class="btn small" data-ec="in" title="가까이 (+)" aria-label="가까이">＋</button>
+      <button class="btn small" data-ec="out" title="멀리 (-)" aria-label="멀리">－</button>
+      <button class="btn small" data-ec="top" title="위에서 보기 / 비스듬히 보기">위에서</button>
+      <button class="btn small" data-ec="fit" title="맵 전체 보기">전체</button>
+    </div>
+  </div>
+
+  <div id="title">
+    <div class="title-card">
+      <div class="logo">전기<br><span>마스터</span> 타운</div>
+      <div class="tagline"><b>전자석 마스터</b> · <b>전기 안전 마스터</b>에 도전하는 블록 마을</div>
+      <div class="story-teaser" id="storyTeaser"></div>
+      <div class="badgebar" id="titleBadges"></div>
+      <div class="menu">
+        <button class="btn primary" id="mStart">마을 탐험 <small id="mStartSub">처음 시작</small></button>
+        <button class="btn volt" id="mGames">🎮 미니 게임 <small>교재 활동 게임 7개</small></button>
+        <button class="btn" id="mLab">AI 연구소 <small>크레인 두뇌 · 안전 로봇</small></button>
+        <button class="btn" id="mEditor">맵 만들기 <small>우리 동네 맵 짓기</small></button>
+        <button class="btn" id="mImport">친구 맵 불러오기 <small>맵 코드 붙여넣기</small></button>
+      </div>
+      <div class="title-foot">
+        <button class="btn small" id="mGuide">교사용 안내</button>
+        <button class="btn small" id="mCert">마스터 인증서</button>
+        <button class="btn small" id="mSound">소리 켜짐</button>
+        <button class="btn small" id="mReset">진행 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="hitFlash"></div>
+  <div id="faint" hidden><b>쿵…</b><span>정신이 아득해져요</span></div>
+
+  <div id="mg" hidden>
+    <div class="mg-top"><b id="mgTitle"></b><span id="mgStage"></span><span id="mgStat"></span><button class="btn small" id="mgQuit">✕ 그만하기 <kbd>Esc</kbd></button></div>
+    <div id="mgBox">
+      <canvas id="mgCv" width="960" height="540" aria-label="미니 게임 화면" hidden></canvas>
+      <div id="mgDom" hidden></div>
+      <div id="mgPop" hidden></div>
+      <div id="mgCard" hidden></div>
+      <div id="mgCount" hidden></div>
+    </div>
+    <div id="mgSay" class="mg-say" hidden></div>
+    <div id="mgBot" class="mg-bot"></div>
+    <div id="mgRotate">📱 화면을 가로로 돌리면 더 크게 보여요</div>
+  </div>
+
+  <div id="modal" hidden><div class="panel" id="panel" role="dialog" aria-modal="true"></div></div>
+</div>
