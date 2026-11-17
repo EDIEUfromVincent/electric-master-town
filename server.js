@@ -53,6 +53,12 @@ function limited(req, key, max){
 }
 const cleanName = s => String(s || '').normalize('NFC').replace(/\s+/g, ' ').trim().slice(0, 12);
 const nameId = n => 'n:' + n.toLowerCase();
+/* 예전 방식(반 · 번호) 기록: 이름 → 파일 목록을 시작할 때 한 번만 모아 둔다 (로그인마다 폴더 전체를 읽지 않게) */
+const LEGACY = new Map();
+try { for (const f of fs.readdirSync(STU_DIR)){ if (!f.endsWith('.json')) continue; try { const o = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); if (o && o.id && !String(o.id).startsWith('n:') && !o.migrated){ const k = cleanName(o.name); LEGACY.set(k, (LEGACY.get(k) || []).concat(f)); } } catch (e) {} } } catch (e) {}
+/* 어떤 오류가 나도 서버가 꺼지지 않게 기록만 남긴다 */
+process.on('uncaughtException', e => console.error('uncaught', e));
+process.on('unhandledRejection', e => console.error('unhandled', e));
 
 /* ----- API ----- */
 async function handleApi(req, res, p){
@@ -71,8 +77,7 @@ async function handleApi(req, res, p){
     let s = readStu(id), created = false, moved = false;
     if (!s){
       /* 예전 방식(반 · 번호)으로 만든 기록이 같은 이름 · 같은 비밀번호로 있으면 이어받는다 */
-      for (const f of fs.readdirSync(STU_DIR)){
-        if (!f.endsWith('.json')) continue;
+      for (const f of (LEGACY.get(name) || [])){
         let o; try { o = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); } catch (e) { continue; }
         if (!o || o.migrated || o.id === id || cleanName(o.name) !== name || !o.hash || pinHash(o.salt, pin) !== o.hash) continue;
         s = {id, name, salt:o.salt, hash:o.hash, created:o.created, save:o.save, sum:o.sum, updated:o.updated, from:o.id};

@@ -3,7 +3,7 @@
    · 행인: 할아버지 · 할머니 · 유모차 끄는 아주머니 · 자전거 타는 아이 · 뛰어다니는 아이 · 대학생.
      보도로 다니고 횡단보도로 길을 건넌다(차가 멈춘다). 뛰어다니는 아이는 가끔 무단 횡단을 한다 → 차에 치이면 다친다.
    · 사람과 부딪히면 서로 밀려나며 휘청인다. 같은 사람을 자꾸 치거나 세게 부딪히면 다툼이 일어난다.
-   · 전기 자전거(시장님 선물, 충전소 옆 거치대): 길가 친구 10명을 모두 도와야 탈 수 있다. 빠르기 2배.
+   · 전기 자전거(시장님 선물, 충전소 옆 거치대): 길가 친구를 모두 만나야 탈 수 있다. 빠르기 2배.
      자전거로 사람을 치면 그 사람이 다치고 내 경험치(레벨)가 깎인다. ❤️는 차에 치일 때만 줄어든다.
    ========================================================= */
 Object.assign(LOOKS, {
@@ -23,21 +23,11 @@ const PEDS = [
    angry:['이 녀석! 어른한테 부딪히고 그냥 가는 게냐?', '허, 말대꾸까지 하는구먼! 요즘 아이들은 예의가 없어!', '에잉, 안전 지킴이를 불러야겠구먼! 괘씸한지고!'],
    sorry:'그래그래, 사과할 줄 알면 됐다. 조심히 다니거라.', ouch:'아이고 허리야… 일어나질 못하겠구먼.',
    talk:['허허, 우리 땐 전기가 귀했지. 아껴 쓰거라.', '저 큰 전구탑 불 켜지는 날만 기다린다네.', '횡단보도에서는 손을 들고 건너야 하는 게야.']},
-  {id:'p_gma', look:'grandma2', name:'할머니', sp:.72, elder:true,
-   bump:['아이고머니나! 장바구니 쏟을 뻔했네.', '에구, 할미 깜짝 놀랐다.', '아가, 천천히 가렴. 할미는 빨리 못 피한단다.'],
-   angry:['아이고, 또 부딪혔네! 할미 무릎 다 나가겠다!', '어허, 사과도 안 하고 그러면 쓰나!', '세상에, 이렇게 버릇없는 아이는 처음 보네!'],
-   sorry:'그래, 착하기도 하지. 할미도 앞을 잘 볼게.', ouch:'아이고… 다리가 너무 아프구나.',
-   talk:['손주 주려고 사탕 샀단다. 하나 줄까?', '냉장고 문은 빨리 닫아야 전기가 안 새지.', '비 오는 날엔 젖은 손으로 콘센트 만지지 말거라.']},
   {id:'p_mom', look:'mom', name:'유모차 끄는 아주머니', sp:.85, stroller:true,
    bump:['어머! 유모차에 아기 있어요!', '앗, 아기 깰 뻔했잖아요. 쉿!', '조심! 유모차 바퀴에 발 밟혀요.'],
    angry:['아기가 깼잖아요! 어떻게 할 거예요?', '지금 그게 할 말이에요? 아기가 울잖아요!', '정말 속상하네요. 안전 지킴이를 불러야겠어요!'],
    sorry:'사과해 줘서 고마워요. 우리 아기도 괜찮대요. 까꿍!', ouch:'아야… 유모차는요? 아기는 괜찮아요?',
    talk:['쉿, 아기가 자고 있어요.', '아기 방 콘센트에는 안전 덮개를 꽂아 뒀어요.', '유모차는 보도 가장자리로 다녀요.']},
-  {id:'p_bike', look:'kidBike', name:'자전거 타는 아이', sp:2.5, bike:true, fast:true,
-   bump:['따릉! 미안미안, 브레이크가 늦었어!', '으악, 자전거 넘어질 뻔!', '앗, 비켜 줘서… 아니, 안 비켰구나!'],
-   angry:['야! 너 때문에 넘어질 뻔했잖아!', '뭐? 내 잘못이라고? 네가 갑자기 튀어나왔잖아!', '흥, 너랑 안 놀아! 자전거 체인 빠졌잖아!'],
-   sorry:'나도 미안! 나도 사람 많은 데선 천천히 탈게.', ouch:'으앙, 무릎 까졌어…',
-   talk:['내 자전거 멋지지? 헬멧도 썼어!', '자전거는 사람 많은 곳에선 내려서 끌어야 해.']},
   {id:'p_run', look:'kidRun', name:'뛰어다니는 아이', sp:2.2, jay:true, fast:true,
    bump:['앗 따거! 미안, 술래한테 쫓기는 중이야!', '으앗, 부딪혔다! 너 술래 아니지?', '헉헉, 비켜 줘!'],
    angry:['아야! 왜 앞을 막고 있어!', '네가 먼저 부딪혔잖아! 사과해!', '흥, 엄마한테 다 이를 거야!'],
@@ -48,16 +38,6 @@ const PEDS = [
    angry:['저기, 일부러 그러는 거 아니지? 이게 몇 번째야?', '말이 좀 심하네. 형한테 그러면 안 되지.', '하… 수업 늦겠다. 너 때문에 시간만 가잖아.'],
    sorry:'그래, 나도 걸으면서 휴대 전화 본 게 잘못이야. 서로 조심하자!', ouch:'윽… 발목을 접질린 것 같아.',
    talk:['전기 전자 공학과 다녀. 전자석 공부 재밌지?', '걸으면서 휴대 전화 보면 위험해. 나도 고칠게.']},
-  {id:'p_uni2', look:'collegian2', name:'대학생 누나', sp:1.2,
-   bump:['꺅, 책 떨어질 뻔했어!', '앗, 괜찮니? 나도 앞을 잘 못 봤네.', '어머, 노트북 들고 있었는데!'],
-   angry:['너 일부러 그러는 거지? 책 다 젖었잖아!', '어휴, 사과 한마디가 그렇게 어렵니?', '됐어, 말이 안 통하네. 시간만 버렸다!'],
-   sorry:'사과해 줘서 고마워. 나도 앞을 잘 볼게!', ouch:'아야… 머리를 콩 부딪혔어. 좀 어지러워.',
-   talk:['도서관 가는 길이야. 과제가 산더미야!', 'LED 스탠드를 쓰면 전기가 덜 든대.']},
-  {id:'p_run2', look:'kidRun2', name:'까불이 꼬마', sp:2.1, jay:true, fast:true,
-   bump:['히히, 부딪혔다! 이번엔 네가 술래!', '앗, 미안! 너무 빨리 뛰었다.', '우왓, 깜짝이야!'],
-   angry:['아야! 너 때문에 넘어졌잖아!', '내가 뭘! 네가 비켰어야지!', '으앙! 너 미워!'],
-   sorry:'괜찮아! 대신 나랑 놀아 줘!', ouch:'으아앙… 무릎에서 피 나…',
-   talk:['나 엄청 빠르다? 봤지?', '공 따라 차도로 뛰어들면 안 된대.']},
 ];
 /* 길가 친구(퀘스트 친구 · 동물)가 부딪혔을 때: 대사와 몸짓(jump 깡충 · fly 날아오름 · flee 도망 · spin 빙글) */
 const WALKER_REACT = {
@@ -183,6 +163,7 @@ function updatePeds(dt){
   updateFights(dt);
   if (playing && !uiBlocking()) bumpCheck(dt);
   if (playing) updatePlayerKnock(dt);
+  if (playing && !uiBlocking()) checkStuck(dt);
 }
 /* 길가 친구가 부딪혔을 때 몸짓 */
 function walkerReact(w, nx, ny, strong, quiet){
@@ -235,6 +216,36 @@ function updateFights(dt){
   }
 }
 
+/* ----- 끼임 방지: 벽·물체 속에 들어가거나, 움직이려 해도 사방이 막혀 있으면 가까운 빈자리로 옮긴다 ----- */
+const STUCK = {t:0, lx:0, ly:0};
+const pBlocked = (x, y) => (G3.ok ? blocked3(x, y) : blockedAt(x, y));
+function unstickPlayer(manual){
+  const x0 = player.x, y0 = player.y;
+  for (let r = 0; r <= 8; r++) for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++){
+    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+    const tx = Math.floor(x0) + dx, ty = Math.floor(y0) + dy, cx = tx + .5, cy = ty + .6;
+    if (cx < 1 || cy < 1 || cx > WORLD.w - 1 || cy > WORLD.h - 1) continue;
+    if (pBlocked(cx, cy) || (typeof isRoadLane === 'function' && isRoadLane(tx, ty) && !onCrosswalk(cx, cy))) continue;
+    if (r === 0 && !manual) return false;
+    if (r === 0 && manual) continue;
+    player.x = cx; player.y = cy; player.kx = player.ky = 0; PATH3.nodes = null; STUCK.t = 0;
+    if (G3.ok && typeof cam3Snap === 'function') cam3Snap();
+    toast(manual ? '빠져나왔어요!' : '끼어 있어서 옆으로 옮겨 줬어요.', 'ok');
+    return true;
+  }
+  return false;
+}
+function checkStuck(dt){
+  if (pBlocked(player.x, player.y)){ unstickPlayer(false); return; }   /* 벽·물체 속 */
+  const v = inputVector(), want = Math.hypot(v.x, v.y) > .3 || !!PATH3.nodes, moved = Math.hypot(player.x - STUCK.lx, player.y - STUCK.ly);
+  STUCK.lx = player.x; STUCK.ly = player.y;
+  if (!want || moved > .004){ STUCK.t = 0; return; }
+  STUCK.t += dt;
+  const s = .2, boxed = pBlocked(player.x + s, player.y) && pBlocked(player.x - s, player.y) && pBlocked(player.x, player.y + s) && pBlocked(player.x, player.y - s);
+  if (STUCK.t > 1.2 && boxed) unstickPlayer(false);   /* 사방이 막힘 */
+  else if (STUCK.t > 4){ STUCK.t = 0; toast('막혀서 못 가나요? 메뉴의 [🆘 끼었을 때 빠져나오기]를 눌러요.'); }
+}
+
 /* ----- 나와 부딪힘 ----- */
 function updatePlayerKnock(dt){
   if (!player.kx && !player.ky) return;
@@ -253,7 +264,7 @@ function bumpCheck(dt){
     const dx = px - player.x, dy = py - (player.y - .05), d = Math.hypot(dx, dy), R = riding ? .62 : .5;
     if (d > R || d < 1e-4) continue;
     const nx = dx / d, ny = dy / d, over = R - d;
-    player.x -= nx * over * .6; player.y -= ny * over * .6; entMove(p, nx * over * .4, ny * over * .4);
+    { const blk = (x, y) => (G3.ok ? blocked3(x, y) : blockedAt(x, y)), qx = player.x - nx * over * .6, qy = player.y - ny * over * .6; if (!blk(qx, player.y)) player.x = qx; if (!blk(player.x, qy)) player.y = qy; } entMove(p, nx * over * .4, ny * over * .4);
     if (STREET.cool > 0 || (isPed && p.bump > 0)) continue;
     STREET.cool = .7;
     player.bump = .45; player.kx = -nx * 2.4; player.ky = -ny * 2.4;
@@ -418,7 +429,7 @@ function rpgPenalty(amt, why){
 
 /* ----- 전기 자전거 ----- */
 function bikeState(){ if (!SAVE.bike || typeof SAVE.bike !== 'object') SAVE.bike = {got:false, on:false}; return SAVE.bike; }
-/* 자전거 조건: 길가 친구(동물 5 · 로봇 삐삐 · 사람 4) 10명을 모두 만나서 대화하기 */
+/* 자전거 조건: 길가 친구(동물 3 · 로봇 삐삐 · 사람 4) 8명을 모두 만나서 대화하기 */
 const friendMet = d => !!(SAVE.rpg && ((SAVE.rpg.talked && SAVE.rpg.talked[d.id]) || (SAVE.rpg.solved && SAVE.rpg.solved[d.id])));
 const helpedCount = () => WALKERS.filter(friendMet).length;
 const bikeUnlocked = () => helpedCount() >= WALKERS.length;
@@ -432,7 +443,7 @@ function bikeGift(){
     '정말 고마워요! 감사의 뜻으로 선물을 준비했어요. 짜잔, 전기 자전거예요!',
     '페달을 밟으면 바퀴 속 전동기가 도와줘요. 전동기 안의 전자석이 전기가 흐를 때 자석이 되어 바퀴를 힘차게 돌리지요. 전기차와 같은 원리예요!',
     '충전소 바로 옆에 전기 자전거 거치대를 세워 두었어요.',
-    '단, 자전거는 마을 이웃을 잘 아는 사람만 탈 수 있어요. 마을을 돌아다니는 동물 친구들, 꼬마 로봇 삐삐, 길가 사람들까지 10명을 모두 만나서 이야기해 보면 탈 수 있게 해 줄게요.',
+    '단, 자전거는 마을 이웃을 잘 아는 사람만 탈 수 있어요. 마을을 돌아다니는 동물 친구들, 꼬마 로봇 삐삐, 길가 사람들까지 ${WALKERS.length}명을 모두 만나서 이야기해 보면 탈 수 있게 해 줄게요.',
     `지금까지 만나서 이야기한 친구는 ${helpedCount()}/${WALKERS.length}명이에요. 자전거를 탈 때는 사람을 치지 않게 조심해요!`,
   ], () => { UI.waypoint = {x:30, y:40, label:'전기 자전거 거치대'}; });
 }
@@ -440,19 +451,19 @@ function bikeRack(){
   const b = bikeState(), n = helpedCount();
   if (!b.got) return;
   if (b.on) return showDialog('전기 자전거 거치대', ['자전거를 거치대에 세웠어요. 걸어서 다녀요.'], () => { b.on = false; persist(); updateBikeHUD(); });
-  if (n < WALKERS.length) return showDialog('전기 자전거 거치대', [`🔒 길가 친구 10명(동물 · 로봇 · 사람)을 모두 만나서 이야기해야 탈 수 있어요. (지금 ${n}/${WALKERS.length}명)`, `아직 못 만난 친구: ${friendsLeft().join(', ')}`, '말풍선(💬)이 떠 있는 친구에게 다가가 E로 말을 걸어요. 지도(M)의 분홍 점이 친구들이에요.']);
+  if (n < WALKERS.length) return showDialog('전기 자전거 거치대', [`🔒 길가 친구 ${WALKERS.length}명(동물 · 로봇 · 사람)을 모두 만나서 이야기해야 탈 수 있어요. (지금 ${n}/${WALKERS.length}명)`, `아직 못 만난 친구: ${friendsLeft().join(', ')}`, '말풍선(💬)이 떠 있는 친구에게 다가가 E로 말을 걸어요. 지도(M)의 분홍 점이 친구들이에요.']);
   showDialog('전기 자전거 거치대', ['🚲 전기 자전거를 꺼냈어요! 이제 2배 빠르게 달릴 수 있어요.', '사람과 부딪히면 그 사람이 다치고 경험치가 깎여요. 사람이 많은 곳에서는 화면 위 🚲 단추로 내려요.'], () => { b.on = true; persist(); updateBikeHUD(); SFX.win(); });
 }
 function toggleBike(){
   const b = bikeState(); if (!b.got || MODE !== 'play' || uiBlocking()) return;
   if (b.on){ b.on = false; persist(); updateBikeHUD(); toast('자전거에서 내렸어요. (끌고 다녀요)'); return; }
-  if (!bikeUnlocked()){ toast(`🔒 길가 친구 10명을 모두 만나 이야기해야 탈 수 있어요 (${helpedCount()}/${WALKERS.length}) · 남은 친구: ${friendsLeft().join(', ')}`, 'bad'); return; }
+  if (!bikeUnlocked()){ toast(`🔒 길가 친구 ${WALKERS.length}명을 모두 만나 이야기해야 탈 수 있어요 (${helpedCount()}/${WALKERS.length}) · 남은 친구: ${friendsLeft().join(', ')}`, 'bad'); return; }
   b.on = true; persist(); updateBikeHUD(); SFX.ping(); toast('🚲 출발! 사람을 조심해요.', 'ok');
 }
 function updateBikeHUD(){
   const el = $('#bBike'); if (!el) return;
   const b = bikeState(); el.hidden = !b.got;
-  el.textContent = b.on ? '🚲 내리기' : `🚲 타기${helpedCount() < WALKERS.length ? ` 🔒${helpedCount()}/10` : ''}`;
+  el.textContent = b.on ? '🚲 내리기' : `🚲 타기${helpedCount() < WALKERS.length ? ` 🔒${helpedCount()}/${WALKERS.length}` : ''}`;
   el.classList.toggle('on', !!b.on);
 }
 
