@@ -1,6 +1,6 @@
 // 전기 마스터 타운 — 학급 서버 (Railway용). 의존 패키지 없음.
 //  - 정적 파일: 게임은 index.html 한 파일
-//  - /api/*  : 학생 로그인 · 학생별 기록 저장 · 교사 계기판
+//  - /api/*  : 학생 로그인 · 학생별 기록 저장
 //  - 기록은 DATA_DIR(기본 ./data, Railway에서는 볼륨 /data)에 학생마다 JSON 파일 하나로 저장한다
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000, ROOT = __dirname;
@@ -8,10 +8,8 @@ const PORT = process.env.PORT || 3000, ROOT = __dirname;
 const DATA_DIR = path.resolve(process.env.DATA_DIR || (fs.existsSync('/data') ? '/data' : path.join(ROOT, 'data')));
 const STU_DIR = path.join(DATA_DIR, 'students');
 fs.mkdirSync(STU_DIR, {recursive:true});
-// 교사 코드: 환경 변수 TEACHER_CODE가 있으면 그것을, 없으면 기본 코드의 해시를 쓴다 (공백은 무시)
 const norm = s => String(s || '').replace(/\s+/g, '');
 const sha = s => crypto.createHash('sha256').update(s).digest('hex');
-const TEACHER_HASH = process.env.TEACHER_CODE ? sha(norm(process.env.TEACHER_CODE)) : 'eb61b0b69df5042ed4be1cac89b0ce9fe673ca7d387d7d54fbe3f5dc2d157105';
 // 로그인 표(token)를 서명하는 비밀값: 환경 변수 SECRET, 없으면 DATA_DIR에 한 번 만들어 둔다
 const SECRET = process.env.SECRET || (() => {
   const f = path.join(DATA_DIR, 'secret.txt');
@@ -99,20 +97,6 @@ async function handleApi(req, res, p){
     s.save = body.save; s.sum = body.sum && typeof body.sum === 'object' ? body.sum : s.sum; s.updated = Date.now();
     writeStu(id, s);
     return send(res, 200, {ok:true, updated:s.updated});
-  }
-  if (p === '/api/teacher' || p === '/api/teacher/reset'){
-    if (limited(req, 'teacher', 20)) return send(res, 429, {error:'잠시 뒤에 다시 해요'});
-    if (sha(norm(body.code)) !== TEACHER_HASH) return send(res, 403, {error:'교사 코드가 달라요'});
-    if (p === '/api/teacher/reset'){
-      const s = readStu(String(body.id || '')); if (!s) return send(res, 404, {error:'학생이 없어요'});
-      s.hash = null; s.salt = null; writeStu(s.id, s); return send(res, 200, {ok:true});
-    }
-    const students = [];
-    for (const f of fs.readdirSync(STU_DIR)){
-      if (!f.endsWith('.json')) continue;
-      try { const s = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); if (s.migrated) continue; students.push({id:s.id, name:s.name, sum:s.sum, updated:s.updated || s.lastLogin || s.created, pinReset:!s.hash}); } catch (e) {}
-    }
-    return send(res, 200, {students});
   }
   return send(res, 404, {error:'없는 주소'});
 }

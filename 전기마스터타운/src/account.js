@@ -1,10 +1,9 @@
 /* =========================================================
-   👤 학생 로그인 · 학생별 기록 · 교사 계기판
-   - 학급 서버(Railway의 server.js)에서 열면: 기록이 서버에 저장돼서 어느 기기에서든 이어 하고, 교사 계기판에 모인다.
-   - 파일·게시본으로 열면: 이 기기 안에 학생별로 따로 저장된다. 계기판은 이 기기의 학생만 보여 준다.
+   👤 학생 로그인 · 학생별 기록
+   - 서버(Railway의 server.js)에서 열면: 기록이 서버에 저장돼서 어느 기기에서든 이어 한다.
+   - 파일·게시본으로 열면: 이 기기 안에 학생별로 따로 저장된다.
    ========================================================= */
 const ACC = {id:null, label:'', token:null, server:false, ready:false, syncT:null, dirty:false};
-const TEACHER_HASH = 'eb61b0b69df5042ed4be1cac89b0ce9fe673ca7d387d7d54fbe3f5dc2d157105';   /* 교사 코드의 해시 (코드 자체는 적지 않는다) */
 const ACC_LIST_KEY = 'emt.accounts.v1', ACC_LAST_KEY = 'emt.lastLogin.v1', LEGACY_KEY = 'emt.save.v1';
 
 async function sha256hex(s){
@@ -158,73 +157,4 @@ function logout(){
 async function accBoot(){
   ACC.server = await detectServer();
   showLogin();
-}
-
-/* ----- 교사 계기판 ----- */
-const DASH = {code:null, rows:null, timer:null};
-function openTeacherGate(){
-  const p = openPanel(`<h2>📊 교사 계기판</h2><p class="sub">선생님만 들어올 수 있어요. 교사 코드를 입력하세요.</p>
-    <div class="row" style="gap:8px"><input id="tcCode" type="password" placeholder="교사 코드" autocomplete="off" style="width:220px"><button class="btn primary" id="tcGo">들어가기</button></div><p id="tcMsg" class="ls-tip"></p>`);
-  const go = async () => {
-    const code = normCode(p.querySelector('#tcCode').value);
-    if (!code) return;
-    if (ACC.server){
-      try { const j = await api('api/teacher', {code}); DASH.code = code; DASH.rows = j.students; openDashboard(); }
-      catch (e){ p.querySelector('#tcMsg').textContent = e.status === 429 ? '너무 여러 번 시도했어요. 1분 뒤에 다시 해요.' : '코드가 맞지 않아요.'; }
-      return;
-    }
-    if (await sha256hex(code) === TEACHER_HASH){ DASH.code = code; DASH.rows = null; openDashboard(); }
-    else p.querySelector('#tcMsg').textContent = '코드가 맞지 않아요.';
-  };
-  p.querySelector('#tcGo').onclick = go;
-  p.querySelector('#tcCode').onkeydown = e => { if (e.key === 'Enter') go(); };
-  setTimeout(() => { const i = p.querySelector('#tcCode'); if (i) i.focus(); }, 50);
-}
-function localRows(){
-  const L = localAccounts();
-  return Object.entries(L).filter(([id, a]) => !a.migrated).map(([id, a]) => {
-    let sum = null; try { sum = JSON.parse(lsGet('emt.sum.v1:' + id) || 'null'); } catch (e) {}
-    return a.migrated ? null : {id, name:a.name, sum, updated:sum ? sum.t : a.created};
-  });
-}
-function ago(t){
-  if (!t) return '-';
-  const s = (Date.now() - t) / 1000;
-  return s < 60 ? '방금' : s < 3600 ? `${Math.floor(s / 60)}분 전` : s < 86400 ? `${Math.floor(s / 3600)}시간 전` : new Date(t).toLocaleDateString('ko-KR');
-}
-async function dashRefresh(){
-  if (!ACC.server){ DASH.rows = localRows(); return; }
-  try { const j = await api('api/teacher', {code:DASH.code}); DASH.rows = j.students; } catch (e) {}
-}
-async function openDashboard(){
-  if (!DASH.code) return openTeacherGate();
-  if (!DASH.rows) await dashRefresh();
-  const q = (DASH.q || '').trim().toLowerCase();
-  const rows = (DASH.rows || []).filter(r => r && (!q || String(r.name).toLowerCase().includes(q))).sort((a, b) => (b.updated || 0) - (a.updated || 0));
-  const cnt = ACTS.map(a => rows.filter(r => r.sum && r.sum.done && r.sum.done.includes(a.id)).length);
-  const head = `<tr><th>이름(별명)</th><th>레벨</th><th>진행</th>${ACTS.map((a, k) => `<th title="${esc(a.title)}">${k + 1}<br><span style="font-size:15px">${a.icon}</span></th>`).join('')}<th>확인 질문</th><th title="다툼으로 지체된 시간 (다툼 횟수)">⏰ 다툼 지체</th><th title="다친 사람 돕기 · 다툼 말리기 / 숨은 퀘스트(MRI)">🤝 도움 · 🔎</th><th>마지막</th>${ACC.server ? '<th></th>' : ''}</tr>`;
-  const body = rows.map(r => {
-    const s = r.sum || {}, done = s.done || [], n = done.length;
-    return `<tr><td>${esc(r.name)}</td><td><b>Lv.${s.lv || 1}</b><br><small>${esc(s.title || '')}</small></td>
-      <td><div class="dash-bar"><i style="width:${Math.round(n / ACTS.length * 100)}%"></i></div><small>${n}/${ACTS.length}${s.finale ? ' 🎆' : ''}</small></td>
-      ${ACTS.map(a => `<td class="dash-c">${done.includes(a.id) ? '✅' : s.cur === a.id ? '🔸' : ''}</td>`).join('')}
-      <td>${s.checkN ? `${s.checkOk}/${s.checkN}` : '-'}</td><td>${s.delay ? `<b style="color:${s.delay >= 60 ? '#ff9b90' : 'inherit'}">${s.delay}초</b><br><small>${s.quarrels || 0}번</small>` : '-'}</td><td>${s.helped || 0} · ${s.hq ? '🔎' + s.hq : '-'}</td><td><small>${ago(r.updated)}</small></td>
-      ${ACC.server ? `<td><button class="btn small ghost" data-pin="${esc(r.id)}" title="비밀번호를 지우면 학생이 다음 로그인 때 새로 정해요">🔑 초기화</button></td>` : ''}</tr>`;
-  }).join('');
-  const p = openPanel(`<h2>📊 교사 계기판</h2>
-    <p class="sub">${ACC.server ? '서버에 저장된 전국 모든 학생(최근에 한 순서). 우리 반 학생은 이름으로 찾아요' : '이 기기에서 로그인한 학생만 보여요. 학급 서버 주소로 열면 모두 모여요.'} · ✅ 성공한 활동 · 🔸 지금 하는 활동 · 학생 ${rows.length}명</p>
-    <div class="row" style="gap:8px;margin-bottom:8px"><input id="dsQ" placeholder="이름(별명)으로 찾기 — 우리 반 학생 이름을 넣어요" value="${esc(DASH.q || '')}" style="width:260px"><button class="btn small" id="dsRe">↻ 새로 고침</button><button class="btn small ghost" id="dsCsv">📋 표 복사</button><button class="btn small ghost" id="dsBack">← 교사용 안내</button></div>
-    <div class="tblwrap"><table class="tbl dash">${head}${body || `<tr><td colspan="${ACTS.length + 8}">${q ? '찾는 이름이 없어요.' : '아직 로그인한 학생이 없어요.'}</td></tr>`}
-      <tr class="dash-sum"><td colspan="3"><b>활동별 성공한 학생</b></td>${cnt.map(c => `<td class="dash-c"><b>${c}</b></td>`).join('')}<td colspan="${ACC.server ? 5 : 4}"></td></tr></table></div>
-    <details style="margin-top:10px"><summary>활동 번호 보기</summary><ol style="line-height:1.7;margin:8px 0">${ACTS.map(a => `<li>${a.icon} ${esc(a.title)}${a.ai ? ' (AI 개발)' : ''}</li>`).join('')}</ol></details>`, {wide:true, onClose:() => { clearInterval(DASH.timer); DASH.timer = null; }});
-  p.querySelector('#dsRe').onclick = async () => { await dashRefresh(); openDashboard(); };
-  p.querySelector('#dsBack').onclick = () => { clearInterval(DASH.timer); DASH.timer = null; openGuide(); };
-  p.querySelector('#dsCsv').onclick = () => cpCopy(['이름\t레벨\t진행\t' + ACTS.map((a, k) => `${k + 1}.${a.title}`).join('\t'), ...rows.map(r => { const s = r.sum || {}, d = s.done || []; return `${r.name}\t${s.lv || 1}\t${d.length}/${ACTS.length}\t` + ACTS.map(a => d.includes(a.id) ? 'O' : '').join('\t'); })].join('\n'));
-  const fq = p.querySelector('#dsQ'); if (fq){ fq.oninput = () => { DASH.q = fq.value; clearTimeout(DASH.qt); DASH.qt = setTimeout(() => { openDashboard(); const n = $('#dsQ'); if (n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 250); }; }
-  p.querySelectorAll('[data-pin]').forEach(b => b.onclick = async () => {
-    if (!confirm('이 학생의 비밀번호를 지울까요? 학생이 다음에 로그인할 때 새 비밀번호를 정해요. 기록은 그대로예요.')) return;
-    try { await api('api/teacher/reset', {code:DASH.code, id:b.dataset.pin}); toast('비밀번호를 지웠어요.', 'ok'); } catch (e) { toast('하지 못했어요.', 'bad'); }
-  });
-  clearInterval(DASH.timer);
-  if (ACC.server) DASH.timer = setInterval(async () => { if (!$('#panel .dash')) { clearInterval(DASH.timer); return; } await dashRefresh(); if ($('#panel .dash')) openDashboard(); }, 20000);
 }
