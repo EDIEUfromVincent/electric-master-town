@@ -84,20 +84,21 @@ function sl3Build(api, st){
   const s1 = st === 0, items = s1 ? SL_S1_ITEMS.map(id => TRAIN_ITEMS.find(i => i.id === id)) : TRAIN_ITEMS;
   const ctx = {d3:true, s1, T:s1 ? (SAVE.mgTree1 && slValid(SAVE.mgTree1) && slDepth(SAVE.mgTree1) === 1 ? slClone(SAVE.mgTree1) : slBlank()) : slLoad2(), sel:null, results:{}, rolling:false, tries:0, item:null, ans:null, fast:false};
   api.scene(sl3Scene(ctx));
-  api.say(s1 ? '맨 위 <b>질문 표지판</b>을 눌러 질문을 고르고, 아래 두 <b>통</b>을 눌러 ‘집기’나 ‘안 집기’를 정해요. 다 정하면 ▶ 굴려 보기!'
-    : '연습 고철 8개를 알맞게 처리하는 질문 길을 만들어요. 통을 눌러 <b>‘질문 하나 더 하기’</b>로 길을 늘릴 수 있어요. 질문은 적을수록 좋아요!');
-  const bot = api.bot(`<span class="mg-chip" id="slQ"></span><button class="btn primary big" id="slGo">▶ 굴려 보기</button><button class="btn" id="slFast">빠르게</button>`);
+  const intro = slIntro(s1).replace('질문 칸', '질문 표지판');
+  const bot = api.bot(SL_BOT);
   const upd = () => { const q = $('#slQ'); if (q) q.textContent = `질문 ${treeSize(ctx.T)}개 · 굴린 횟수 ${ctx.tries}번`; };
   bot.querySelector('#slFast').onclick = e => { ctx.fast = !ctx.fast; e.currentTarget.classList.toggle('on', ctx.fast); };
   bot.querySelector('#slGo').onclick = () => {
-    if (ctx.rolling || MG.ended) return;
+    if (ctx.rolling || ctx.demo || MG.ended) return;
     if (!slValid(ctx.T)) return api.say('아직 정하지 않은 칸(❓ 질문을 골라요 · 결정을 골라요)이 있어요. 모두 정한 뒤 굴려요.', 'bad');
     ctx.tries++; upd(); if (s1) SAVE.mgTree1 = slClone(ctx.T); else SAVE.mgTreeDraft = slClone(ctx.T); persist();
     slRoll(api, ctx, mgShuffle(items), res => {
       const ok = res.filter(r => r.out.ok).length, n = res.length, size = treeSize(ctx.T);
       if (s1 && ok === n) return api.end(ctx.tries === 1 ? 3 : ctx.tries === 2 ? 2 : 1, `고철 ${n}개를 모두 알맞게 처리했어요! (굴린 횟수 ${ctx.tries}번)`, resultTable(res));
       if (!s1 && ok >= 7){
-        SAVE.mgTree = slClone(ctx.T); if (!SAVE.tree || !treeComplete(SAVE.tree)) SAVE.tree = slClone(ctx.T); persist();
+        SAVE.mgTree = slClone(ctx.T); if (!SAVE.tree || !treeComplete(SAVE.tree)) SAVE.tree = slClone(ctx.T);
+        if (!SAVE.badges.em3){ SAVE.badges.em3 = true; toast('AI 크레인 두뇌 미션 성공!', 'ok'); }
+        persist();
         return api.end(ok === 8 && size <= 2 ? 3 : ok === 8 ? 2 : 1, `연습 고철 ${n}개 중 <b>${ok}개</b>를 알맞게 처리했어요. 질문 ${size}개.${ok === 8 && size > 2 ? ' 질문을 2개로 줄여도 모두 맞힐 수 있을까요?' : ok < 8 ? ' 틀린 고철까지 맞히면 번개가 늘어요.' : ''}`, resultTable(res));
       }
       api.say(`${n}개 중 ${ok}개를 알맞게 처리했어요. <b>✗</b>가 붙은 고철을 보고 질문이나 결정을 고쳐 다시 굴려요.`, 'bad');
@@ -105,7 +106,7 @@ function sl3Build(api, st){
   };
   api.keys(e => { const m = e.code.match(/^(?:Digit|Numpad)([1-9])$/); if (m) sl3Guess(api, ctx, 0, 0, +m[1] - 1); });
   api.pointer({down:(sx, sy) => {
-    if (MG.ended) return;
+    if (MG.ended || ctx.demo) return;
     if (ctx.rolling){ sl3Guess(api, ctx, sx, sy); return; }
     const hit = api.pick(sl3Nodes(ctx), sx, sy);
     if (ctx.sel){ api.pop(); ctx.sel = null; if (!hit) return; }
@@ -113,37 +114,9 @@ function sl3Build(api, st){
     ctx.results = {}; slEditPop(api, ctx, hit.path, upd);
   }});
   api.loop(dt => { if (ctx.rolling && ctx.step) ctx.step(dt); api.stat(sl3Stat(ctx)); });
-  upd();
+  upd(); slHelp(api, ctx, st, items, intro);
 }
-function sl3Test(api){
-  const T = [SAVE.mgTree, SAVE.tree].find(t => t && slValid(t) && slDepth(t) <= 3);
-  if (!T) return api.end(0, '먼저 2단계에서 질문 길을 완성해요.');
-  const ctx = {d3:true, s1:false, T:slClone(T), sel:null, results:{}, rolling:false, item:null, ans:null, fast:false};
-  api.scene(sl3Scene(ctx));
-  api.say('2단계에서 만든 질문 길이에요. 처음 보는 <b>새 고철 8개</b>를 몇 개나 알맞게 처리할지 먼저 예상해요.');
-  const bot = api.bot(`<span class="mg-chip">내 예상</span>${[...Array(9).keys()].map(n => `<button class="btn small" data-p="${n}">${n}개</button>`).join('')}`);
-  bot.querySelectorAll('[data-p]').forEach(b => b.onclick = () => {
-    if (ctx.rolling || MG.ended) return;
-    SLIDE.pred = +b.dataset.p; SND.tick();
-    api.bot(`<span class="mg-chip">내 예상 ${SLIDE.pred}개</span><button class="btn" id="slFast">빠르게</button>`);
-    $('#slFast').onclick = e => { ctx.fast = !ctx.fast; e.currentTarget.classList.toggle('on', ctx.fast); };
-    api.say('새 고철 트럭이 도착했어요! 질문 길을 따라 미끄러져요.');
-    slRoll(api, ctx, TEST_ITEMS.slice(), res => {
-      const ok = res.filter(r => r.out.ok).length, acc = ok / res.length;
-      SAVE.treeRuns.push({kind:'test', acc, pred:SLIDE.pred, size:treeSize(ctx.T), time:Date.now()});
-      let badge = '';
-      if (ok >= 7 && !SAVE.badges.em3){ SAVE.badges.em3 = true; badge = '<div class="okbox"><b>AI 크레인 두뇌 미션 성공!</b> 처음 보는 고철도 알맞게 처리했어요.</div>'; }
-      persist(); SLIDE.tree = slClone(ctx.T);
-      api.end(ok >= 8 ? 3 : ok >= 7 ? 2 : ok >= 6 ? 1 : 0, `새 고철 8개 중 <b>${ok}개</b>를 알맞게 처리했어요. 내 예상은 ${SLIDE.pred}개였어요.`,
-        badge + resultTable(res) + `<div class="row" style="justify-content:center;margin-top:10px"><button class="btn volt" id="sl3D">🏗️ 3D 고철장에서 크레인으로 보기</button><button class="btn" id="slFix">✏️ 질문 길 고치기 (2단계)</button></div>`);
-    });
-  });
-  api.keys(e => { const m = e.code.match(/^(?:Digit|Numpad)([1-9])$/); if (m) sl3Guess(api, ctx, 0, 0, +m[1] - 1); });
-  api.pointer({down:(sx, sy) => { if (!MG.ended && ctx.rolling) sl3Guess(api, ctx, sx, sy); }});
-  api.loop(dt => { if (ctx.rolling && ctx.step) ctx.step(dt); api.stat(sl3Stat(ctx)); });
-}
-mg3Attach('slide', [() => sl3Scene({T:SAVE.mgTree1 && slValid(SAVE.mgTree1) ? slClone(SAVE.mgTree1) : slBlank(), s1:true}), () => sl3Scene({T:slLoad2()}),
-  () => sl3Scene({T:slClone([SAVE.mgTree, SAVE.tree].find(t => t && slValid(t) && slDepth(t) <= 3) || slBlank())})], [api => sl3Build(api, 0), api => sl3Build(api, 1), sl3Test]);
+mg3Attach('slide', [() => sl3Scene({T:SAVE.mgTree1 && slValid(SAVE.mgTree1) ? slClone(SAVE.mgTree1) : slBlank(), s1:true}), () => sl3Scene({T:slLoad2()})], [api => sl3Build(api, 0), api => sl3Build(api, 1)]);
 
 /* ===== 📣 전기 안전 캠페인: 블록 무대 ===== */
 function mkStage3(b){

@@ -88,7 +88,7 @@ function slRoll(api, ctx, items, onDone){
     const lp = POS(path); pts.push({x:lp.x, y:lp.y + (ctx.d3 ? -.1 : 6), leaf:path});
     Object.assign(R, {pts, k:1, x:pts[0].x, y:pts[0].y, it, tr}); ctx.item = {it, x:R.x, y:R.y};
     /* 예측: 굴리기 전에 '어느 통으로 갈까?'를 맞히면 점수와 콤보 (질문 길을 눈으로 따라가 보기) */
-    if (ctx.d3){ ctx.predicting = true; ctx.guess = null; ctx.predT = ctx.predMax = Math.max(2.2, 3.6 - R.i * .18) / (ctx.fast ? 2 : 1); api.say(`🔮 <b>${esc(it.name)}</b> (🧱${it.material} · ⚖️${it.heavy ? '무거움' : '가벼움'} · 📏${it.big ? '큼' : '작음'} · 🎨${it.colorName}) — 어느 통으로 갈까요? 통을 눌러 예측해요!`); }
+    if (ctx.d3 && !ctx.demo){ ctx.predicting = true; ctx.guess = null; ctx.predT = ctx.predMax = Math.max(2.2, 3.6 - R.i * .18) / (ctx.fast ? 2 : 1); api.say(`🔮 <b>${esc(it.name)}</b> (🧱${it.material} · ⚖️${it.heavy ? '무거움' : '가벼움'} · 📏${it.big ? '큼' : '작음'} · 🎨${it.colorName}) — 어느 통으로 갈까요? 통을 눌러 예측해요!`); }
   };
   ctx.step = dt => {
     if (ctx.predicting){ ctx.predT -= dt; if (ctx.predT <= 0) ctx.predicting = false; else return; }
@@ -117,82 +117,102 @@ function slRoll(api, ctx, items, onDone){
   };
   next();
 }
+/* ===== 자동이의 시범 · 힌트 =====
+   처음 하는 학생에게 '질문 칸 고르기 → 통 정하기 → 굴려 보기'를 자동이가 먼저 보여 준다.
+   자동이는 일부러 겉모습 규칙(은색 · 무게 · 크기)으로 만들어 틀리는 모습을 보이고, 무엇을 물어야 할지 생각할 거리를 남긴다 */
+const SL_DEMO = [
+  [{path:'r', say:'🤖 자동이: 삐릭! 내가 먼저 해 보겠다. 맨 위 <b>질문 칸</b>을 누르면 물어볼 질문을 고를 수 있다.'},
+   {path:'r', set:n => { n.q = 'silver'; }, say:'🤖 번쩍이는 건 철이다! <b>‘은색인가요?’</b>를 골랐다.'},
+   {path:'ry', set:n => { n.a = 'weak'; }, say:'🤖 <b>예</b> 쪽 통을 눌러 <b>🧲 집기</b>로 정한다.'},
+   {path:'rn', set:n => { n.a = 'skip'; }, say:'🤖 <b>아니요</b> 쪽 통은 <b>🚫 안 집기</b>. 다 정했으니 ▶ 굴려 보기!'},
+   {roll:true},
+   {say:'🤖 삐릭…? 은색 알루미늄 캔은 전자석에 붙지 않았고, 회색 철 못은 놓쳤다. <b>색</b>으로는 안 되는 건가? 이제 네 차례다. 무엇을 물어야 할까?', wait:5200}],
+  [{path:'r', set:n => { n.q = 'heavy'; }, say:'🤖 이번엔 세기도 정해야 한다. 맨 위 질문은 <b>‘무거운가요?’</b>!'},
+   {path:'ry', set:n => { n.a = 'strong'; }, say:'🤖 무거우면 <b>🔋🔋 세게 (전지 2개)</b>.'},
+   {path:'rn', set:n => { n.a = null; }, say:'🤖 가벼운 쪽은 더 나눠 보자. 통을 누르고 <b>‘❓ 질문 하나 더 하기’</b>를 고르면 길이 하나 더 생긴다!'},
+   {path:'rn', set:(n, T) => { T.no = {t:'q', q:'big', yes:{t:'a', a:'weak'}, no:{t:'a', a:'skip'}}; }, say:'🤖 새 질문은 <b>‘큰가요?’</b> — 크면 약하게, 작으면 안 집기!'},
+   {roll:true},
+   {say:'🤖 삐릭… 큰 종이 상자는 붙지 않았고, 작은 철 캔과 철 못은 놓쳤다! 무게나 크기보다 <b>먼저</b> 물어야 할 게 있다. 이제 네 차례! 막히면 💡 힌트를 눌러라.', wait:5600}],
+];
+const SL_HINTS = [
+  ['크레인을 직접 조종할 때 어떤 고철이 전자석에 붙었나요? <b>재료</b>를 물어보면 어떨까요?', '알루미늄 캔과 철 캔은 둘 다 <b>은색</b>이에요. 색으로 나누면 어떻게 될까요?', '전자석에 붙는 고철은 <b>🧲 집기</b>, 붙지 않는 고철은 <b>🚫 안 집기</b>로 보내요.'],
+  ['먼저 <b>‘철로 만들었나요?’</b>로 나누면, 전자석에 붙지 않는 고철은 바로 안 집기로 보낼 수 있어요.', '세게 집어야 하는 건 <b>큰</b> 고철일까요, <b>무거운</b> 고철일까요? 작지만 무거운 물건도 있어요.', '철인 쪽 통을 눌러 <b>‘❓ 질문 하나 더 하기’</b>로 무게를 한 번 더 물어봐요. 질문 2개면 충분해요!'],
+];
+function slDemo(api, ctx, st, items, done){
+  const steps = SL_DEMO[st], keep = ctx.T; let i = 0, over = false;
+  Object.assign(ctx, {demo:true, T:slBlank(), results:{}, sel:null});
+  const finish = () => {
+    if (over) return; over = true;
+    Object.assign(ctx, {demo:false, T:keep, sel:null, results:{}, rolling:false, step:null, item:null, ans:null, craneFx:null});
+    api.pop(); SAVE.slDemo = SAVE.slDemo || {}; SAVE.slDemo[st] = true; persist(); done();
+  };
+  const run = () => {
+    if (over || MG.ended) return;
+    const s = steps[i++]; if (!s) return finish();
+    if (s.roll){ ctx.sel = null; return slRoll(api, ctx, items, () => api.after(700, run)); }
+    if (s.path){ ctx.sel = s.path; if (s.set) s.set(nodeAt(ctx.T, s.path), ctx.T); SND.tick(); }
+    if (s.say) api.say(s.say);
+    api.after(s.wait || 2600, run);
+  };
+  run();
+  return finish;
+}
+/* 아래 단추 줄의 💡 힌트 · 🤖 시범 */
+function slHelp(api, ctx, st, items, intro){
+  let hint = 0, skip = null;
+  const demoBtn = $('#slDemo'), go = $('#slGo');
+  const setDemoUi = on => { if (demoBtn) demoBtn.textContent = on ? '⏭ 시범 건너뛰기' : '🤖 시범 다시 보기'; if (go) go.disabled = on; };
+  const startDemo = () => { setDemoUi(true); skip = slDemo(api, ctx, st, items, () => { skip = null; setDemoUi(false); api.say(intro); }); };
+  if (demoBtn) demoBtn.onclick = () => { if (ctx.rolling && !ctx.demo) return; if (skip) skip(); else startDemo(); };
+  const hb = $('#slHint'); if (hb) hb.onclick = () => { if (ctx.demo) return; const H = SL_HINTS[st]; api.say(`💡 힌트 ${hint % H.length + 1}/${H.length} · ${H[hint % H.length]}`); hint++; SND.tick(); };
+  if (!(SAVE.slDemo && SAVE.slDemo[st])) startDemo(); else api.say(intro);
+}
 function slideBuild(api, st){
   const s1 = st === 0, items = s1 ? SL_S1_ITEMS.map(id => TRAIN_ITEMS.find(i => i.id === id)) : TRAIN_ITEMS;
   const ctx = {s1, T:s1 ? (SAVE.mgTree1 && slValid(SAVE.mgTree1) && slDepth(SAVE.mgTree1) === 1 ? slClone(SAVE.mgTree1) : slBlank()) : slLoad2(), sel:null, results:{}, rolling:false, tries:0, item:null, ans:null, fast:false};
   api.canvas(true);
-  api.say(s1 ? '맨 위 <b>질문 칸</b>을 눌러 질문을 고르고, 아래 두 <b>통</b>을 눌러 ‘집기’나 ‘안 집기’를 정해요. 다 정하면 ▶ 굴려 보기!'
-    : '연습 고철 8개를 알맞게 처리하는 질문 길을 만들어요. 통을 눌러 <b>‘질문 하나 더 하기’</b>로 길을 늘릴 수 있어요. 질문은 적을수록 좋아요!');
-  const bot = api.bot(`<span class="mg-chip" id="slQ"></span><button class="btn primary big" id="slGo">▶ 굴려 보기</button><button class="btn" id="slFast">빠르게</button>`);
+  const intro = slIntro(s1);
+  const bot = api.bot(SL_BOT);
   const upd = () => { const q = $('#slQ'); if (q) q.textContent = `질문 ${treeSize(ctx.T)}개 · 굴린 횟수 ${ctx.tries}번`; };
   bot.querySelector('#slFast').onclick = e => { ctx.fast = !ctx.fast; e.currentTarget.classList.toggle('on', ctx.fast); };
   bot.querySelector('#slGo').onclick = () => {
-    if (ctx.rolling || MG.ended) return;
+    if (ctx.rolling || ctx.demo || MG.ended) return;
     if (!slValid(ctx.T)) return api.say('아직 정하지 않은 칸(❓ 질문을 골라요 · 결정을 골라요)이 있어요. 모두 정한 뒤 굴려요.', 'bad');
     ctx.tries++; upd(); if (s1) SAVE.mgTree1 = slClone(ctx.T); else SAVE.mgTreeDraft = slClone(ctx.T); persist();
     slRoll(api, ctx, mgShuffle(items), res => {
       const ok = res.filter(r => r.out.ok).length, n = res.length, size = treeSize(ctx.T);
       if (s1 && ok === n) return api.end(ctx.tries === 1 ? 3 : ctx.tries === 2 ? 2 : 1, `고철 ${n}개를 모두 알맞게 처리했어요! (굴린 횟수 ${ctx.tries}번)`, resultTable(res));
       if (!s1 && ok >= 7){
-        SAVE.mgTree = slClone(ctx.T); if (!SAVE.tree || !treeComplete(SAVE.tree)) SAVE.tree = slClone(ctx.T); persist();
+        SAVE.mgTree = slClone(ctx.T); if (!SAVE.tree || !treeComplete(SAVE.tree)) SAVE.tree = slClone(ctx.T);
+        if (!SAVE.badges.em3){ SAVE.badges.em3 = true; toast('AI 크레인 두뇌 미션 성공!', 'ok'); }
+        persist();
         return api.end(ok === 8 && size <= 2 ? 3 : ok === 8 ? 2 : 1, `연습 고철 ${n}개 중 <b>${ok}개</b>를 알맞게 처리했어요. 질문 ${size}개.${ok === 8 && size > 2 ? ' 질문을 2개로 줄여도 모두 맞힐 수 있을까요?' : ok < 8 ? ' 틀린 고철까지 맞히면 번개가 늘어요.' : ''}`, resultTable(res));
       }
       api.say(`${n}개 중 ${ok}개를 알맞게 처리했어요. <b>✗</b>가 붙은 고철을 보고 질문이나 결정을 고쳐 다시 굴려요.`, 'bad');
     });
   };
   api.pointer({down:(x, y) => {
-    if (ctx.rolling || MG.ended) return;
+    if (ctx.rolling || ctx.demo || MG.ended) return;
     const hit = slHit(ctx.T, x, y);
     if (ctx.sel){ api.pop(); ctx.sel = null; if (!hit) return; }
     if (!hit) return;
     ctx.results = {}; slEditPop(api, ctx, hit, upd);
   }});
   api.loop(dt => { if (ctx.rolling && ctx.step) ctx.step(dt); slDraw(api.g, ctx); });
-  upd();
+  upd(); slHelp(api, ctx, st, items, intro);
 }
-function slideTest(api){
-  const T = [SAVE.mgTree, SAVE.tree].find(t => t && slValid(t) && slDepth(t) <= 3);
-  if (!T){ api.canvas(false); return api.end(0, '먼저 2단계에서 질문 길을 완성해요.'); }
-  const ctx = {s1:false, T:slClone(T), sel:null, results:{}, rolling:false, item:null, ans:null, fast:false};
-  api.canvas(true);
-  api.say('2단계에서 만든 질문 길이에요. 처음 보는 <b>새 고철 8개</b>를 몇 개나 알맞게 처리할지 먼저 예상해요.');
-  const bot = api.bot(`<span class="mg-chip">내 예상</span>${[...Array(9).keys()].map(n => `<button class="btn small" data-p="${n}">${n}개</button>`).join('')}`);
-  bot.querySelectorAll('[data-p]').forEach(b => b.onclick = () => {
-    if (ctx.rolling || MG.ended) return;
-    SLIDE.pred = +b.dataset.p; SND.tick();
-    api.bot(`<span class="mg-chip">내 예상 ${SLIDE.pred}개</span><button class="btn" id="slFast">빠르게</button>`);
-    $('#slFast').onclick = e => { ctx.fast = !ctx.fast; e.currentTarget.classList.toggle('on', ctx.fast); };
-    api.say('새 고철 트럭이 도착했어요! 질문 길을 따라 미끄러져요.');
-    slRoll(api, ctx, TEST_ITEMS.slice(), res => {
-      const ok = res.filter(r => r.out.ok).length, acc = ok / res.length;
-      SAVE.treeRuns.push({kind:'test', acc, pred:SLIDE.pred, size:treeSize(ctx.T), time:Date.now()});
-      let badge = '';
-      if (ok >= 7 && !SAVE.badges.em3){ SAVE.badges.em3 = true; badge = '<div class="okbox"><b>AI 크레인 두뇌 미션 성공!</b> 처음 보는 고철도 알맞게 처리했어요.</div>'; }
-      persist(); SLIDE.tree = slClone(ctx.T);
-      api.end(ok >= 8 ? 3 : ok >= 7 ? 2 : ok >= 6 ? 1 : 0, `새 고철 8개 중 <b>${ok}개</b>를 알맞게 처리했어요. 내 예상은 ${SLIDE.pred}개였어요.`,
-        badge + resultTable(res) + `<div class="row" style="justify-content:center;margin-top:10px"><button class="btn volt" id="sl3D">🏗️ 3D 고철장에서 크레인으로 보기</button><button class="btn" id="slFix">✏️ 질문 길 고치기 (2단계)</button></div>`);
-    });
-  });
-  api.loop(dt => { if (ctx.rolling && ctx.step) ctx.step(dt); slDraw(api.g, ctx); });
-}
-mgReg({id:'slide', order:4, icon:'🛝', title:'질문 미끄럼틀', stat:'ai', ai:'규칙 세우기(예/아니요 질문 길) → 연습 고철로 다듬기 → 처음 보는 고철로 시험하기',
+const SL_BOT = `<span class="mg-chip" id="slQ"></span><button class="btn primary big" id="slGo">▶ 굴려 보기</button><button class="btn" id="slFast">빠르게</button><button class="btn" id="slHint">💡 힌트</button><button class="btn" id="slDemo">🤖 시범 다시 보기</button>`;
+const slIntro = s1 => s1 ? '맨 위 <b>질문 칸</b>을 눌러 질문을 고르고, 아래 두 <b>통</b>을 눌러 ‘집기’나 ‘안 집기’를 정해요. 다 정하면 ▶ 굴려 보기!'
+  : '연습 고철 8개를 알맞게 처리하는 질문 길을 만들어요. 통을 눌러 <b>‘❓ 질문 하나 더 하기’</b>로 길을 늘릴 수 있어요. 질문은 적을수록 좋아요!';
+mgReg({id:'slide', order:4, icon:'🛝', title:'질문 미끄럼틀', stat:'ai', ai:'규칙 세우기(예/아니요 질문 길) → 연습 고철로 굴려 보고 고치기',
   book:'전자석 기중기 — 철만 붙이고, 무거운 고철은 세게 (켜고 끄기 · 세기)',
   stages:[
-    {name:'질문 하나로 나누기', goal:'고철 4개가 질문 하나를 지나 ‘집기’ 통과 ‘안 집기’ 통으로 미끄러져요. 전자석에 붙는 고철만 집도록 질문과 통을 정해요.', how:'질문 칸·통을 눌러 고르기 · ▶ 굴려 보기'},
-    {name:'질문 길 만들기', goal:'연습 고철 8개를 안 집기 · 약하게(전지 1개) · 세게(전지 2개)로 알맞게 처리하는 질문 길을 만들어요. 질문은 적을수록 좋아요.', how:'통을 눌러 ‘질문 하나 더 하기’ · ▶ 굴려 보기'},
-    {name:'새 고철 트럭 시험', goal:'처음 보는 고철 8개를 내 질문 길이 몇 개나 알맞게 처리할지 예상한 뒤 시험해요.', how:'예상 개수 고르기 → 저절로 굴러가요'}],
+    {name:'질문 하나로 나누기', goal:'고철 4개가 질문 하나를 지나 ‘집기’ 통과 ‘안 집기’ 통으로 미끄러져요. 전자석에 붙는 고철만 집도록 질문과 통을 정해요. 처음에는 자동이가 시범을 보여 줘요.', how:'질문 칸·통을 눌러 고르기 · ▶ 굴려 보기 · 💡 힌트'},
+    {name:'질문 길 만들기', goal:'연습 고철 8개를 안 집기 · 약하게(전지 1개) · 세게(전지 2개)로 알맞게 처리하는 질문 길을 만들어요. 질문은 적을수록 좋아요.', how:'통을 눌러 ‘질문 하나 더 하기’ · ▶ 굴려 보기 · 💡 힌트'}],
   learn:[
     '전자석에는 <b>철로 만든 물체</b>만 붙어요. ‘철로 만들었나요?’처럼 딱 맞는 질문 하나로 물체를 나눌 수 있어요. 이렇게 예/아니요로 나누는 것이 AI가 판단하는 한 가지 방법이에요.',
-    '무거운 철은 전지 2개로 <b>세게</b>, 가벼운 철은 전지 1개로 <b>약하게</b> 들어요. 질문을 더 하면 자세히 나눌 수 있지만, 꼭 필요한 질문만 쓰는 것이 좋은 규칙이에요.',
-    'AI는 <b>처음 보는 데이터</b>로 시험해야 진짜 실력을 알 수 있어요. 색이나 크기처럼 겉모습만 보는 질문은 새 고철에서 틀리기 쉬워요.'],
-  start(st, api){ if (st < 2) slideBuild(api, st); else slideTest(api); },
-  afterEnd(st){
-    if (st !== 2) return;
-    const a = $('#sl3D'), f = $('#slFix');
-    if (a) a.onclick = () => { if (SLIDE.tree) SAVE.tree = slClone(SLIDE.tree); persist(); mgQuit(true); runTreeTest(SLIDE.pred); };
-    if (f) f.onclick = () => mgStart('slide', 1);
-  },
-  extra:[{label:'AI 크레인 두뇌 연구실 (질문 길을 더 깊게)', fn:() => openTreeLab()}]});
+    '무거운 철은 전지 2개로 <b>세게</b>, 가벼운 철은 전지 1개로 <b>약하게</b> 들어요. 굴려 보고 틀린 고철을 보며 질문을 고치는 것이 AI를 만드는 과정이에요. 색이나 크기처럼 겉모습만 보는 질문은 틀리기 쉬워요.'],
+  start(st, api){ slideBuild(api, st); }});
 
 /* ===== 전기 안전 캠페인 (교재 표현하기) ===== */
 const CP_RULES = [
@@ -284,15 +304,23 @@ function cpComic(g, P, lines, names = ['하늘', '바다']){
     mgText(g, names[0], X + 92, Y + H - 26, 14, '#1c2733'); mgText(g, names[1], X + W - 82, Y + H - 26, 14, '#1c2733');
   });
 }
+/* 3컷 대본: 장면 네 개를 모두 만든다. 목록에서 아무 장면이나 골라 만들고, 저장하면 목록으로 돌아온다 */
 function campComic(api){
-  const S = {P:null, step:0, miss:0, lines:[]};
+  const S = {P:null, step:0, miss:0, lines:[], done:{}};
   api.canvas(false);
+  const list = () => {
+    S.P = null; api.canvas(false); api.bot(''); if (api.d3) api.scene(cp3Backdrop());
+    const n = Object.keys(S.done).length;
+    api.say(n ? `만화 ${n}/${CP_PLAYS.length}개 완성! 남은 장면을 골라 계속 만들어요.` : '네 장면을 모두 3컷 대본으로 만들어요. 먼저 만들 장면을 골라요.');
+    const el = api.dom(`<div class="cp"><h3 class="mg-h">🎭 3컷 대본 만들기 <small>(${n}/${CP_PLAYS.length} 완성)</small></h3><div class="cp-plays">${CP_PLAYS.map((P, i) => `<button class="cp-play ${S.done[P.id] ? 'done' : ''}" data-i="${i}" ${S.done[P.id] ? 'disabled' : ''}><span>${S.done[P.id] ? '✅' : P.icon}</span><b>${esc(P.title)}</b><small>${esc(P.p1)}</small></button>`).join('')}</div></div>`);
+    el.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { S.P = CP_PLAYS[+b.dataset.i]; S.lines = [S.P.p1]; S.step = 1; SND.tick(); stepUI(); });
+  };
   const stepUI = () => {
-    const P = S.P;
+    const P = S.P, n = Object.keys(S.done).length + 1;
     if (S.step <= 2){
       const opts = mgShuffle((S.step === 1 ? P.p2 : P.p3).map((t, k) => ({t, ok:k === 0})));
-      api.say(S.step === 1 ? '2컷: 친구 바다는 뭐라고 말려야 할까요? <b>까닭이 바른 말</b>을 골라요.' : '3컷: 하늘이는 어떻게 바르게 행동할까요?');
-      const el = api.dom(`<div class="cp"><div class="cp-strip">${[0, 1, 2].map(i => `<div class="cp-cut ${i < S.step ? 'full' : i === S.step ? 'now' : ''}"><b>${i + 1}컷 · ${i === 1 ? '👧 바다' : '👦 하늘'}</b><p>${i < S.lines.length ? esc(S.lines[i]) : i === S.step ? '?' : ''}</p></div>`).join('')}</div>
+      api.say(`만화 ${n}/${CP_PLAYS.length} · ${S.step === 1 ? '2컷: 친구 바다는 뭐라고 말려야 할까요? <b>까닭이 바른 말</b>을 골라요.' : '3컷: 하늘이는 어떻게 바르게 행동할까요?'}`);
+      const el = api.dom(`<div class="cp"><h4>${P.icon} ${esc(P.title)}</h4><div class="cp-strip">${[0, 1, 2].map(i => `<div class="cp-cut ${i < S.step ? 'full' : i === S.step ? 'now' : ''}"><b>${i + 1}컷 · ${i === 1 ? '👧 바다' : '👦 하늘'}</b><p>${i < S.lines.length ? esc(S.lines[i]) : i === S.step ? '?' : ''}</p></div>`).join('')}</div>
         <h4>${S.step === 1 ? '👧 바다의 말 고르기' : '👦 하늘이의 행동 고르기'}</h4><div class="cp-opts">${opts.map((o, k) => `<button class="btn cp-o" data-k="${k}"><kbd>${k + 1}</kbd> ${esc(o.t)}</button>`).join('')}</div></div>`);
       el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
         if (MG.ended) return;
@@ -309,21 +337,22 @@ function campComic(api){
   };
   const render = () => {
     api.dom(''); if (api.d3) api.scene(cp3ComicScene(S.P, S.lines)); else { api.canvas(true); cpComic(api.g, S.P, S.lines); }
-    api.say(api.d3 ? '무대 위에서 3컷 역할놀이가 펼쳐졌어요! 갤러리에 저장하고 끝내요.' : '3컷 만화가 완성됐어요! 갤러리에 저장하고 끝내요.');
-    const bot = api.bot(`<button class="btn primary big" id="cpSave">갤러리에 저장하고 끝내기</button><button class="btn" id="cpPng" hidden>🖼️ 그림 파일로 저장</button><button class="btn ghost" id="cpEdit">대사 고치기</button>`);
+    const last = Object.keys(S.done).length + 1 >= CP_PLAYS.length;
+    api.say(`${api.d3 ? '무대 위에서 3컷 역할놀이가 펼쳐졌어요!' : '3컷 만화가 완성됐어요!'} 갤러리에 저장해요.`);
+    const bot = api.bot(`<button class="btn primary big" id="cpSave">${last ? '갤러리에 저장하고 끝내기' : '갤러리에 저장하고 다음 장면 ▶'}</button><button class="btn" id="cpPng" hidden>🖼️ 그림 파일로 저장</button><button class="btn ghost" id="cpEdit">대사 고치기</button>`);
     const png = bot.querySelector('#cpPng');
     mgCanSave().then(ok => { if (ok && png.isConnected) png.hidden = false; });
     png.onclick = () => mgSavePng(api.d3 ? mg3Snapshot() : $('#mgCv'), `전기안전캠페인_${S.P.title}.png`);
     bot.querySelector('#cpEdit').onclick = () => { api.bot(''); api.canvas(false); if (api.d3) api.scene(cp3Backdrop()); S.step = 3; stepUI(); };
     bot.querySelector('#cpSave').onclick = () => {
       cpWorks().push({kind:'comic', play:S.P.id, lines:S.lines.slice(), time:Date.now()}); persist();
-      api.end(S.miss === 0 ? 3 : S.miss === 1 ? 2 : 1, `‘${esc(S.P.title)}’ 3컷 대본을 만들어 캠페인 갤러리에 저장했어요. 틀린 고르기 ${S.miss}번.`);
+      S.done[S.P.id] = true; SND.ok();
+      if (Object.keys(S.done).length < CP_PLAYS.length) return list();
+      api.end(S.miss === 0 ? 3 : S.miss <= 2 ? 2 : 1, `3컷 대본 ${CP_PLAYS.length}개를 모두 만들어 캠페인 갤러리에 저장했어요. 틀린 고르기 ${S.miss}번.`);
     };
   };
-  api.say('역할놀이로 만들 장면을 골라요.');
-  const el = api.dom(`<div class="cp"><h3 class="mg-h">🎭 어떤 장면으로 3컷 대본을 만들까요?</h3><div class="cp-plays">${CP_PLAYS.map((P, i) => `<button class="cp-play" data-i="${i}"><span>${P.icon}</span><b>${esc(P.title)}</b><small>${esc(P.p1)}</small></button>`).join('')}</div></div>`);
-  el.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { S.P = CP_PLAYS[+b.dataset.i]; S.lines = [S.P.p1]; S.step = 1; SND.tick(); stepUI(); });
   api.keys(e => { const m = e.code.match(/^(?:Digit|Numpad)([1-3])$/); if (m && S.P && S.step <= 2){ const b = document.querySelector(`#mgDom [data-k="${+m[1] - 1}"]`); if (b && !b.disabled) b.click(); } });
+  list();
 }
 /* 그림 파일 저장: claude.ai 게시본에서는 downloads 기능으로 묻고 저장, 내려받은 HTML 파일에서는 보통 내려받기.
    저장할 수 없는 화면이면 단추를 숨긴다. */
@@ -371,7 +400,7 @@ function openCampaignGallery(){
 mgReg({id:'campaign', order:7, icon:'📣', title:'전기 안전 캠페인', stat:'safe', book:'전기를 안전하게 사용하고 절약하는 방법 표현하기 (과학 글쓰기 · 역할놀이 · 그림)',
   stages:[
     {name:'만약 ~라면 수칙', goal:'상황에 알맞은 행동과 까닭을 골라 ‘만약 ~라면, ~한다. 왜냐하면 ~’ 안전 수칙 카드 3장을 만들어요.', how:'버튼 또는 1·2·3 키'},
-    {name:'역할놀이 3컷 대본', goal:'위험한 장면 → 친구의 말 → 바른 행동 순서로 3컷 대본을 만들고 만화로 저장해요.', how:'대사 고르기 · 내 말로 다듬기'},
+    {name:'역할놀이 3컷 대본', goal:'위험한 장면 → 친구의 말 → 바른 행동 순서로, 네 장면(젖은 손 · 문어발 · 전선 당기기 · 빈방 TV)을 모두 3컷 대본으로 만들어 만화로 저장해요.', how:'장면 고르기 → 대사 고르기 · 내 말로 다듬기 (4개 모두)'},
     {name:'우리 동네 안전 지도', goal:'맵 만들기 공방에서 상황 카드 3개 이상이 있는 우리 동네 지도를 만들고 로봇을 순찰시켜요. 해내면 ⚡ 3개!', how:'맵 만들기 공방이 열려요', launch:() => enterEditor()}],
   learn:[
     '‘만약 ~라면, ~한다’는 컴퓨터 프로그램의 <b>조건문</b>과 같아요. 상황(조건)마다 할 일을 정해 두면 누구나 같은 규칙으로 안전하게 행동할 수 있어요.',

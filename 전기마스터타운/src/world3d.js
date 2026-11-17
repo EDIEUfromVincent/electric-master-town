@@ -707,7 +707,7 @@ function collectLights(env){
   if (MODE === 'crane'){ addLight(35.6, 4.4, 3.4, 13, [1, .97, .9]); addLight(42.4, 4.4, 3.4, 13, [1, .97, .9]); }   // 크레인 작업등
   if (MODE === 'mg3') mg3Lights();
   if (MODE === 'epi') epiLights();
-  else zoneLights();
+  else { zoneLights(); placeLights(); }
   const talk = dialogNPC();
   if (talk && env.dk > .15) addLight((player.x + talk.x + .5) / 2 + Math.sin(CAM3.yaw) * 1.5, 2.2, (player.y + talk.y + .5) / 2 + Math.cos(CAM3.yaw) * 1.5, 10, [1, .95, .85]);
   if (env.dk > .25 && MODE !== 'title'){
@@ -861,7 +861,7 @@ function drawObjects3D(env, dt){
     if (talk) player.ang = angLerp(player.ang || 0, Math.atan2(talk.x + .5 - player.x, talk.y + .5 - player.y), 1 - Math.pow(.002, dt));
     setCut(VOXU, null);
     if (!(HP.inv > 0 && Math.floor(TIME * 12) % 2)){
-      const py = bikeOn() ? drawPlayerBike3D() : (player.h || 0) + (player.jz || 0) + (player.bump > 0 ? Math.sin(player.bump / .45 * Math.PI) * .12 : 0);
+      const py = bikeOn() ? drawPlayerBike3D() : (player.h || 0) + (player.jz || 0) + (player.bump > 0 ? Math.sin(player.bump / .45 * Math.PI) * .12 : 0) + (PLACE.sit ? .1 : 0);   /* 영화관 의자에 앉으면 좌석 높이 */
       person3('player', player.x, py, player.y, player.ang || 0, player.moving && !player.jz ? player.walk : 0, hasEquipped('gloves'));
     }
   }

@@ -297,6 +297,19 @@ const RB_CAND = [
   {label:'danger', text:'물기 있는 손으로 콘센트를 만졌다'}, {label:'good', text:'형광등 대신 LED 전구를 달았다'},
   {label:'waste', text:'아무도 없는 방에 TV가 켜져 있다'}, {label:'danger', text:'콘센트 하나에 플러그를 여러 개 꽂았다'}];
 const rbScene = id => SCENES.find(s => s.id === id), rbTest = id => TEST_SCENES.find(s => s.id === id);
+/* 3단계에서 고를 수 있는 예시 문장 (겹치는 문장은 하나만) */
+const RB_POOL = (() => { const seen = new Set(); return RB_CAND.concat(RB_REL).filter(c => !seen.has(c.text) && seen.add(c.text)); })();
+/* 같은 라벨 카드가 몰리지 않게: 라벨별로 섞은 뒤, 남은 장수가 많은 라벨부터 바로 앞과 다른 라벨을 하나씩 꺼낸다 */
+function rbSpread(cards){
+  const g = {}; for (const c of mgShuffle(cards)) (g[c.label] = g[c.label] || []).push(c);
+  const out = []; let last = null;
+  while (out.length < cards.length){
+    const ks = Object.keys(g).filter(k => g[k].length).sort((a, b) => g[b].length - g[a].length || Math.random() - .5);
+    const k = ks.find(x => x !== last) || ks[0]; out.push(g[k].shift()); last = k;
+  }
+  return out;
+}
+const rbSim = (a, b) => { const A = bigramSet(a), B = bigramSet(b); let n = 0; for (const x of A) if (B.has(x)) n++; return n / Math.max(1, A.size + B.size - n); };
 function rbModel(pairs){ const d = {good:[], danger:[], waste:[]}; for (const [l, t] of pairs) if (d[l]) d[l].push(t); return NB.train(d); }
 /* 카드 고르기: 문장 카드가 하나씩 나오고, 정해진 시간 안에 칸을 고른다. 고른 칸은 바로 알려 주지 않는다(로봇은 내가 고른 그대로 믿는다). */
 function rbSort(api, cards, bins, sec, done){
@@ -341,12 +354,12 @@ function rbBadHTML(bad, title = '🔁 다시 볼 라벨'){
 }
 function robotS1(api){
   robo3Reset();
-  const cards = mgShuffle(RB_TRAIN.map(rbScene));
+  const cards = rbSpread(RB_TRAIN.map(rbScene));
   api.canvas(false); api.say('문장을 읽고 알맞은 칸을 골라요. 로봇은 내가 고른 칸을 <b>정답(라벨)</b>이라고 믿고 배워요!');
   rbSort(api, cards, ['good', 'danger', 'waste'], 8, picks => {
     let ok = 0; const bad = [], pairs = [];
     cards.forEach((c, i) => { const p = picks[i]; if (p === c.label) ok++; else bad.push({c, p}); if (LABELS[p]) pairs.push([p, c.text]); });
-    const m = rbModel(pairs), tests = RB_TEST1.map(rbTest), res = tests.map(t => ({t, r:NB.predict(m, t.text)})), score = res.filter(x => x.r.label === x.t.label).length;
+    const m = rbModel(pairs), tests = rbSpread(RB_TEST1.map(rbTest)), res = tests.map(t => ({t, r:NB.predict(m, t.text)})), score = res.filter(x => x.r.label === x.t.label).length;
     let fair = '';
     if (bad.length){ const m2 = rbModel(cards.map(c => [c.label, c.text])), s2 = tests.filter(t => NB.predict(m2, t.text).label === t.label).length;
       fair = `<div class="note" style="margin-top:8px">라벨을 모두 바르게 붙였다면 로봇은 <b>${s2}개</b>를 맞혔을 거예요. 라벨이 틀리면 AI도 틀리게 배워요.</div>`; }
@@ -357,7 +370,7 @@ function robotS1(api){
 }
 function robotS2(api){
   robo3Reset();
-  const cards = mgShuffle(RB_REL.concat(RB_JUNK));
+  const cards = rbSpread(RB_REL.concat(RB_JUNK));
   api.canvas(false); api.say('로봇에게 줄 데이터를 골라요. <b>전기와 상관없는 문장</b>과 <b>개인정보</b>는 🗑️에 버리고, 나머지는 알맞은 칸에 넣어요.');
   rbSort(api, cards, ['good', 'danger', 'waste', 'trash'], 8, picks => {
     let ok = 0, pii = 0; const bad = [], pairs = [], cleanPairs = [];
@@ -375,41 +388,65 @@ function robotS2(api){
     rbThinking(api, () => api.end(b, `카드 ${cards.length}장 중 <b>${ok}장</b>을 알맞게 골랐어요.${pii ? ' 개인정보가 들어가서 번개는 1개까지만 받을 수 있어요.' : ''}`, warn + rbBadHTML(bad, '🔁 다시 볼 카드') + probe));
   });
 }
+/* 3단계: 틀린 장면마다 '이 장면을 바로잡으려면 어떤 예시를 더 가르칠까?'를 두 개 중에서 고른다.
+   하나는 정답 라벨의 비슷한 문장(도움이 됨), 하나는 로봇이 틀리게 답한 라벨의 비슷한 문장(더 헷갈리게 함). 고른 예시는 쌓여서 계속 배운다 */
+function rbOptions(t, robotLabel, taught, used = new Set()){
+  const left = RB_POOL.filter(c => !taught.some(x => x.text === c.text) && !used.has(c.text));   /* 장면마다 서로 다른 예시가 나오게 */
+  const best = lab => left.filter(c => c.label === lab).map(c => ({c, s:rbSim(c.text, t.text)})).sort((a, b) => b.s - a.s)[0];
+  const wrongLab = robotLabel && robotLabel !== t.label ? robotLabel : LABEL_KEYS.find(l => l !== t.label);
+  const out = [best(t.label), best(wrongLab)].filter(Boolean).map(x => x.c);
+  out.forEach(c => used.add(c.text));
+  return mgShuffle(out);
+}
 function robotS3(api){
   robo3Reset();
-  const base = RB_TRAIN.map(rbScene).map(s => [s.label, s.text]), tests = TEST_SCENES, cand = mgShuffle(RB_CAND), sel = new Set(), hist = [];
-  const run = extra => { const m = rbModel(base.concat(extra.map(c => [c.label, c.text]))); const res = tests.map(t => ({t, r:NB.predict(m, t.text)})); return {res, score:res.filter(x => x.r.label === x.t.label).length}; };
-  let cur = run([]), tries = 0, best = 0; hist.push(cur.score);
-  api.canvas(false);
-  api.say('로봇이 틀린 문장을 살펴보고, 비슷한 예시 문장을 <b>4개까지</b> 골라 다시 가르쳐요. 기회는 3번!');
-  const el = api.dom(`<div class="rb3"><div class="rb-sec"><h4>🤖 지금 로봇의 시험 점수 <b class="rb-score" id="r3S"></b></h4><p class="mg-small">1단계 문장 12개(바른 라벨)로 배운 로봇이 시험 마을 장면 13개를 풀었어요.</p><div id="r3H" class="rb-hist"></div><div id="r3W"></div></div>
-    <div class="rb-sec"><h4>➕ 보탤 예시 문장 고르기 <small>(<b id="r3N">0</b>/4)</small></h4><div class="cands">${cand.map((c, i) => `<button class="cand" data-i="${i}">${rbChip(c.label)}<span>${esc(c.text)}</span></button>`).join('')}</div></div></div>`);
-  const bot = api.bot(`<button class="btn primary big" id="r3Go">다시 가르치고 시험하기 <small id="r3T">(기회 3번)</small></button><button class="btn" id="r3End" disabled>이대로 끝내기</button>`);
+  const base = RB_TRAIN.map(rbScene).map(s => [s.label, s.text]), tests = TEST_SCENES, taught = [], hist = [];
+  const run = () => { const m = rbModel(base.concat(taught.map(c => [c.label, c.text]))); const res = tests.map(t => ({t, r:NB.predict(m, t.text)})); return {res, score:res.filter(x => x.r.label === x.t.label).length}; };
+  let cur = run(), tries = 0, best = cur.score, wrong = [], opts = [], pick = {};
+  hist.push(cur.score); api.canvas(false);
+  const el = api.dom(`<div class="rb3">
+    <div class="rb3-top"><div><span class="rb3-lbl">🤖 로봇의 시험 점수</span><b class="rb-score" id="r3S"></b></div><div id="r3H" class="rb-hist"></div></div>
+    <ol class="rb3-steps"><li id="r3s1">① 로봇이 틀린 장면을 읽어요</li><li id="r3s2">② 장면마다 더 가르칠 예시를 하나씩 골라요</li><li id="r3s3">③ 다시 가르치고 시험해요</li></ol>
+    <div id="r3L" class="rb3-list"></div><div id="r3T" class="rb3-taught"></div></div>`);
+  const bot = api.bot(`<button class="btn primary big" id="r3Go">🔁 고른 예시로 다시 가르치기 <small id="r3N"></small></button><button class="btn" id="r3End" disabled>이대로 끝내기</button>`);
   const draw = () => {
     $('#r3S').textContent = `${cur.score} / ${tests.length}`;
     $('#r3H').innerHTML = hist.map((s, i) => `<span class="${i === hist.length - 1 ? 'on' : ''}">${i ? `${i}번째` : '처음'} <b>${s}</b></span>`).join('<i>→</i>');
-    const wrong = cur.res.filter(x => x.r.label !== x.t.label);
-    $('#r3W').innerHTML = wrong.length ? rbTestHTML(wrong, `❌ 로봇이 틀린 장면 ${wrong.length}개`) : '<div class="okbox">🏆 시험 장면 13개를 모두 맞혔어요!</div>';
-    $('#r3N').textContent = sel.size; $('#r3T').textContent = `(남은 기회 ${3 - tries}번)`;
+    wrong = cur.res.filter(x => x.r.label !== x.t.label); const used = new Set(); opts = wrong.map(x => rbOptions(x.t, x.r.label, taught, used)); pick = {};
+    $('#r3L').innerHTML = wrong.length ? wrong.map((x, i) => `<div class="rb3-row" data-row="${i}">
+        <div class="rb3-q"><p><b>❌ ${esc(x.t.text)}</b></p><div class="rb3-ans">${rbChip(x.r.label, '🤖 로봇 ')} <span>정답</span> ${rbChip(x.t.label)}</div></div>
+        <div class="rb3-opts"><small>이 장면을 바로잡으려면 어떤 예시를 더 가르칠까요?</small>${opts[i].length ? opts[i].map((c, k) => `<button class="rb3-o" data-i="${i}" data-k="${k}">${rbChip(c.label)}<span>${esc(c.text)}</span></button>`).join('') : '<em>더 가르칠 예시가 없어요</em>'}</div></div>`).join('')
+      : '<div class="okbox">🏆 시험 장면 13개를 모두 맞혔어요!</div>';
+    $('#r3T').innerHTML = taught.length ? `<b>지금까지 더 가르친 예시 ${taught.length}개</b> ${taught.map(c => rbChip(c.label)).join(' ')}` : '';
+    $('#r3N').textContent = `(남은 기회 ${3 - tries}번)`;
+    el.querySelectorAll('.rb3-o').forEach(b => b.onclick = () => {
+      const i = +b.dataset.i, k = +b.dataset.k;
+      pick[i] = pick[i] === k ? undefined : k; SND.tick();
+      el.querySelectorAll(`.rb3-o[data-i="${i}"]`).forEach(x => x.classList.toggle('on', +x.dataset.k === pick[i]));
+      el.querySelector(`[data-row="${i}"]`).classList.toggle('picked', pick[i] != null); stepOn();
+    });
+    stepOn();
   };
-  el.querySelectorAll('.cand').forEach(b => b.onclick = () => {
-    const i = +b.dataset.i; if (sel.has(i)) sel.delete(i); else { if (sel.size >= 4) return api.say('4개까지만 고를 수 있어요. 다른 카드를 빼고 골라요.', 'bad'); sel.add(i); }
-    b.classList.toggle('on', sel.has(i)); SND.tick(); $('#r3N').textContent = sel.size;
-  });
-  const finish = () => api.end(best >= 13 ? 3 : best >= 12 ? 2 : best >= 11 ? 1 : 0, `시험 점수가 처음 ${hist[0]}개에서 최고 <b>${best}개</b>가 되었어요. (기회 ${tries}번 사용)`,
+  const nPick = () => Object.values(pick).filter(v => v != null).length;
+  const stepOn = () => { const n = nPick(); $('#r3s1').className = 'done'; $('#r3s2').className = n ? 'done' : 'on'; $('#r3s3').className = n ? 'on' : ''; };
+  const finish = () => api.end(best >= 13 ? 3 : best >= 12 ? 2 : best >= 11 ? 1 : 0, `시험 점수가 처음 ${hist[0]}개에서 최고 <b>${best}개</b>가 되었어요. (기회 ${tries}번 사용 · 더 가르친 예시 ${taught.length}개)`,
     `<div class="rb-sec"><b>📈 점수 변화</b><div class="rb-hist">${hist.map((s, i) => `<span>${i ? `${i}번째` : '처음'} <b>${s}</b></span>`).join('<i>→</i>')}</div></div>`);
   bot.querySelector('#r3Go').onclick = () => {
     if (MG.ended || tries >= 3) return;
-    if (!sel.size) return api.say('보탤 예시 문장을 1개 이상 골라요.', 'bad');
-    tries++; cur = run([...sel].map(i => cand[i])); hist.push(cur.score); best = Math.max(best, cur.score);
+    const chosen = Object.entries(pick).filter(([, k]) => k != null).map(([i, k]) => ({c:opts[+i][k], t:wrong[+i].t}));
+    if (!chosen.length) return api.say('틀린 장면 아래에서 더 가르칠 예시를 하나 이상 골라요.', 'bad');
+    const misled = chosen.filter(x => x.c.label !== x.t.label).length;
+    chosen.forEach(x => taught.push(x.c));
+    tries++; const prev = cur.score; cur = run(); hist.push(cur.score); best = Math.max(best, cur.score);
     $('#r3End').disabled = false; draw();
-    const d = cur.score - hist[hist.length - 2];
-    if (cur.score >= 13){ SND.ok(); api.say('🏆 모두 맞혔어요! 틀린 장면과 비슷한 예시를 보탠 덕분이에요.', 'ok'); api.after(1200, finish); return; }
-    if (d > 0){ SND.ok(); api.say(`점수가 ${d}개 올랐어요! 아직 틀린 장면과 비슷한 문장이 있는지 살펴봐요.`, 'ok'); }
-    else { SND.bad(); api.say(d < 0 ? '점수가 내려갔어요. 어떤 예시가 로봇을 헷갈리게 했을까요?' : '점수가 그대로예요. 로봇이 이미 아는 내용만 보탠 건 아닐까요?', 'bad'); }
+    const d = cur.score - prev;
+    if (cur.score >= 13){ SND.ok(); api.say('🏆 모두 맞혔어요! 틀린 장면과 비슷하고 정답 라벨이 같은 예시를 보탠 덕분이에요.', 'ok'); api.after(1200, finish); return; }
+    if (d > 0){ SND.ok(); api.say(`점수가 ${d}개 올랐어요!${misled ? ` 그런데 고른 예시 중 ${misled}개는 로봇이 틀린 쪽 라벨이었어요. 정답 라벨과 같은 예시를 골라 봐요.` : ' 남은 틀린 장면도 같은 방법으로 고쳐 봐요.'}`, 'ok'); }
+    else { SND.bad(); api.say(misled ? `점수가 ${d < 0 ? '내려갔어요' : '그대로예요'}. 고른 예시 ${misled}개가 로봇이 틀린 쪽 라벨이라 로봇이 더 헷갈렸어요. 정답 라벨(오른쪽 칩)과 같은 예시를 골라요.` : '점수가 그대로예요. 다른 예시를 골라 한 번 더 가르쳐 봐요.', 'bad'); }
     if (tries >= 3) api.after(1600, finish);
   };
   bot.querySelector('#r3End').onclick = () => { if (tries) finish(); };
+  api.say('① 로봇이 틀린 장면을 읽고, ② 장면마다 아래 예시 두 개 중 <b>로봇에게 더 가르칠 예시</b>를 하나씩 골라요. ③ 다 고르면 [다시 가르치기]! 기회는 3번이에요.');
   draw();
 }
 mgReg({id:'robot', order:6, icon:'🤖', title:'로봇 훈련소', stat:'ai', ai:'데이터에 라벨 붙이기 → 데이터 고르기(개인정보 빼기) → 시험하고 틀린 것을 보고 고치기',
@@ -417,7 +454,7 @@ mgReg({id:'robot', order:6, icon:'🤖', title:'로봇 훈련소', stat:'ai', ai
   stages:[
     {name:'라벨 붙이기', goal:'문장 12개에 ✅ 바른 사용 · ⚠️ 위험 · 💸 낭비 라벨을 붙여 로봇을 가르쳐요. 로봇은 내가 붙인 라벨을 그대로 믿고 배운 뒤 처음 보는 문장을 풀어요.', how:'버튼 또는 1·2·3 키 · 한 장에 8초'},
     {name:'데이터 고르기', goal:'문장 16장 중 전기와 상관없는 문장과 개인정보는 🗑️에 버리고, 나머지는 알맞은 칸에 넣어요.', how:'버튼 또는 1·2·3·4 키 · 한 장에 8초'},
-    {name:'시험하고 고치기', goal:'로봇이 틀린 시험 장면을 보고, 도움이 될 예시 문장을 4개까지 골라 다시 가르쳐요. 13개를 모두 맞히게 해 봐요.', how:'카드를 눌러 고르기 · 다시 가르치고 시험하기 (기회 3번)'}],
+    {name:'시험하고 고치기', goal:'로봇이 틀린 시험 장면마다, 바로잡는 데 도움이 될 예시를 두 개 중에서 골라 다시 가르쳐요. 13개를 모두 맞히게 해 봐요.', how:'틀린 장면 아래 예시 고르기 → 다시 가르치기 (기회 3번)'}],
   learn:[
     'AI는 사람이 붙인 <b>라벨(정답)</b>을 보고 배워요. 라벨이 틀리면 AI도 틀리게 배워요. 그래서 데이터를 만드는 사람의 바른 판단이 중요해요.',
     '상관없는 문장을 섞으면 AI가 엉뚱한 낱말을 단서로 삼고, <b>개인정보</b>를 넣으면 AI가 그것까지 기억해요. AI에게 줄 데이터는 <b>골라서</b> 줘야 해요.',

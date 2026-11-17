@@ -223,6 +223,7 @@ const LOOKS = {
   tech:    {shirt:'#455a64', pants:'#2a3341', skin:'#e9bd92', hat:'#ffd23f', hair:'#3a2a1d'},
   mayor:   {shirt:'#2b3a55', pants:'#1f2633', skin:'#f0c8a0', hair:'#6b6b6b', vest:'#e5483a'},
   driver:  {shirt:'#2fb36b', pants:'#2a3341', skin:'#e9bd92', hat:'#1f8a4c', hair:'#2a1d14'},
+  shopkeeper:{shirt:'#c0504d', pants:'#2a3341', skin:'#f0c8a0', hat:'#ff7ad9', hair:'#3a2a1d'},
 };
 function drawPerson(px, py, S, look, dir, walk){
   const L = LOOKS[look] || LOOKS.player; const u = S / 40 * (L.scale || 1);
@@ -288,6 +289,7 @@ function objDone(o){
   if (o.type === 'device') return !!(SAVE.dex[o.dev] && SAVE.dex[o.dev].done);
   if (o.type === 'scene') return !!SAVE.judged[o.id];
   if (o.type === 'npc') return !actGiverHere(o);
+  if (o.type === 'thing') return placeThingDone(o);
   if (o.type === 'mission') return WORLD.kind === 'story' || WORLD.kind === 'room' ? o.id !== actPlaceNow() : true;   /* 지금 가야 할 장소만 빛난다 */
   return true;
 }

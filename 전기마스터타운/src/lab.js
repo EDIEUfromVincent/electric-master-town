@@ -347,10 +347,10 @@ function openCraneMenu(){
   const p = openPanel(`<h2>크레인 조종석</h2><p class="sub">크레인 끝의 전자석으로 철 고철만 골라 철 고철함에 옮겨요.</p>
     <div class="grid2">
       <div class="card"><h4>${q.em2 ? '✅ ' : ''}직접 조종하기</h4><p style="font-size:14px;color:var(--text-dim)">전지 개수와 자석 켜기·끄기를 직접 조작해요. 어떤 물체가 붙고, 언제 센 전자석이 필요한지 찾아봐요.</p><button class="btn primary" id="cmManual">시작</button></div>
-      <div class="card"><h4>${q.em3 ? '✅ ' : ''}AI 두뇌로 자동 운전</h4><p style="font-size:14px;color:var(--text-dim)">내가 만든 질문 길(스무고개)대로 크레인이 스스로 판단해요.</p><button class="btn" id="cmAuto">AI 크레인 두뇌 열기</button></div>
+      <div class="card"><h4>${q.em3 ? '✅ ' : ''}AI 크레인 두뇌</h4><p style="font-size:14px;color:var(--text-dim)">AI 크레인 두뇌실의 질문 미끄럼틀에서 크레인이 스스로 판단하는 질문 길을 만들어요.</p><button class="btn" id="cmAuto">질문 미끄럼틀 열기</button></div>
     </div>`);
   p.querySelector('#cmManual').onclick = () => crane3Ready() ? startCrane3D('manual') : openCraneManual();
-  p.querySelector('#cmAuto').onclick = openTreeLab;
+  p.querySelector('#cmAuto').onclick = () => mgOpenGame('slide');
 }
 function openCraneManual(){
   const p = openPanel(`<h2>고철장 크레인 조종</h2>
@@ -420,8 +420,7 @@ function openCraneManual(){
     p.querySelector('#crDone').innerHTML = `<div class="okbox" style="margin-top:10px"><b>미션 성공!</b> 철 고철 4개를 모두 옮겼어요. 전기 사용량 ${e}. 미니 게임 ${boltsHTML(bolts)}<br>
       붙지 않은 물체 시도 ${stats.nostick}번 · 무거워서 떨어뜨림 ${stats.drop}번 · 가벼운 고철에 전지 2개 ${stats.waste}번<br>
       <b>생각해 볼까요?</b> 나는 무엇을 보고 '집을지 말지', '얼마나 세게 할지' 정했나요? 그 판단 기준을 AI 크레인 두뇌에 가르쳐 봐요.</div>
-      <div class="row" style="margin-top:10px"><button class="btn primary" id="crGoTree">AI 크레인 두뇌 만들러 가기</button><button class="btn" data-close>닫기</button></div>`;
-    p.querySelector('#crGoTree').onclick = openTreeLab;
+      <div class="row" style="margin-top:10px"><button class="btn primary" data-close>닫기</button></div>`;
   }
 }
 
@@ -434,110 +433,7 @@ function traceTree(n, it){
 function treeComplete(n){ return !!n && (n.t === 'a' || (n.t === 'q' && treeComplete(n.yes) && treeComplete(n.no))); }
 function treeSize(n){ return !n || n.t !== 'q' ? 0 : 1 + treeSize(n.yes) + treeSize(n.no); }
 function nodeAt(root, path){ let n = root; for (const ch of path.slice(1)) n = ch === 'y' ? n.yes : n.no; return n; }
-function setNode(path, val){
-  if (path === 'r'){ SAVE.tree = val; return; }
-  const parent = nodeAt(SAVE.tree, path.slice(0, -1)); if (path.endsWith('y')) parent.yes = val; else parent.no = val;
-}
-/* 질문 길 그리기: 위에서 아래로 갈라지는 '예/아니요' 길. 칸 아래에는 그 칸까지 내려온 연습 고철이 보인다.
-   한 길에서 이미 물어본 특징(재료·무게·크기·색)은 다시 고를 수 없다. */
-const TREE_UI = {open:null, kind:null};
-function treeArrivals(root, items){
-  const map = {};
-  for (const it of items){
-    let n = root, path = 'r';
-    while (n && n.t === 'q'){ const a = QUESTIONS[n.q].f(it); path += a ? 'y' : 'n'; n = a ? n.yes : n.no; }
-    (map[path] = map[path] || []).push(it);
-  }
-  return map;
-}
-function qCard(q, path){
-  const Qd = QUESTIONS[q], A = ATTR[Qd.key];
-  return `<button class="qcard ${A.cls}" data-path="${path}" data-q="${q}"><span class="qk">${A.icon} ${Qd.key}</span>${Qd.text}</button>`;
-}
-function treeHTML(n, path, depth, keys = [], arr = {}){
-  const here = arr[path] || [];
-  const who = (n && n.t === 'q') ? '' : here.length
-    ? `<div class="tarr">${here.map(it => { const ok = n && n.t === 'a' ? correctAction(it) === n.a : null; return `<span class="tchip ${ok === true ? 'ok' : ok === false ? 'bad' : ''}">${ok === true ? '✓ ' : ok === false ? '✗ ' : ''}${esc(it.name)}</span>`; }).join('')}</div>`
-    : (depth ? '<div class="tarr none">여기로 오는 연습 고철이 없어요</div>' : '');
-  if (!n || n.t === 'e'){
-    const avail = Q_ORDER.filter(q => !keys.includes(QUESTIONS[q].key));
-    const open = TREE_UI.open === path ? TREE_UI.kind : null;
-    let inner;
-    if (open === 'q') inner = `<div class="tpick-t">어떤 특징을 물어볼까요?</div><div class="tpick">${avail.map(q => qCard(q, path)).join('')}</div><button class="btn small ghost" data-cancel>닫기</button>`;
-    else if (open === 'a') inner = `<div class="tpick-t">크레인이 어떻게 할까요?</div><div class="tpick">${Object.entries(ACTIONS).map(([k, v]) => `<button class="chip ${k} big" data-path="${path}" data-a="${k}">${v.text}</button>`).join('')}</div><button class="btn small ghost" data-cancel>닫기</button>`;
-    else inner = `<div class="tadd">${depth < 3 && avail.length ? `<button class="btn small" data-open="${path}" data-kind="q">＋ 질문 넣기</button>` : ''}<button class="btn small" data-open="${path}" data-kind="a">＋ 결정 넣기</button></div>`;
-    return `<div class="tnode"><div class="tbox empty${open ? ' open' : ''}">${inner}</div>${who}</div>`;
-  }
-  if (n.t === 'a') return `<div class="tnode"><div class="tbox act"><span class="chip ${n.a}">${ACTIONS[n.a].text}</span><button class="del" data-del="${path}" aria-label="지우기">×</button></div>${who}</div>`;
-  const Qd = QUESTIONS[n.q], A = ATTR[Qd.key], dup = keys.includes(Qd.key), nk = keys.concat(Qd.key);
-  const warn = dup ? `<div class="qwarn">⚠️ 위에서 이미 ${josa(Qd.key, '을', '를')} 물어봤어요. 이 질문은 지워도 돼요.</div>`
-    : Qd.legacy ? '<div class="qwarn">예전 질문이에요. 금속에는 철·알루미늄·구리가 모두 들어가요. \'철로 만들었나요?\'로 바꿔 볼까요?</div>' : '';
-  return `<div class="tnode"><div class="tbox q ${A.cls}${dup ? ' dup' : ''}"><span class="qk">${A.icon} ${Qd.key}</span><div class="qt">${Qd.text}</div>${warn}<button class="del" data-del="${path}" aria-label="지우기">×</button></div>
-    <div class="tbr"><div class="tb"><span class="tlab yes">예</span>${treeHTML(n.yes, path + 'y', depth + 1, nk, arr)}</div><div class="tb"><span class="tlab no">아니요</span>${treeHTML(n.no, path + 'n', depth + 1, nk, arr)}</div></div></div>`;
-}
-const HINTS = [
-  '크레인을 직접 조종할 때 어떤 고철이 전자석에 붙었나요? <b>재료</b>를 먼저 물어보면 어떨까요?',
-  '알루미늄 캔과 철 캔은 둘 다 <b>은색</b>이에요. 색으로 나누면 어떻게 될까요?',
-  '세게 집어야 하는 건 <b>큰</b> 고철일까요, <b>무거운</b> 고철일까요? 작지만 무거운 물건도 있어요.',
-];
-function attrChips(it){
-  return `<div class="attrs"><span class="ac mat">🧱 ${it.material}</span><span class="ac wt">⚖️ ${it.heavy ? '무거움' : '가벼움'}</span><span class="ac sz">📏 ${it.big ? '큼' : '작음'}</span><span class="ac col">🎨 ${it.colorName}</span></div>`;
-}
-function itemCard(it, showAnswer = true){
-  const a = correctAction(it);
-  return `<div class="icard"><img src="${itemThumbURL(it)}" alt=""><b>${esc(it.name)}</b>${attrChips(it)}
-    ${showAnswer ? `<div class="lbl"><span class="chip ${a}">정답: ${ACTIONS[a].short}</span></div>` : ''}</div>`;
-}
-function openTreeLab(){
-  if (!SAVE.tree) SAVE.tree = {t:'e'};
-  let hintN = 0; TREE_UI.open = null;
-  const p = openPanel(`<h2>AI 크레인 두뇌 만들기</h2>
-    <p class="sub">크레인 두뇌는 <b>스무고개</b>처럼 '예/아니요' 질문을 차례로 해서 고철을 나눠요. 고철은 <b>질문 길</b>을 따라 내려가 마지막 칸에 적힌 대로 움직여요. 필요한 만큼만 세게 집으면 전기도 아낄 수 있어요.</p>
-    <p class="note" style="margin:0 0 6px">어른들은 이렇게 질문으로 나누는 AI를 '의사결정트리'라고 불러요.</p>
-    <h3>① 연습 고철 (정답이 적혀 있어요)</h3><div class="items">${TRAIN_ITEMS.map(it => itemCard(it)).join('')}</div>
-    <h3>② 질문 길 만들기</h3>
-    <p class="sub" style="margin-top:0">물어볼 수 있는 특징은 <b>🧱 재료 · ⚖️ 무게 · 📏 크기 · 🎨 색</b> 네 가지예요. 한 길에서 같은 특징은 한 번만 물어요. 칸 아래에 그 칸까지 내려온 연습 고철이 보여요.</p>
-    <div class="tree" id="tBox"></div>
-    <div class="row"><button class="btn small" id="tClear">처음부터</button><button class="btn small" id="tHint">힌트 보기</button><span id="tInfo" style="font-size:13px;color:var(--text-dim)"></span></div>
-    <div id="tHintBox" style="margin-top:8px"></div>
-    <h3>③ 시험하기</h3>
-    <div class="row"><button class="btn" id="tTrain">연습 고철로 시험</button><button class="btn primary" id="tTest">새 고철 트럭으로 시험</button></div>
-    <div id="tRes" style="margin-top:10px"></div>
-    <h3>시험 기록</h3><div id="tHist"></div>`, {wide:true});
-  const render = () => {
-    p.querySelector('#tBox').innerHTML = treeHTML(SAVE.tree, 'r', 0, [], treeArrivals(SAVE.tree, TRAIN_ITEMS));
-    const done = treeComplete(SAVE.tree), n = treeSize(SAVE.tree);
-    p.querySelector('#tInfo').textContent = done ? `완성! 질문 ${n}개${n > 3 ? ' · 질문을 줄여도 될지 살펴봐요' : ''}` : '빈칸을 모두 채우면 완성돼요';
-    p.querySelectorAll('#tBox [data-open]').forEach(b => b.onclick = () => { TREE_UI.open = b.dataset.open; TREE_UI.kind = b.dataset.kind; render(); });
-    p.querySelectorAll('#tBox [data-cancel]').forEach(b => b.onclick = () => { TREE_UI.open = null; render(); });
-    p.querySelectorAll('#tBox [data-q]').forEach(b => b.onclick = () => { setNode(b.dataset.path, {t:'q', q:b.dataset.q, yes:{t:'e'}, no:{t:'e'}}); TREE_UI.open = null; persist(); SND.tick(); render(); });
-    p.querySelectorAll('#tBox [data-a]').forEach(b => b.onclick = () => { setNode(b.dataset.path, {t:'a', a:b.dataset.a}); TREE_UI.open = null; persist(); SND.tick(); render(); });
-    p.querySelectorAll('#tBox [data-del]').forEach(b => b.onclick = () => { setNode(b.dataset.del, {t:'e'}); TREE_UI.open = null; persist(); render(); });
-    renderHist();
-  };
-  const renderHist = () => {
-    const runs = SAVE.treeRuns.slice(-12);
-    p.querySelector('#tHist').innerHTML = runs.length ? `<div class="hist">${runs.map(r => `<div title="${r.kind === 'test' ? '새 고철' : '연습'} ${Math.round(r.acc * 100)}%" style="height:${Math.max(4, r.acc * 60)}px;background:${r.kind === 'test' ? 'var(--volt)' : 'var(--info)'}"><span>${Math.round(r.acc * 100)}</span></div>`).join('')}</div>
-      <p class="sub" style="margin-top:6px">파랑: 연습 고철 · 노랑: 새 고철 트럭. 고칠 때마다 정확도가 어떻게 바뀌었나요?</p>` : '<p class="sub">아직 시험 기록이 없어요.</p>';
-  };
-  p.querySelector('#tClear').onclick = () => { SAVE.tree = {t:'e'}; TREE_UI.open = null; persist(); render(); };
-  p.querySelector('#tHint').onclick = () => { hintN = Math.min(HINTS.length, hintN + 1); p.querySelector('#tHintBox').innerHTML = HINTS.slice(0, hintN).map((h, i) => `<div class="note" style="margin-bottom:6px">힌트 ${i + 1}. ${h}</div>`).join(''); };
-  p.querySelector('#tTrain').onclick = () => {
-    if (!treeComplete(SAVE.tree)) return toast('질문 길의 빈칸을 먼저 채워요.', 'bad');
-    const rows = TRAIN_ITEMS.map(it => { const tr = traceTree(SAVE.tree, it); return {it, tr, out:craneOutcome(it, tr.action)}; });
-    const acc = rows.filter(r => r.out.ok).length / rows.length;
-    SAVE.treeRuns.push({kind:'train', acc, size:treeSize(SAVE.tree), time:Date.now()}); persist();
-    p.querySelector('#tRes').innerHTML = `<div class="row"><span class="big-score">${Math.round(acc * 100)}%</span><span>연습 고철 8개 중 ${rows.filter(r => r.out.ok).length}개를 알맞게 처리했어요.</span></div>` + resultTable(rows);
-    acc === 1 ? SND.ok() : SND.bad(); renderHist(); rpgSync();
-  };
-  p.querySelector('#tTest').onclick = () => {
-    if (!treeComplete(SAVE.tree)) return toast('질문 길의 빈칸을 먼저 채워요.', 'bad');
-    p.querySelector('#tRes').innerHTML = `<div class="card"><b>먼저 예상해요.</b> 처음 보는 고철 8개 중 내 크레인 두뇌가 몇 개를 알맞게 처리할까요?
-      <div class="row" style="margin-top:8px"><input id="tPred" type="number" min="0" max="8" value="6" style="width:80px" aria-label="예상 개수"> 개 <button class="btn primary" id="tGo">시험 시작</button></div></div>`;
-    p.querySelector('#tGo').onclick = () => runTreeTest(clamp(+p.querySelector('#tPred').value || 0, 0, 8));
-  };
-  render();
-}
+/* 예전 'AI 크레인 두뇌 만들기' 창은 없앴다: 질문 길은 AI 크레인 두뇌실의 질문 미끄럼틀(mg_ai.js)에서 만든다 */
 function resultTable(rows){
   return `<div class="tblwrap" style="margin-top:8px"><table class="tbl"><thead><tr><th>고철</th><th>크레인 두뇌가 물어본 질문</th><th>결정</th><th>결과</th></tr></thead><tbody>${rows.map(r => `
     <tr><td>${esc(r.it.name)}<br><small style="color:var(--text-dim)">🧱${r.it.material} · ⚖️${r.it.heavy ? '무거움' : '가벼움'} · 📏${r.it.big ? '큼' : '작음'} · 🎨${r.it.colorName}</small></td>
@@ -545,39 +441,6 @@ function resultTable(rows){
     <td><span class="chip ${r.tr.action}">${ACTIONS[r.tr.action].short}</span></td>
     <td class="${r.out.ok ? 'res-ok' : r.out.kind === 'waste' ? 'res-mid' : 'res-bad'}">${r.out.ok ? '✓' : r.out.kind === 'waste' ? '△' : '✗'} ${r.out.msg}</td></tr>`).join('')}</tbody></table></div>`;
 }
-function treeTestReport(tree, pred, p, holder){
-    const all = TEST_ITEMS.map(it => { const tr = traceTree(tree, it); return {it, tr, out:craneOutcome(it, tr.action)}; });
-    const ok = all.filter(r => r.out.ok).length, acc = ok / all.length;
-    SAVE.treeRuns.push({kind:'test', acc, pred, size:treeSize(tree), time:Date.now()});
-    let badge = '';
-    if (acc >= .85 && !SAVE.badges.em3){ SAVE.badges.em3 = true; badge = '<div class="okbox" style="margin-top:8px"><b>AI 크레인 두뇌 미션 성공!</b></div>'; }
-    else if (acc < .85) badge = '<div class="note" style="margin-top:8px">미션 성공 기준은 85% 이상이에요. 틀린 고철을 보고 질문을 고쳐 다시 도전해요.</div>';
-    if (acc === 1) badge += '<div class="okbox" style="margin-top:8px">⭐ <b>완벽한 두뇌!</b> 처음 보는 고철도 모두 알맞게 처리했어요. 질문을 더 줄일 수 있을지 도전해 봐요.</div>';
-    persist(); acc >= .85 ? SND.ok() : SND.bad();
-    holder.innerHTML = `<div class="row" style="margin-top:10px"><span class="big-score">${Math.round(acc * 100)}%</span>
-      <span>새 고철 8개 중 <b>${ok}개</b>를 알맞게 처리했어요. 내 예상은 ${pred}개였어요.</span></div>${badge}${resultTable(all)}
-      <div class="fieldset" style="margin-top:12px"><label for="atNote">AI가 틀린 고철은 무엇이고, 어떤 질문이나 결정을 바꾸면 좋을까요?</label>
-      <textarea id="atNote" rows="2" maxlength="200">${esc(SAVE.treeNote)}</textarea></div>
-      <div class="row"><button class="btn primary" id="atBack">두뇌 고치러 가기</button><button class="btn" data-close>닫기</button></div>`;
-    p.querySelector('#atNote').oninput = e => { SAVE.treeNote = e.target.value; persist(); };
-    p.querySelector('#atBack').onclick = openTreeLab;
-    checkMasters();
-}
-function runTreeTest(pred){
-  const tree = JSON.parse(JSON.stringify(SAVE.tree));
-  if (crane3Ready()) return startCrane3D('auto', {tree, pred});
-  const p = openPanel(`<h2>새 고철 트럭 시험</h2><p class="sub">처음 보는 고철 8개를 내 크레인 두뇌가 스스로 판단해요. 말풍선에 AI의 판단 경로가 나와요.</p>
-    <div class="crane-wrap"><canvas id="atC" width="1640" height="760" aria-label="자동 크레인 시험 화면"></canvas></div>
-    <div class="crane-ctrl"><button class="btn" id="atFast">빠르게</button><button class="btn" id="atSkip">결과 바로 보기</button><span class="meter">처리 <b id="atN">0</b>/8</span></div>
-    <div id="atRes"></div>`, {wide:true});
-  const sc = new CraneScene(p.querySelector('#atC'), TEST_ITEMS);
-  const rows = []; let shown = false;
-  const show = () => { if (shown) return; shown = true; sc.alive = false; treeTestReport(tree, pred, p, p.querySelector('#atRes')); };
-  p.querySelector('#atFast').onclick = e => { sc.speed = sc.speed === 1 ? 2.5 : 1; e.target.classList.toggle('on', sc.speed > 1); };
-  p.querySelector('#atSkip').onclick = show;
-  sc.runAuto(tree, (it, tr, out) => { rows.push(out); const n = p.querySelector('#atN'); if (n) n.textContent = rows.length; if (rows.length === TEST_ITEMS.length) setTimeout(show, 500); });
-}
-
 /* ---------- 4-5. AI 안전 로봇 (나이브 베이즈 분류) ---------- */
 const NB = {
   STOP:new Set(['있다', '있어요', '있는', '하고', '하는', '한다', '했다', '그리고', '그', '저', '것', '수', '때', '더', '안', '이다', '입니다', '두었다', '둔다', '모두', '계속', '그대로']),

@@ -389,8 +389,8 @@ function recommendMRI(p){
     if (!(p.mriOK && p.mriOK2)) return;
     p.check = false; p.hospital = true; p.wait = 0; p.say = {t:3, txt:'🏥 병원 다녀올게!'};
     const st = streetState(); if (st.hq !== 'mri') st.hq = 'mri'; persist(); award('em', 6);
-    UI.waypoint = {x:51, y:33, label:'병원 MRI 🧲'};
-    rpgToast('🔎 <b>숨은 퀘스트</b> · 병원의 전자석: 병원 옆 MRI(자기 공명 영상 장치)로 가 봐요!', 'item');
+    UI.waypoint = {x:51, y:29, label:'🏥 병원 MRI 영상관'};
+    rpgToast('🔎 <b>숨은 퀘스트</b> · 병원의 전자석: 광장 남쪽 병원(MRI 영상관)에 들어가 MRI를 살펴봐요!', 'item');
     setTimeout(() => { p.x = 50.5; p.y = 31.5; pedSpotFix(p); p.hospital = false; p.wait = 20; }, 4000);
   });
 }

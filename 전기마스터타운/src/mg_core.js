@@ -9,7 +9,7 @@ function mgReg(def){ MG_GAMES.push(def); MG_GAMES.sort((a, b) => (a.order || 99)
 const mgDef = id => MG_GAMES.find(g => g.id === id);
 function mgRec(id){ if (!SAVE.mg || typeof SAVE.mg !== 'object') SAVE.mg = {}; if (!Array.isArray(SAVE.mg[id])) SAVE.mg[id] = [0, 0, 0]; return SAVE.mg[id]; }
 const mgBolts = (id, st) => (SAVE.mg && Array.isArray(SAVE.mg[id]) ? SAVE.mg[id][st] || 0 : 0);
-const mgOpen = (id, st) => st === 0 || mgBolts(id, st - 1) > 0;
+const mgOpen = (id, st) => st === 0 || !!(mgDef(id) && mgDef(id).free) || mgBolts(id, st - 1) > 0;   /* free: 단계를 순서 없이 고르는 게임 (상점) */
 const mgCleared = (id, st) => mgBolts(id, st) > 0;
 const mgTotal = () => MG_GAMES.reduce((n, d) => n + [0, 1, 2].reduce((a, s) => a + mgBolts(d.id, s), 0), 0);
 function mgSetBolts(id, st, b){ const r = mgRec(id); if (b > (r[st] || 0)){ r[st] = b; persist(); return true; } return false; }
@@ -177,7 +177,7 @@ function mgEnd(bolts, msg, extra){
   bolts > 0 ? SND.ok() : SND.bad();
   /* 활동 길에서는 다음 단계가 '같은 활동'일 때만 바로 이어 간다. 다른 활동이면 마을로 돌아가 인물의 안내를 받는다 */
   const chain = typeof actChainOn === 'function' && actChainOn();
-  const next = !d.single && st < 2 && bolts > 0 && (!chain || actSameAct(d.id, st, st + 1));
+  const next = !d.single && st < d.stages.length - 1 && bolts > 0 && (!chain || actSameAct(d.id, st, st + 1));
   mgCard(`<div class="mg-ci">${bolts > 0 ? (bolts === 3 ? '🏆' : '🎉') : '💪'}</div><h3>${bolts > 0 ? (bolts === 3 ? '완벽해요!' : '성공!') : '아쉬워요, 다시 해 봐요!'}</h3>
     <div class="mg-big">${boltsHTML(bolts)}</div>${best > bolts ? `<p class="mg-small">최고 기록 ${boltsHTML(best)}</p>` : ''}
     <p>${msg || ''}</p>${bolts > 0 && d.learn && d.learn[st] ? `<div class="mg-learn"><b>📘 교재와 이어 보기</b><br>${d.learn[st]}</div>` : ''}${extra || ''}

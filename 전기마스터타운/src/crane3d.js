@@ -198,8 +198,7 @@ function cr3Finish(){
   $('#cbDone').innerHTML = `<div class="okbox"><b>미션 성공!</b> 철 고철 4개를 모두 옮겼어요. 전기 사용량 ${e}. 미니 게임 ${boltsHTML(bolts)}<br>
     붙지 않은 물체 시도 ${S.nostick}번 · 무거워서 떨어뜨림 ${S.drop}번 · 가벼운 고철에 전지 2개 ${S.waste}번<br>
     <b>생각해 볼까요?</b> 나는 무엇을 보고 '집을지 말지', '얼마나 세게 할지' 정했나요? 그 판단 기준을 AI 크레인 두뇌에 가르쳐 봐요.</div>
-    <div class="row" style="margin-top:8px"><button class="btn primary" id="cbGoTree">AI 크레인 두뇌 만들러 가기</button><button class="btn" id="cbBack">마을로 돌아가기</button></div>`;
-  $('#cbGoTree').onclick = () => exitCrane3D(openTreeLab);
+    <div class="row" style="margin-top:8px"><button class="btn primary" id="cbBack">${ZONE.borrow ? '방으로 돌아가기 ▶' : '마을로 돌아가기'}</button></div>`;
   $('#cbBack').onclick = () => exitCrane3D();
 }
 

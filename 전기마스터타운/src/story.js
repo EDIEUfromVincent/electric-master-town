@@ -160,7 +160,7 @@ function afterChapter(n){
 function startPrologue(){
   const S = SAVE.story;
   const go = () => showDialog('볼트 박사', LINES.voltIntro, () => {
-    SAVE.met.volt = true; S.chapter = Math.max(S.chapter, 1); actState().idx = actIdx(); persist();
+    SAVE.met.volt = true; S.chapter = Math.max(S.chapter, 1); actState().seen = ACTS.filter(actDone).map(a => a.id); persist();
     updateHUD(); showBanner('D-5', '깜빡이는 마을');
     actWaypoint(); openZoneMap();   /* 볼트 박사의 안내: 차시 구역 고르기 */
   });

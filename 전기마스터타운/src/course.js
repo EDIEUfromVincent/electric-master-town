@@ -6,11 +6,15 @@
      - gate  : 마을 지도에서 문 가운데 칸 {x, y}. 문은 남쪽(+y)을 바라보고, 그 앞 칸이 비어 있어야 한다.
      - rooms : 구역 안의 방. 옆으로 이어져 있어 왼쪽·오른쪽 포털로 옮겨 다닌다 (첫 방 왼쪽, 끝 방 오른쪽이 출구).
      - town  : 방을 다 끝낸 뒤 마을에서 마저 할 활동 id.
-     - need  : 구역을 끝내는 데 필요한 것 (zone.js의 ZONE_NEEDS 이름). ride : 처음 들어갈 때 타고 와야 하는 것.
+     - need  : 구역을 끝내는 데 필요한 것 (zone.js의 ZONE_NEEDS 이름). open : 문이 열리는 데 필요한 것 (없으면 처음부터 열림).
+     - ride  : 처음 들어갈 때 타고 와야 하는 것. 구역은 차시 순서와 상관없이 들어갈 수 있다 (결석한 학생도 그날 차시부터).
    · 방 지도(map): 한 줄 = 한 칸 줄, 글자 하나 = 한 칸.
        #  벽     .  바닥    <  왼쪽 포털    >  오른쪽 포털
        N  활동을 맡은 사람(ACTS의 giver)    S  활동 장소(station)
-       그 밖의 글자 → props 표에서 소품으로 바꾼다. 소품은 [모양, 옆으로 몇 칸 더 막을지(0~2), 돌리기(0~3, 90° 단위)]
+       그 밖의 글자 → props 표에서 소품으로 바꾼다. 소품은 [모양, 옆으로 몇 칸 더 막을지(0~2), 돌리기(0~3, 90° 단위), 밟고 지나가기, 머리 위 그림]
+       things 표의 글자 → 다가가 E로 살펴보는 볼거리·놀거리 (places.js)
+   · places : 차시와 상관없이 언제든 들어가는 '자유 탐험 장소'. 마을 건물의 문(gate.style 'door', face 'S'·'N')으로 들어간다.
+     활동을 일찍 마친 학생을 위한 곳이라 진도·완료 조건에 들어가지 않는다.
    ========================================================= */
 const COURSE = {
   id:'electric6', title:'전기 마스터 타운', unit:'6학년 과학 · 전기의 이용',
@@ -85,7 +89,7 @@ const COURSE = {
      ]},
     {id:'z3', no:3, color:'#25d17a', icon:'🛡️', name:'안전 마을 연구소', gate:{x:24, y:10},
      goal:'전기를 효율적·안전하게 쓰는 방법을 조사하고, AI 안전 로봇을 가르치고, 배운 것을 알리고 정리해요.',
-     ride:'bike', gift:'truck',
+     open:['bike'], ride:'bike', gift:'truck',
      rooms:[
        {id:'home', name:'우리 집 안전 점검실', act:'a7', station:{id:'m_home', act:'g_home', emoji:'🏠', name:'우리 집 안전 탐정 게임기'},
         map:[
@@ -132,5 +136,63 @@ const COURSE = {
           '##################'],
         props:{f:['fridge'], w:['washer'], a:['aircon'], y:['shelf'], p:['plant'], c:['counter']}},
      ]},
+  ],
+  places:[
+    {id:'shop', icon:'🧲', color:'#ff7ad9', name:'전자석 제품 상점', where:'안전 마을 별님네 집 자리', gate:{x:6, y:17, face:'S', style:'door'},
+     goal:'상점 주인과 게임 3가지! 전자석 제품 골라 사기 · 값 어림하기 · 특징 보고 제품 맞히기',
+     rooms:[{id:'shop', name:'전자석 제품 상점', npc:{id:'shopkeeper', name:'상점 주인 자력 씨', look:'shopkeeper'},
+       map:[
+         '##################',
+         '#.a..b..c..d..e..#',
+         '#................#',
+         '<.......N..S.....#',
+         '#................#',
+         '#..f...g...h...k.#',
+         '#..............p.#',
+         '##################'],
+       props:{a:['shelf', 0, 0, false, '🌀'], b:['shelf', 0, 0, false, '🔊'], c:['shelf', 0, 0, false, '🔔'], d:['shelf', 0, 0, false, '🧲'], e:['shelf', 0, 0, false, '🔦'],
+         f:['counter', 0, 0, false, '💨'], g:['counter', 0, 0, false, '🤖'], h:['counter', 0, 0, false, '🧭'], k:['counter', 0, 0, false, '🧺'], p:['plant']},
+       things:{S:{kind:'shopDesk', name:'🎲 상점 게임 하기'}}}]},
+    {id:'hospital', icon:'🏥', color:'#5ec8ff', name:'병원 MRI 영상관', where:'광장 남쪽 병원', gate:{x:51, y:30, face:'N', style:'door'},
+     goal:'MRI(자기 공명 영상 장치)가 전자석을 어떻게 쓰는지 영상으로 보고, 진짜 MRI를 살펴봐요.',
+     rooms:[{id:'cinema', name:'병원 MRI 영상관', npc:{id:'doctor', name:'병원 의사 선생님', look:'doctor'},
+       map:[
+         '##################',
+         '#....V.......M...#',
+         '#................#',
+         '<..c.c.c.....N...#',
+         '#..c.c.c.........#',
+         '#.............b.b#',
+         '#.p..............#',
+         '##################'],
+       props:{b:['bed'], p:['plant']},
+       things:{V:{kind:'screen', span:1, name:'🎬 MRI 영상 보기'}, c:{kind:'seat', name:'🎬 앉아서 MRI 영상 보기'}, M:{kind:'mri', span:1, name:'🧲 MRI 살펴보기'}}}]},
+    {id:'museum', icon:'🏛️', color:'#e0b25c', name:'과학 박물관', where:'안전 마을 해님네 집 자리', gate:{x:6, y:8, face:'S', style:'door'},
+     goal:'에디슨 방과 테슬라 방에서 두 과학자가 전기에 남긴 업적 액자를 모두 살펴보고 관람 도장을 모아요.',
+     rooms:[
+       {id:'edison', name:'에디슨 방',
+        map:[
+          '##################',
+          '#..1...2...3...4.#',
+          '#................#',
+          '<.......B........>',
+          '#................#',
+          '#.p....5.......p.#',
+          '#................#',
+          '##################'],
+        props:{p:['plant']},
+        things:{B:{kind:'bust', who:'edison', name:'에디슨 흉상'}, 1:{kind:'frame', key:'e1'}, 2:{kind:'frame', key:'e2'}, 3:{kind:'frame', key:'e3'}, 4:{kind:'frame', key:'e4'}, 5:{kind:'frame', key:'e5', stand:true}}},
+       {id:'tesla', name:'테슬라 방',
+        map:[
+          '##################',
+          '#..1...2...3...4.#',
+          '#................#',
+          '<.......B........>',
+          '#................#',
+          '#.p....5....z..p.#',
+          '#................#',
+          '##################'],
+        props:{p:['plant'], z:['tcoil']},
+        things:{B:{kind:'bust', who:'tesla', name:'테슬라 흉상'}, 1:{kind:'frame', key:'t1'}, 2:{kind:'frame', key:'t2'}, 3:{kind:'frame', key:'t3'}, 4:{kind:'frame', key:'t4'}, 5:{kind:'frame', key:'t5', stand:true}}}]},
   ],
 };

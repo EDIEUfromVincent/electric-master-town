@@ -26,7 +26,7 @@ const ACTS = [
    intro:['고철장에 온 걸 환영한다! 크레인 끝의 둥근 판이 바로 전자석이지.', '철 고철만 골라 철 고철함에 옮겨 줘. 무거운 건 전지 2개로 세게, 가벼운 건 1개로! 전기는 아껴야 한다!'],
    done:['고맙다! 켜서 들고, 꺼서 내려놓고, 무게에 맞게 세기를 바꾸고. 전자석 기중기는 그 성질로 일하는 거야.', '그런데 매번 사람이 크레인을 몰 순 없잖아? 저기 자동 크레인 두뇌 자동이가 고집을 부리고 있어. 가서 좀 도와줘!'],
    check:{q:'전자석 기중기가 철을 원하는 곳에 내려놓을 수 있는 까닭은?', o:['전기를 끊으면 자석의 성질이 사라져서', '철이 가벼워서', '극이 바뀌어서'], a:0, why:'전자석은 전기가 흐를 때만 자석이 돼요.'}},
-  {id:'a5', icon:'🛝', title:'AI 크레인 두뇌 만들기', place:'m_tree', placeName:'AI 연구소 🖥️ 크레인 두뇌 컴퓨터', giver:'auto', games:[['slide', 0], ['slide', 1], ['slide', 2]], ai:true,
+  {id:'a5', icon:'🛝', title:'AI 크레인 두뇌 만들기', place:'m_tree', placeName:'AI 연구소 🖥️ 크레인 두뇌 컴퓨터', giver:'auto', games:[['slide', 0], ['slide', 1]], ai:true,
    book:'(AI 프로그램 개발) 전자석 기중기가 스스로 판단하도록 예/아니요 질문 길(의사결정트리)을 만들고, 처음 보는 고철로 시험해 고치기',
    intro:['삐릭! 내 규칙은 완벽하다! 번쩍이면 철! 크면 무겁다!', '…알루미늄 캔이 섞였다고? 흥, 그럼 네가 내 두뇌를 새로 짜 봐라. 질문으로 나눠서 처음 보는 고철도 맞히면 인정하지!'],
    done:['삐릭… 처음 보는 고철도 맞혔다고? 내 규칙이 틀렸다는 걸 인정한다. 겉모습보다 재료를 물어야 했다.', 'AI도 틀릴 수 있다. 틀리면 고치고, 사람이 시험해 봐야 안다! 그런데 마을 도로에 초록 전기차가 헐떡이며 달리던데… 구역 밖으로 나가 붙잡아서 이야기를 들어 봐라.'],
@@ -71,8 +71,14 @@ function actDone(a){
     return false;
   });
 }
-/* 순서대로: 앞 활동을 끝내야 다음 활동이 '지금 할 일'이 된다 */
-function actIdx(){ for (let i = 0; i < ACTS.length; i++) if (!actDone(ACTS[i])) return i; return ACTS.length; }
+/* 지금 할 활동: 구역 방 안이면 그 구역의 첫 미완료 활동, 마을이면 마지막으로 들어갔던 구역의 남은 활동(마을 미션 포함),
+   그것도 없으면 전체의 첫 미완료 활동. 구역은 차시 순서와 상관없이 들어갈 수 있다 */
+function actIdx(){
+  const z = typeof zoneFocus === 'function' && WORLD && (WORLD.kind === 'room' || WORLD.kind === 'story') ? zoneFocus() : null;
+  if (z){ const a = zoneActs(z).find(x => !actDone(x)); if (a) return ACTS.indexOf(a); }
+  for (let i = 0; i < ACTS.length; i++) if (!actDone(ACTS[i])) return i;
+  return ACTS.length;
+}
 const actCur = () => (SAVE.met && SAVE.met.volt ? ACTS[actIdx()] || null : null);
 const actAllDone = () => actIdx() >= ACTS.length;
 const actReached = id => !!(SAVE.met && SAVE.met.volt) && actIdx() >= actIdxOf(id);
@@ -170,14 +176,14 @@ function actHintLine(o){
 }
 
 /* ----- 활동을 끝냈을 때: 맡은 사람이 정리 → 확인 질문 → 다음 사람 안내 ----- */
+/* 새로 끝난 활동마다 정리 대사를 한 번씩 (구역을 어떤 순서로 하든) */
 function actSync(){
-  const S = actState(), i = actIdx();
-  if (S.idx == null || !SAVE.met || !SAVE.met.volt){ S.idx = i; return; }
-  if (i > S.idx){
-    const doneAct = ACTS[S.idx] && actDone(ACTS[S.idx]) ? ACTS[S.idx] : ACTS[i - 1];   /* 방금 끝낸 활동 (전기차처럼 미리 해 둔 활동은 건너뛴다) */
-    S.idx = i; persist();
-    if (SAVE.story && Array.isArray(SAVE.story.queue)) storyEnqueue('act:' + doneAct.id);
-  } else if (i < S.idx) S.idx = i;
+  const S = actState(), done = ACTS.filter(actDone).map(a => a.id);
+  if (!SAVE.met || !SAVE.met.volt || !Array.isArray(S.seen)){ S.seen = done; return; }
+  const fresh = done.filter(id => !S.seen.includes(id));
+  if (!fresh.length) return;
+  S.seen = done; persist();
+  if (SAVE.story && Array.isArray(SAVE.story.queue)) fresh.forEach(id => storyEnqueue('act:' + id));
 }
 function actDoneBeat(id){
   const a = actById(id); if (!a) return;
