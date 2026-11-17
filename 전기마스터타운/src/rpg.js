@@ -364,6 +364,7 @@ function drawRpg3D(t){
   }
   if (PET.on) robot3(PET.x, surfY(PET.x, PET.y), PET.y, PET.ry, t, .5);
   drawPeds3D(t);
+  epiTownDraw(t);
 }
 /* 2D 화면(3D를 못 쓸 때)에서 친구들 그리기 */
 function rpgEnts2D(S, list, x0, x1, y0, y1){

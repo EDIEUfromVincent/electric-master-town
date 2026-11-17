@@ -11,6 +11,7 @@ function frame(now){
         if (MODE === 'play'){ if (!uiBlocking()) updatePlayer3D(dt); else { player.moving = false; PATH3.nodes = null; } updateJump(dt); }
         if (MODE === 'patrol') updateRobot(dt);
         if (MODE === 'crane') updateCrane3D(dt);
+        if (MODE === 'epi') epiUpdate(dt);
         updateWalkers(dt); updatePet(dt);
         updateCars(dt); carHitCheck(dt); evUpdate();
         updateStoryFx(dt);
@@ -41,7 +42,7 @@ window.addEventListener('keydown', e => {
   const typing = e.target && e.target.closest && e.target.closest('input,textarea,select');
   if (UI.mg && !UI.modal && !UI.cutscene){ if (typing && e.code !== 'Escape') return; mgKey(e, true); return; }
   if (e.code === 'Escape'){
-    if (UI.cutscene) csSkip(); else if (UI.dialog) closeDialogAll(); else if (UI.modal) closePanel(); else if (MODE === 'crane') exitCrane3D(); else if (MODE === 'play') openMenu();
+    if (UI.cutscene) csSkip(); else if (UI.dialog) closeDialogAll(); else if (UI.modal) closePanel(); else if (MODE === 'epi') epiSkip(); else if (MODE === 'crane') exitCrane3D(); else if (MODE === 'play') openMenu();
     return;
   }
   if (typing) return;
@@ -119,6 +120,7 @@ $('#bQuest').onclick = () => { if (WORLD.kind === 'story') openQuests(); else to
 $('#bMenu').onclick = openMenu;
 $('#bBag').onclick = openBag;
 $('#bBike').onclick = toggleBike;
+$('#epiSkip').onclick = () => epiSkip();
 
 $('#minimap').onclick = () => { MINI.big = !MINI.big; MINI.base = null; };
 $('#bSkipPatrol').onclick = finishRobot;

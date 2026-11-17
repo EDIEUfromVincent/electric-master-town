@@ -196,6 +196,7 @@ function afterChapter(n){
     SAVE.story.finale = true; persist(); updateHUD(); rpgSync();
     toast('점등식 성공! 마을이 환하게 밝아졌어요.', 'ok');
     UI.pending.push(() => openCert());
+    UI.pending.push(() => epiOffer());   /* 모든 활동을 마친 선물: 번개 트럭 → 에필로그 */
     return;
   }
   const c = CHAPTERS[n]; showBanner(c.day, c.title);

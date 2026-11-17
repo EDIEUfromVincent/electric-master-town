@@ -521,6 +521,8 @@ function cam3Update(dt){
     const a = G3.W / Math.max(1, G3.H), fe = a < 1 ? Math.min(1.3, .8 / Math.sqrt(Math.max(.4, a))) : .8;
     const bar = $('#craneBar'), bh = bar && !bar.hidden ? bar.getBoundingClientRect().height : 0;
     tx = 39; ty = 2.1; tz = 2.7; yaw = 0; pitch = .42; dist = Math.max(12.2, 7.4 / (Math.tan(fe / 2) * a)); sy = clamp(bh / Math.max(1, CH), .2, .5); rate = .02;
+  } else if (MODE === 'epi'){
+    const c = epiCam(); tx = c.tx; ty = c.ty; tz = c.tz; yaw = c.yaw; pitch = c.pitch; dist = c.dist; sy = c.sy; rate = c.rate;
   } else if (MODE === 'mg3' && MG3.sc){
     /* 미니 게임 무대: 게임 글 사이 빈 곳에 무대가 꽉 차게 */
     const c = mg3CamParams(); tx = c.tx; ty = c.ty; tz = c.tz; yaw = c.yaw; pitch = c.pitch; dist = c.dist; sy = c.sy; rate = .012;
@@ -697,6 +699,7 @@ function collectLights(env){
   }
   if (MODE === 'crane'){ addLight(35.6, 4.4, 3.4, 13, [1, .97, .9]); addLight(42.4, 4.4, 3.4, 13, [1, .97, .9]); }   // 크레인 작업등
   if (MODE === 'mg3') mg3Lights();
+  if (MODE === 'epi') epiLights();
   const talk = dialogNPC();
   if (talk && env.dk > .15) addLight((player.x + talk.x + .5) / 2 + Math.sin(CAM3.yaw) * 1.5, 2.2, (player.y + talk.y + .5) / 2 + Math.cos(CAM3.yaw) * 1.5, 10, [1, .95, .85]);
   if (env.dk > .25 && MODE !== 'title'){
@@ -785,7 +788,8 @@ function faceTo(o, tx, tz, dt, def){
   return o._ry;
 }
 function drawObjects3D(env, dt){
-  if (MODE === 'mg3'){ mg3Draw(env, dt); return; }   // 미니 게임 무대: 마을 물체 대신 무대 모형만
+  if (MODE === 'mg3'){ mg3Draw(env, dt); return; }
+  if (MODE === 'epi'){ epiDraw(env, dt); return; }   // 에필로그: 집으로 가는 밤길   // 미니 게임 무대: 마을 물체 대신 무대 모형만
   const W = WORLD, t = TIME, story = W.kind === 'story', talk = dialogNPC(), playing = MODE !== 'title';
   for (const o of W.objects){
     const cx = o.x + .5, cz = o.y + .5, gy = surfY(cx, cz);
@@ -938,6 +942,7 @@ function overlay3D(){
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, CW, CH);
   if (MODE === 'crane') craneOverlay();
   else if (MODE === 'mg3') mg3Overlay();
+  else if (MODE === 'epi') epiOverlay();
   else if (WORLD && MODE !== 'title' && MODE !== 'editor'){
     const W = WORLD, t = TIME, ox = CAM3.fpActive ? player.x : CAM3.tx, oz = CAM3.fpActive ? player.y : CAM3.tz;
     if (!UI.dialog && !UI.cutscene) for (const o of W.objects){

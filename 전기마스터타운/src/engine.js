@@ -388,7 +388,7 @@ function loadWorld(def){
   WORLD.objects = def.objects;
   rebuildSolidMap();
   initWalkers(WORLD); initPeds(WORLD);
-  if (WORLD.kind === 'story') evSyncWorld();
+  if (WORLD.kind === 'story'){ evSyncWorld(); epiTownSync(); }
   MINI.base = null;
 }
 function rebuildSolidMap(){

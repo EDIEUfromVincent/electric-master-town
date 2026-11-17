@@ -283,7 +283,6 @@ function buildStoryWorld(){
       {axis:'y', dir:1,  lane:28.5, pos:8,  speed:3.0, color:'#ffd23f'},
       {axis:'y', dir:-1, lane:29.5, pos:36, speed:2.6, color:'#2fb36b', ev:true, quest:true},
       {axis:'x', dir:1, lane:41.45, pos:40.2, speed:0, color:'#c58bff', parked:true},
-      {axis:'x', dir:-1, lane:41.45, pos:43.4, speed:0, color:'#e2782b', parked:true},
     ],
   };
 }

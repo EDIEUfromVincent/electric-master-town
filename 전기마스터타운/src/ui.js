@@ -9,7 +9,7 @@ const IS_TOUCH = ('ontouchstart' in window) || !!(window.matchMedia && matchMedi
 let SAVE_KEY = 'emt.save.v1:__none';   /* 로그인하면 학생별 열쇠로 바뀐다 (account.js) */
 const DEFAULT_SAVE = () => ({met:{}, exp:{}, badges:{}, dex:{}, judged:{}, tree:null, treeRuns:[], treeNote:'',
   train:{good:[], danger:[], waste:[]}, model:null, robotRuns:[], lastTest:{}, robotNote:'', crane:{},
-  pos:null, nickname:'', sound:true, maps:[], rpg:null, hp:5, evq:null, mg:{}, notes:{}, works:[], mgTree:null, mgTree1:null, mgTreeDraft:null, act:{}, mgLog:[], bike:null, street:null,
+  pos:null, nickname:'', sound:true, maps:[], rpg:null, hp:5, evq:null, mg:{}, notes:{}, works:[], mgTree:null, mgTree1:null, mgTreeDraft:null, act:{}, mgLog:[], bike:null, street:null, epi:null,
   story:{init:false, openingSeen:false, chapter:0, done:{}, queue:[], finale:false}});
 let SAVE = DEFAULT_SAVE();
 function loadSave(){
@@ -229,6 +229,7 @@ function interact(o){
   if (o.type === 'evcar') return evCatch();
   if (o.type === 'bikerack') return bikeRack();
   if (o.type === 'ped') return talkPed(o);
+  if (o.type === 'truck') return talkTruck();
   if (o.type === 'walker') return talkWalker(o);
   if (WORLD.kind === 'custom') return interactCustom(o);
   if (o.type === 'npc') return talkNPC(o);

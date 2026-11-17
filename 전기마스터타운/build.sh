@@ -5,7 +5,7 @@
 set -e
 cd "$(dirname "$0")"
 mkdir -p dist
-JS_FILES="src/data.js src/engine.js src/gl3d.js src/world3d.js src/ui.js src/story.js src/lab.js src/crane3d.js src/rpg.js src/town_ev.js src/street.js src/mg_core.js src/mg_magnet.js src/mg_safety.js src/mg_ai.js src/mg3d.js src/mg3_magnet.js src/mg3_safety.js src/mg3_ai.js src/editor.js src/act.js src/account.js src/main.js"
+JS_FILES="src/data.js src/engine.js src/gl3d.js src/world3d.js src/ui.js src/story.js src/lab.js src/crane3d.js src/rpg.js src/town_ev.js src/street.js src/epilogue.js src/mg_core.js src/mg_magnet.js src/mg_safety.js src/mg_ai.js src/mg3d.js src/mg3_magnet.js src/mg3_safety.js src/mg3_ai.js src/editor.js src/act.js src/account.js src/main.js"
 {
   echo '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
   cat src/head.html

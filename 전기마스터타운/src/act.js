@@ -202,7 +202,8 @@ function openActs(){
     ${met ? '' : '<div class="okbox" style="margin-bottom:10px">먼저 AI 연구소 앞의 <b>볼트 박사</b>와 이야기해요.</div>'}
     <div class="act-list">${ACTS.map(row).join('')}</div>
     ${met && typeof evQuestCard === 'function' ? evQuestCard() : ''}
-    <div class="row" style="margin-top:12px;gap:8px"><button class="btn" id="actRec">🗂️ 배움 기록</button></div>`, {wide:true});
+    <div class="row" style="margin-top:12px;gap:8px"><button class="btn" id="actRec">🗂️ 배움 기록</button>${SAVE.epi && SAVE.epi.got && MODE === 'play' ? '<button class="btn volt" id="actEpi">🏠 번개 트럭으로 집에 가기 (에필로그)</button>' : ''}</div>`, {wide:true});
+  const ep = p.querySelector('#actEpi'); if (ep) ep.onclick = () => { closePanel(); epiStart(); };
   const eg = p.querySelector('#evGo'); if (eg) eg.onclick = () => { closePanel(); evGuide(); };
   p.querySelectorAll('[data-replay]').forEach(b => b.onclick = () => actReplay(actById(b.dataset.replay)));
   const go = p.querySelector('[data-go]'); if (go) go.onclick = () => { closePanel(); actWaypoint(); toast('노란 화살표를 따라가요!'); };
