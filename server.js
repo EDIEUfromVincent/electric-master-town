@@ -51,7 +51,8 @@ function limited(req, key, max){
   if (HITS.size > 5000) HITS.clear();
   return arr.length > max;
 }
-const cleanCls = s => String(s || '').trim().slice(0, 20) || '우리반';
+const cleanName = s => String(s || '').normalize('NFC').replace(/\s+/g, ' ').trim().slice(0, 12);
+const nameId = n => 'n:' + n.toLowerCase();
 
 /* ----- API ----- */
 async function handleApi(req, res, p){
@@ -62,19 +63,29 @@ async function handleApi(req, res, p){
   catch (e) { return send(res, e.code || 400, {error:'잘못된 요청'}); }
 
   if (p === '/api/login'){
+    /* 전국 어디서든: 이름(또는 별명) + 비밀번호(숫자 4~8자리)만으로 들어온다. 같은 이름은 한 사람만 쓸 수 있다 */
     if (limited(req, 'login', 30)) return send(res, 429, {error:'잠시 뒤에 다시 해요'});
-    const cls = cleanCls(body.cls), no = parseInt(body.no, 10), name = String(body.name || '').trim().slice(0, 12), pin = String(body.pin || '');
-    if (!(no >= 1 && no <= 99999) || !name || !/^\d{4}$/.test(pin)) return send(res, 400, {error:'번호 · 이름 · 비밀번호(숫자 4자리)를 확인해요'});
-    const id = `${cls}-${no}`;
-    let s = readStu(id), created = false;
-    if (!s){ const salt = crypto.randomBytes(12).toString('hex'); s = {id, cls, no, name, salt, hash:pinHash(salt, pin), created:Date.now(), save:null, sum:null, updated:0}; created = true; }
-    else {
-      if (s.name !== name) return send(res, 403, {error:'이름이 달라요', code:'name'});
+    const name = cleanName(body.name), pin = String(body.pin || '');
+    if (!name || !/^\d{4,8}$/.test(pin)) return send(res, 400, {error:'이름(별명)과 비밀번호(숫자 4~8자리)를 확인해요'});
+    const id = nameId(name);
+    let s = readStu(id), created = false, moved = false;
+    if (!s){
+      /* 예전 방식(반 · 번호)으로 만든 기록이 같은 이름 · 같은 비밀번호로 있으면 이어받는다 */
+      for (const f of fs.readdirSync(STU_DIR)){
+        if (!f.endsWith('.json')) continue;
+        let o; try { o = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); } catch (e) { continue; }
+        if (!o || o.migrated || o.id === id || cleanName(o.name) !== name || !o.hash || pinHash(o.salt, pin) !== o.hash) continue;
+        s = {id, name, salt:o.salt, hash:o.hash, created:o.created, save:o.save, sum:o.sum, updated:o.updated, from:o.id};
+        o.migrated = id; writeStu(o.id, o); moved = true; break;
+      }
+    }
+    if (!s){ const salt = crypto.randomBytes(12).toString('hex'); s = {id, name, salt, hash:pinHash(salt, pin), created:Date.now(), save:null, sum:null, updated:0}; created = true; }
+    else if (!moved){
       if (!s.hash){ s.salt = crypto.randomBytes(12).toString('hex'); s.hash = pinHash(s.salt, pin); }   // 교사가 비밀번호를 지운 뒤 처음 로그인
       else if (pinHash(s.salt, pin) !== s.hash) return send(res, 401, {error:'비밀번호가 달라요', code:'pin'});
     }
     s.lastLogin = Date.now(); writeStu(id, s);
-    return send(res, 200, {token:tokenFor(id), save:s.save, created});
+    return send(res, 200, {token:tokenFor(id), save:s.save, created, moved});
   }
   if (p === '/api/save'){
     const id = idFromToken(body.token); if (!id) return send(res, 401, {error:'다시 로그인해요'});
@@ -94,7 +105,7 @@ async function handleApi(req, res, p){
     const students = [];
     for (const f of fs.readdirSync(STU_DIR)){
       if (!f.endsWith('.json')) continue;
-      try { const s = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); students.push({id:s.id, cls:s.cls, no:s.no, name:s.name, sum:s.sum, updated:s.updated || s.lastLogin || s.created, pinReset:!s.hash}); } catch (e) {}
+      try { const s = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); if (s.migrated) continue; students.push({id:s.id, name:s.name, sum:s.sum, updated:s.updated || s.lastLogin || s.created, pinReset:!s.hash}); } catch (e) {}
     }
     return send(res, 200, {students});
   }

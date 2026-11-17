@@ -17,7 +17,8 @@ async function sha256hex(s){
   return 'x' + h1.toString(16) + h2.toString(16);
 }
 const normCode = s => String(s || '').replace(/\s+/g, '');
-const accId = (cls, no) => `${String(cls || '').trim() || '우리반'}-${no}`;
+const normName = s => String(s || '').normalize('NFC').replace(/\s+/g, ' ').trim().slice(0, 12);
+const accId = name => 'n:' + normName(name).toLowerCase();
 function lsGet(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v){ try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
 function localAccounts(){ try { return JSON.parse(lsGet(ACC_LIST_KEY) || '{}') || {}; } catch (e) { return {}; } }
@@ -73,37 +74,43 @@ window.addEventListener('pagehide', () => {
   }
 });
 
-/* ----- 로그인 화면 ----- */
+/* ----- 로그인 화면: 이름(별명) + 비밀번호만 ----- */
 function showLogin(msg){
   ACC.ready = false;
   const last = (() => { try { return JSON.parse(lsGet(ACC_LAST_KEY) || 'null'); } catch (e) { return null; } })() || {};
   const el = $('#login'); el.hidden = false; $('#title').hidden = true;
-  $('#lgCls').value = last.cls || ''; $('#lgNo').value = last.no || ''; $('#lgName').value = last.name || ''; $('#lgPin').value = '';
-  $('#lgMode').textContent = ACC.server ? '☁️ 학급 서버에 저장돼요. 어느 기기에서든 이어서 할 수 있어요.' : '💾 이 기기에 학생별로 따로 저장돼요.';
+  $('#lgName').value = last.name || ''; $('#lgPin').value = '';
+  $('#lgMode').textContent = ACC.server ? '☁️ 전국 어디서든 같은 이름(별명)과 비밀번호로 들어오면 전에 하던 기록이 이어져요.' : '💾 이 기기에 학생별로 따로 저장돼요.';
   $('#lgMsg').textContent = msg || ''; $('#lgMsg').className = msg ? 'bad' : '';
-  setTimeout(() => { const i = last.no ? $('#lgPin') : $('#lgNo'); if (i) i.focus(); }, 50);
+  setTimeout(() => { const i = last.name ? $('#lgPin') : $('#lgName'); if (i) i.focus(); }, 50);
 }
 async function doLogin(){
-  const cls = $('#lgCls').value.trim().slice(0, 20), no = parseInt($('#lgNo').value, 10), name = $('#lgName').value.trim().slice(0, 12), pin = $('#lgPin').value.trim();
+  const name = normName($('#lgName').value), pin = $('#lgPin').value.trim();
   const say = (m, ok) => { $('#lgMsg').textContent = m; $('#lgMsg').className = ok ? 'ok' : 'bad'; };
-  if (!(no >= 1 && no <= 99999)) return say('번호를 1~99999 사이 숫자로 써요.');
   if (!name) return say('이름(또는 별명)을 써요.');
-  if (!/^\d{4}$/.test(pin)) return say('비밀번호는 숫자 4자리예요.');
-  const id = accId(cls, no), btn = $('#lgGo'); btn.disabled = true; say('들어가는 중…', true);
+  if (!/^\d{4,8}$/.test(pin)) return say('비밀번호는 숫자 4~8자리예요.');
+  const id = accId(name), btn = $('#lgGo'); btn.disabled = true; say('들어가는 중…', true);
   try {
-    let save = null, fresh = false;
+    let save = null, fresh = false, moved = false;
     if (ACC.server){
-      const j = await api('api/login', {cls, no, name, pin});
-      ACC.token = j.token; save = j.save; fresh = !!j.created;
+      const j = await api('api/login', {name, pin});
+      ACC.token = j.token; save = j.save; fresh = !!j.created; moved = !!j.moved;
       const local = (() => { try { return JSON.parse(lsGet('emt.save.v1:' + id) || 'null'); } catch (e) { return null; } })();
       if (local && local._t && (!save || !save._t || local._t > save._t)) save = local;   /* 서버에 못 올린 최근 기록이 이 기기에 있으면 그것을 쓴다 */
     } else {
       const L = localAccounts(), h = await sha256hex(id + ':' + pin);
       if (L[id]){
-        if (L[id].name !== name) throw new Error('이 번호는 다른 이름으로 만들어져 있어요. 번호와 이름을 확인해요.');
-        if (L[id].hash !== h) throw new Error('비밀번호가 맞지 않아요. 잊었으면 선생님께 말해요.');
+        if (L[id].hash !== h) throw new Error('이 이름은 이미 쓰고 있거나 비밀번호가 달라요. 비밀번호를 확인하거나 다른 별명을 써요.');
       } else {
-        fresh = true; L[id] = {cls, no, name, hash:h, created:Date.now()};
+        /* 예전 방식(반 · 번호) 계정이 같은 이름 · 비밀번호로 있으면 그 기록을 이어받는다 */
+        for (const [oid, a] of Object.entries(L)){
+          if (oid.startsWith('n:') || a.migrated || normName(a.name) !== name) continue;
+          if (await sha256hex(oid + ':' + pin) !== a.hash) continue;
+          const old = lsGet('emt.save.v1:' + oid); if (old) lsSet('emt.save.v1:' + id, old);
+          const os = lsGet('emt.sum.v1:' + oid); if (os) lsSet('emt.sum.v1:' + id, os);
+          a.migrated = id; moved = true; break;
+        }
+        fresh = !moved; L[id] = {name, hash:h, created:Date.now()};
         if (!lsSet(ACC_LIST_KEY, JSON.stringify(L))) throw new Error('이 기기에는 저장할 수 없어요.');
       }
       try { save = JSON.parse(lsGet('emt.save.v1:' + id) || 'null'); } catch (e) {}
@@ -112,16 +119,16 @@ async function doLogin(){
         if (old && !Object.values(L).some(a => a.legacy)){ try { save = JSON.parse(old); L[id].legacy = true; lsSet(ACC_LIST_KEY, JSON.stringify(L)); } catch (e) {} }
       }
     }
-    lsSet(ACC_LAST_KEY, JSON.stringify({cls, no, name}));
-    ACC.id = id; ACC.label = `${cls ? cls + ' ' : ''}${no}번 ${name}`;
+    lsSet(ACC_LAST_KEY, JSON.stringify({name}));
+    ACC.id = id; ACC.label = name;
     SAVE_KEY = 'emt.save.v1:' + id;
     applySave(save); SAVE.nickname = name;
     ACC.ready = true; persist();
     $('#login').hidden = true; btn.disabled = false;
-    afterLogin(fresh);
+    afterLogin(fresh, moved);
   } catch (e){
     btn.disabled = false;
-    say(e.code === 'name' ? '이 번호는 다른 이름으로 만들어져 있어요. 번호와 이름을 확인해요.' : e.code === 'pin' ? '비밀번호가 맞지 않아요. 잊었으면 선생님께 말해요.' : e.status === 429 ? '너무 여러 번 시도했어요. 1분 뒤에 다시 해요.' : (e.message || '들어가지 못했어요.'));
+    say(e.code === 'pin' ? '이 이름(별명)은 이미 누가 쓰고 있거나 비밀번호가 달라요. 비밀번호를 확인하거나, 처음이라면 다른 별명을 써요.' : e.status === 429 ? '너무 여러 번 시도했어요. 1분 뒤에 다시 해요.' : (e.message || '들어가지 못했어요.'));
   }
 }
 function applySave(s){
@@ -132,7 +139,7 @@ function applySave(s){
   if (!SAVE.story.done || typeof SAVE.story.done !== 'object') SAVE.story.done = {};
   rpgNormalize();
 }
-function afterLogin(fresh){
+function afterLogin(fresh, moved){
   HP.inv = 0; UI.waypoint = null;
   rpgSync(true); storyInit(); updateRpgHUD();
   loadWorld(buildStoryWorld());
@@ -140,7 +147,7 @@ function afterLogin(fresh){
   showTitle();
   $('#accName').textContent = ACC.label;
   $('#accSync').textContent = ACC.server ? '☁️ 학급 서버' : '💾 이 기기';
-  toast(fresh ? `${ACC.label}, 환영해요!` : `${ACC.label}, 다시 왔군요!`, 'ok');
+  toast(moved ? `${ACC.label}, 전에 하던 기록을 이어 왔어요!` : fresh ? `${ACC.label}, 환영해요! 이 이름과 비밀번호를 꼭 기억해요.` : `${ACC.label}, 다시 왔군요!`, 'ok');
 }
 function logout(){
   if (ACC.server && ACC.dirty) accPush();
@@ -175,9 +182,9 @@ function openTeacherGate(){
 }
 function localRows(){
   const L = localAccounts();
-  return Object.entries(L).map(([id, a]) => {
+  return Object.entries(L).filter(([id, a]) => !a.migrated).map(([id, a]) => {
     let sum = null; try { sum = JSON.parse(lsGet('emt.sum.v1:' + id) || 'null'); } catch (e) {}
-    return {id, cls:a.cls, no:a.no, name:a.name, sum, updated:sum ? sum.t : a.created};
+    return a.migrated ? null : {id, name:a.name, sum, updated:sum ? sum.t : a.created};
   });
 }
 function ago(t){
@@ -192,26 +199,28 @@ async function dashRefresh(){
 async function openDashboard(){
   if (!DASH.code) return openTeacherGate();
   if (!DASH.rows) await dashRefresh();
-  const rows = (DASH.rows || []).slice().sort((a, b) => String(a.cls).localeCompare(String(b.cls), 'ko') || a.no - b.no);
+  const q = (DASH.q || '').trim().toLowerCase();
+  const rows = (DASH.rows || []).filter(r => r && (!q || String(r.name).toLowerCase().includes(q))).sort((a, b) => (b.updated || 0) - (a.updated || 0));
   const cnt = ACTS.map(a => rows.filter(r => r.sum && r.sum.done && r.sum.done.includes(a.id)).length);
-  const head = `<tr><th>반</th><th>번호</th><th>이름</th><th>레벨</th><th>진행</th>${ACTS.map((a, k) => `<th title="${esc(a.title)}">${k + 1}<br><span style="font-size:15px">${a.icon}</span></th>`).join('')}<th>확인 질문</th><th title="다툼으로 지체된 시간 (다툼 횟수)">⏰ 다툼 지체</th><th title="다친 사람 돕기 · 다툼 말리기 / 숨은 퀘스트(MRI)">🤝 도움 · 🔎</th><th>마지막</th>${ACC.server ? '<th></th>' : ''}</tr>`;
+  const head = `<tr><th>이름(별명)</th><th>레벨</th><th>진행</th>${ACTS.map((a, k) => `<th title="${esc(a.title)}">${k + 1}<br><span style="font-size:15px">${a.icon}</span></th>`).join('')}<th>확인 질문</th><th title="다툼으로 지체된 시간 (다툼 횟수)">⏰ 다툼 지체</th><th title="다친 사람 돕기 · 다툼 말리기 / 숨은 퀘스트(MRI)">🤝 도움 · 🔎</th><th>마지막</th>${ACC.server ? '<th></th>' : ''}</tr>`;
   const body = rows.map(r => {
     const s = r.sum || {}, done = s.done || [], n = done.length;
-    return `<tr><td>${esc(r.cls || '')}</td><td>${r.no}</td><td>${esc(r.name)}</td><td><b>Lv.${s.lv || 1}</b><br><small>${esc(s.title || '')}</small></td>
+    return `<tr><td>${esc(r.name)}</td><td><b>Lv.${s.lv || 1}</b><br><small>${esc(s.title || '')}</small></td>
       <td><div class="dash-bar"><i style="width:${Math.round(n / ACTS.length * 100)}%"></i></div><small>${n}/${ACTS.length}${s.finale ? ' 🎆' : ''}</small></td>
       ${ACTS.map(a => `<td class="dash-c">${done.includes(a.id) ? '✅' : s.cur === a.id ? '🔸' : ''}</td>`).join('')}
       <td>${s.checkN ? `${s.checkOk}/${s.checkN}` : '-'}</td><td>${s.delay ? `<b style="color:${s.delay >= 60 ? '#ff9b90' : 'inherit'}">${s.delay}초</b><br><small>${s.quarrels || 0}번</small>` : '-'}</td><td>${s.helped || 0} · ${s.hq ? '🔎' + s.hq : '-'}</td><td><small>${ago(r.updated)}</small></td>
       ${ACC.server ? `<td><button class="btn small ghost" data-pin="${esc(r.id)}" title="비밀번호를 지우면 학생이 다음 로그인 때 새로 정해요">🔑 초기화</button></td>` : ''}</tr>`;
   }).join('');
   const p = openPanel(`<h2>📊 교사 계기판</h2>
-    <p class="sub">${ACC.server ? '학급 서버에 저장된 모든 학생' : '이 기기에서 로그인한 학생만 보여요. 학급 서버 주소로 열면 반 전체가 모여요.'} · ✅ 성공한 활동 · 🔸 지금 하는 활동 · 학생 ${rows.length}명</p>
-    <div class="row" style="gap:8px;margin-bottom:8px"><button class="btn small" id="dsRe">↻ 새로 고침</button><button class="btn small ghost" id="dsCsv">📋 표 복사</button><button class="btn small ghost" id="dsBack">← 교사용 안내</button></div>
-    <div class="tblwrap"><table class="tbl dash">${head}${body || `<tr><td colspan="${ACTS.length + 10}">아직 로그인한 학생이 없어요.</td></tr>`}
-      <tr class="dash-sum"><td colspan="5"><b>활동별 성공한 학생</b></td>${cnt.map(c => `<td class="dash-c"><b>${c}</b></td>`).join('')}<td colspan="${ACC.server ? 5 : 4}"></td></tr></table></div>
+    <p class="sub">${ACC.server ? '서버에 저장된 전국 모든 학생(최근에 한 순서). 우리 반 학생은 이름으로 찾아요' : '이 기기에서 로그인한 학생만 보여요. 학급 서버 주소로 열면 모두 모여요.'} · ✅ 성공한 활동 · 🔸 지금 하는 활동 · 학생 ${rows.length}명</p>
+    <div class="row" style="gap:8px;margin-bottom:8px"><input id="dsQ" placeholder="이름(별명)으로 찾기 — 우리 반 학생 이름을 넣어요" value="${esc(DASH.q || '')}" style="width:260px"><button class="btn small" id="dsRe">↻ 새로 고침</button><button class="btn small ghost" id="dsCsv">📋 표 복사</button><button class="btn small ghost" id="dsBack">← 교사용 안내</button></div>
+    <div class="tblwrap"><table class="tbl dash">${head}${body || `<tr><td colspan="${ACTS.length + 8}">${q ? '찾는 이름이 없어요.' : '아직 로그인한 학생이 없어요.'}</td></tr>`}
+      <tr class="dash-sum"><td colspan="3"><b>활동별 성공한 학생</b></td>${cnt.map(c => `<td class="dash-c"><b>${c}</b></td>`).join('')}<td colspan="${ACC.server ? 5 : 4}"></td></tr></table></div>
     <details style="margin-top:10px"><summary>활동 번호 보기</summary><ol style="line-height:1.7;margin:8px 0">${ACTS.map(a => `<li>${a.icon} ${esc(a.title)}${a.ai ? ' (AI 개발)' : ''}</li>`).join('')}</ol></details>`, {wide:true, onClose:() => { clearInterval(DASH.timer); DASH.timer = null; }});
   p.querySelector('#dsRe').onclick = async () => { await dashRefresh(); openDashboard(); };
   p.querySelector('#dsBack').onclick = () => { clearInterval(DASH.timer); DASH.timer = null; openGuide(); };
-  p.querySelector('#dsCsv').onclick = () => cpCopy(['반\t번호\t이름\t레벨\t진행\t' + ACTS.map((a, k) => `${k + 1}.${a.title}`).join('\t'), ...rows.map(r => { const s = r.sum || {}, d = s.done || []; return `${r.cls || ''}\t${r.no}\t${r.name}\t${s.lv || 1}\t${d.length}/${ACTS.length}\t` + ACTS.map(a => d.includes(a.id) ? 'O' : '').join('\t'); })].join('\n'));
+  p.querySelector('#dsCsv').onclick = () => cpCopy(['이름\t레벨\t진행\t' + ACTS.map((a, k) => `${k + 1}.${a.title}`).join('\t'), ...rows.map(r => { const s = r.sum || {}, d = s.done || []; return `${r.name}\t${s.lv || 1}\t${d.length}/${ACTS.length}\t` + ACTS.map(a => d.includes(a.id) ? 'O' : '').join('\t'); })].join('\n'));
+  const fq = p.querySelector('#dsQ'); if (fq){ fq.oninput = () => { DASH.q = fq.value; clearTimeout(DASH.qt); DASH.qt = setTimeout(() => { openDashboard(); const n = $('#dsQ'); if (n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 250); }; }
   p.querySelectorAll('[data-pin]').forEach(b => b.onclick = async () => {
     if (!confirm('이 학생의 비밀번호를 지울까요? 학생이 다음에 로그인할 때 새 비밀번호를 정해요. 기록은 그대로예요.')) return;
     try { await api('api/teacher/reset', {code:DASH.code, id:b.dataset.pin}); toast('비밀번호를 지웠어요.', 'ok'); } catch (e) { toast('하지 못했어요.', 'bad'); }
