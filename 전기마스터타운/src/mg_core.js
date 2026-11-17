@@ -181,7 +181,7 @@ function mgEnd(bolts, msg, extra){
   mgCard(`<div class="mg-ci">${bolts > 0 ? (bolts === 3 ? '🏆' : '🎉') : '💪'}</div><h3>${bolts > 0 ? (bolts === 3 ? '완벽해요!' : '성공!') : '아쉬워요, 다시 해 봐요!'}</h3>
     <div class="mg-big">${boltsHTML(bolts)}</div>${best > bolts ? `<p class="mg-small">최고 기록 ${boltsHTML(best)}</p>` : ''}
     <p>${msg || ''}</p>${bolts > 0 && d.learn && d.learn[st] ? `<div class="mg-learn"><b>📘 교재와 이어 보기</b><br>${d.learn[st]}</div>` : ''}${extra || ''}
-    <div class="row" style="justify-content:center;margin-top:12px">${next ? `<button class="btn primary" id="mgNext">${st + 2}단계로</button>` : ''}<button class="btn" id="mgAgain">다시 하기</button>${chain ? '' : '<button class="btn" id="mgList">게임 목록</button>'}<button class="btn ${next ? 'ghost' : 'primary'}" id="mgOut">${chain && !next && bolts > 0 ? '마을로 돌아가기 ▶' : '마을로'}</button></div>`);
+    <div class="row" style="justify-content:center;margin-top:12px">${next ? `<button class="btn primary" id="mgNext">${st + 2}단계로</button>` : ''}<button class="btn" id="mgAgain">다시 하기</button>${chain ? '' : '<button class="btn" id="mgList">게임 목록</button>'}<button class="btn ${next ? 'ghost' : 'primary'}" id="mgOut">${(WORLD && WORLD.kind === 'room' ? '방으로' : '마을로') + (chain && !next && bolts > 0 ? ' 돌아가기 ▶' : '')}</button></div>`);
   if (next) $('#mgNext').onclick = () => mgStart(d.id, st + 1);
   $('#mgAgain').onclick = () => mgStart(d.id, st);
   if ($('#mgList')) $('#mgList').onclick = () => { mgQuit(true); mgOpenGame(d.id); };

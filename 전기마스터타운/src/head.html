@@ -291,6 +291,39 @@ kbd{font-family:var(--font-display);background:var(--ink);border:2px solid var(-
 #banner .b-day{background:var(--volt);color:#2a2200;border-radius:8px;padding:2px 9px;font-size:16px;white-space:nowrap}
 #banner .b-title{font-size:20px;color:#fff}
 @keyframes bnr{0%{opacity:0;transform:translate(-50%,-14px)}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-8px)}}
+/* 차시 구역: 문 클로즈업 뒤 하얗게 · 구역 이름 카드 · 방 띠 · 구역 지도 */
+#zoneFade{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:0;background:#fff;transition:opacity .45s ease}
+#zoneCard{--zc:#3ee0ff;position:absolute;left:50%;top:32%;z-index:31;display:grid;justify-items:center;gap:8px;pointer-events:none;text-align:center;width:min(92vw,640px);animation:zcard 3.3s ease forwards}
+#zoneCard .zc-no{background:var(--zc);color:#10202a;border-radius:10px;padding:3px 16px;font-family:var(--font-display);font-size:22px;box-shadow:var(--shadow)}
+#zoneCard .zc-name{font-family:var(--font-display);font-weight:400;font-size:clamp(32px,7vw,58px);color:#fff;line-height:1.1;text-shadow:0 3px 0 #1c2733,0 0 22px rgba(0,0,0,.55)}
+#zoneCard .zc-room{font-size:17px;color:#fff;background:rgba(21,32,43,.88);border:2px solid var(--zc);padding:4px 14px;border-radius:999px}
+@keyframes zcard{0%{opacity:0;transform:translate(-50%,-38%) scale(.94)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}82%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-56%)}}
+#zoneBar{--zc:#3ee0ff;margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;max-width:min(560px,62vw);background:rgba(21,32,43,.9);border-left:5px solid var(--zc);padding:5px 10px;border-radius:0 8px 8px 0;font-size:13px;box-shadow:var(--shadow)}
+#zoneBar .zb-z{font-family:var(--font-display);color:var(--zc);font-size:15px;margin-right:2px}
+#zoneBar .zb-r{padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.08);color:#d5dde6;white-space:nowrap}
+#zoneBar .zb-r.on{background:var(--zc);color:#10202a;font-weight:700}
+#zoneBar .zb-r.done::after{content:' ✓';color:var(--ok)}
+#zoneBar .zb-r.lock{opacity:.45}
+#zoneBar i{font-style:normal;color:#7f8b99}
+.zone-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.zone-card{--zc:#3ee0ff;display:grid;gap:8px;align-content:start;background:var(--ink-2);border:2px solid var(--line);border-top:6px solid var(--zc);border-radius:14px;padding:12px 14px}
+.zone-card.cur{box-shadow:0 0 0 3px color-mix(in srgb,var(--zc) 35%,transparent)} .zone-card.lock{opacity:.62} .zone-card.done{border-color:var(--ok);border-top-color:var(--zc)}
+.zc-head{display:flex;gap:8px;align-items:center;font-size:17px}
+.zc-chip{display:inline-block;background:var(--zc,#3ee0ff);color:#10202a;border-radius:8px;padding:2px 10px;font-family:var(--font-display);font-size:15px}
+.zc-goal{margin:0;font-size:14px;color:var(--text-dim);line-height:1.5}
+.zc-acts{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:14px}
+.zc-acts li small{color:var(--text-dim)} .zc-acts li.ok{color:#bff3d6}
+.zc-note{margin:0;font-size:13px;color:var(--volt)}
+.zc-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
+.zc-foot small{color:var(--text-dim)}
+.zone-clear{--zc:#3ee0ff;display:grid;gap:10px;justify-items:center;text-align:center;padding:6px 0}
+.zone-clear .zcl-icon{font-size:76px;line-height:1}
+.zone-clear h2{margin:0}
+.zone-clear .zc-acts{justify-items:start}
+.zone-clear p{max-width:480px;margin:0;line-height:1.6}
+.act-zone{display:flex;align-items:center;gap:8px;margin:14px 0 6px;font-size:16px}
+.act-zone:first-child{margin-top:0}
+@media (max-width:720px){#zoneBar{max-width:calc(100vw - 24px);font-size:12px}#zoneBar .zb-r{padding:1px 6px}}
 #cutscene{position:absolute;inset:0;z-index:24;cursor:pointer}
 .cs-on #hud,.cs-on #touch,.cs-on #toast{visibility:hidden}
 .cs-bar{position:absolute;left:0;right:0;background:#05080d}

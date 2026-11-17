@@ -1,5 +1,6 @@
 /* =========================================================
    📘 활동 — 교과서(아이스크림) 활동 순서대로 이어지는 한 줄 길
+   - 활동은 차시 구역의 방에서 한다 (어느 방인지는 course.js, 구역·방 움직임은 zone.js).
    - 활동마다 '맡은 사람(giver)'이 있다. 그 사람에게 말을 걸면 활동이 시작된다.
    - 활동을 끝내면 맡은 사람이 정리해 주고, 다음에 만날 사람을 알려 준다.
    - 다음 사람은 머리 위에 ! 가 뜨고 제자리에서 폴짝폴짝 뛴다. 노란 화살표가 길을 알려 준다.
@@ -28,36 +29,36 @@ const ACTS = [
   {id:'a5', icon:'🛝', title:'AI 크레인 두뇌 만들기', place:'m_tree', placeName:'AI 연구소 🖥️ 크레인 두뇌 컴퓨터', giver:'auto', games:[['slide', 0], ['slide', 1], ['slide', 2]], ai:true,
    book:'(AI 프로그램 개발) 전자석 기중기가 스스로 판단하도록 예/아니요 질문 길(의사결정트리)을 만들고, 처음 보는 고철로 시험해 고치기',
    intro:['삐릭! 내 규칙은 완벽하다! 번쩍이면 철! 크면 무겁다!', '…알루미늄 캔이 섞였다고? 흥, 그럼 네가 내 두뇌를 새로 짜 봐라. 질문으로 나눠서 처음 보는 고철도 맞히면 인정하지!'],
-   done:['삐릭… 처음 보는 고철도 맞혔다고? 내 규칙이 틀렸다는 걸 인정한다. 겉모습보다 재료를 물어야 했다.', 'AI도 틀릴 수 있다. 틀리면 고치고, 사람이 시험해 봐야 안다! 그런데 저기 도로에 초록 전기차가 헐떡이며 달리던데… 붙잡아서 이야기를 들어 봐라.'],
+   done:['삐릭… 처음 보는 고철도 맞혔다고? 내 규칙이 틀렸다는 걸 인정한다. 겉모습보다 재료를 물어야 했다.', 'AI도 틀릴 수 있다. 틀리면 고치고, 사람이 시험해 봐야 안다! 그런데 마을 도로에 초록 전기차가 헐떡이며 달리던데… 구역 밖으로 나가 붙잡아서 이야기를 들어 봐라.'],
    check:{q:'질문 길이 처음 보는 고철에서 틀렸다. 무엇을 해야 할까?', o:['시험 고철의 답을 외워 넣는다', '틀린 고철을 보고 질문을 고쳐 다시 시험한다', '그냥 그대로 쓴다'], a:1, why:'처음 보는 데이터로 시험하고, 틀린 까닭을 찾아 고치는 것이 AI를 만드는 과정이에요.'}},
   {id:'a6', icon:'⚡', title:'전기 자동차와 충전소', giver:'evdriver', ev:true,
    book:'영상 속 전자석 예: 전기 자동차 — 전동기 속 전자석. 시장님께 충전소가 필요한 까닭(에너지 절약 · 전자석)과 세울 곳(안전)을 설득하기',
-   done:['충전소 덕분에 배터리가 쑥쑥 차고 있어! 전기차는 전기 에너지를 효율적으로 쓰는 탈것이란다.', '그런데 효율적으로 쓰는 것만큼 안전하게 쓰는 것도 중요해. 안전 마을의 안전이가 집집마다 위험한 곳을 찾고 있대. 도와주겠니?']},
+   done:['충전소 덕분에 배터리가 쑥쑥 차고 있어! 전기차는 전기 에너지를 효율적으로 쓰는 탈것이란다.', '시장님이 고맙다고 전기 자전거를 주신대! 마을 친구들을 모두 만나 자전거를 타게 되면, 3차시 구역에서 안전이가 기다리고 있을 거야.']},
   {id:'a7', icon:'🏠', title:'전기를 효율적·안전하게 쓰는 방법 조사', place:'m_home', placeName:'안전 마을 🏠 우리 집 안전 탐정 게임기', giver:'guard', games:[['home', 0], ['home', 1]],
    book:'모둠별로 전기를 효율적이고 안전하게 사용하는 방법을 조사해 봅시다.',
    intro:['안전 지킴이 안전이예요! 집집마다 전기를 위험하게 쓰거나 낭비하는 곳이 숨어 있어요.', '거실, 부엌, 욕실을 살피며 바른 사용인지, 위험한지, 낭비인지 판단해 주세요. 위험을 내버려 두면 불이 나요!'],
-   done:['멀티탭 문어발, 젖은 손, 안 보는 TV… 위험과 낭비를 잘 찾았어요!', '그런데 마을에는 집이 수백 채예요. 사람 혼자서 다 살필 수는 없어요. 볼트 박사님이 AI 안전 로봇을 준비하고 계세요. 연구소로 가 봐요!'],
+   done:['멀티탭 문어발, 젖은 손, 안 보는 TV… 위험과 낭비를 잘 찾았어요!', '그런데 마을에는 집이 수백 채예요. 사람 혼자서 다 살필 수는 없어요. 볼트 박사님이 옆 방에서 AI 안전 로봇을 준비하고 계세요. 오른쪽 포털로 가 봐요!'],
    check:{q:'하나의 콘센트에 플러그를 여러 개 꽂아 쓰면?', o:['바른 사용', '위험', '낭비'], a:1, why:'한꺼번에 많은 전기가 흘러 열이 나고 불이 날 수 있어요.'}},
   {id:'a8', icon:'🤖', title:'AI 안전 로봇 가르치기', place:'m_nb', placeName:'AI 연구소 🖥️ 안전 로봇 컴퓨터', giver:'volt', games:[['robot', 0], ['robot', 1], ['robot', 2]], ai:true,
    book:'(AI 프로그램 개발) 조사한 방법을 바른 사용·위험·낭비 데이터로 만들어 로봇을 학습시키고, 처음 보는 장면으로 시험해 고치기',
    intro:['견습생이 조사한 방법이 로봇의 학습 데이터가 돼요. 문장마다 바른 사용·위험·낭비 이름표를 붙여 가르쳐요.', '관계없는 문장과 개인정보는 빼고, 처음 보는 장면으로 시험해요. 틀리면 로봇 탓보다 데이터부터 살펴봐요!'],
-   done:['로봇이 처음 보는 장면도 판단하게 됐어요! 하지만 로봇도 틀릴 수 있으니 마지막 확인은 사람이 해요.', '이제 우리가 배운 것을 마을 사람들에게 알릴 차례예요. 안전 마을의 달님이 역할놀이를 준비하고 있대요!'],
+   done:['로봇이 처음 보는 장면도 판단하게 됐어요! 하지만 로봇도 틀릴 수 있으니 마지막 확인은 사람이 해요.', '이제 우리가 배운 것을 마을 사람들에게 알릴 차례예요. 옆 방 역할놀이 무대에서 달님이 기다리고 있대요!'],
    check:{q:'로봇이 위험한 장면을 바른 사용이라고 했다. 가장 먼저 살필 것은?', o:['로봇에게 준 학습 데이터', '태블릿 밝기', '로봇의 이름'], a:0, why:'비슷한 예시가 부족하거나 이름표가 틀렸는지 데이터부터 살펴요.'}},
   {id:'a9', icon:'📣', title:'다양한 방법으로 표현하기', place:'m_stage', placeName:'달님네 집 📣 역할놀이 무대', giver:'moon', games:[['campaign', 0], ['campaign', 1]],
    book:'전기를 효율적이고 안전하게 사용하는 방법을 다양한 활동(역할놀이 · 과학 글쓰기 · 그림 그리기)으로 표현해 봅시다.',
    intro:['나 달님이야! 우리 집 콘센트가 문어발이었던 거 기억나? 다른 집도 그럴지 몰라.', '"만약 ~라면, ~한다. 왜냐하면 ~" 수칙 카드를 만들고, 역할놀이 만화로 마을에 알려 줘!'],
-   done:['네 만화 덕분에 이웃들이 플러그를 머리 잡고 뽑기 시작했어!', '별님이 마트에서 가전제품을 고르는데 에너지 소비 효율 등급이 헷갈린대. 별님네 집에 가 봐!'],
+   done:['네 만화 덕분에 이웃들이 플러그를 머리 잡고 뽑기 시작했어!', '별님이 마트에서 가전제품을 고르는데 에너지 소비 효율 등급이 헷갈린대. 옆 방 가전제품 매장으로 가 봐!'],
    check:{q:'전기를 절약하려고 플러그를 뽑을 때 안전한 방법은?', o:['전선을 잡아당긴다', '플러그의 머리 부분을 잡고 뽑는다', '젖은 손으로 뽑는다'], a:1, why:'전선을 당기면 피복이 벗겨져 감전되거나 불이 날 수 있어요.'}},
   {id:'a10', icon:'🏷️', title:'효율 등급과 까닭 정리', place:'m_mart', placeName:'별님네 집 🏷️ 가전제품 카탈로그', giver:'star', games:[['home', 2]],
    book:'에너지 소비 효율 등급이 높은 전기 기구 선택하기 · 전기를 효율적이고 안전하게 사용해야 하는 까닭을 이야기해 봅시다.',
    intro:['나는 별님! 냉장고를 새로 사야 하는데 1등급, 3등급… 뭘 골라야 할까?', '예산 안에서 한 달 전기 요금이 가장 적게 드는 걸 골라 줘. 그리고 전기를 아끼고 안전하게 써야 하는 까닭도 정리해 줘!'],
-   done:['전기를 절약할 수 있고, 감전 사고나 화재를 막을 수 있고, 안전하고 지속가능한 사회를 만들 수 있어서! 이제 확실히 알겠어.', '마을 전력이 다 찼대! 볼트 박사님이 점등식을 준비하고 계셔. 광장으로 가 보자!'],
+   done:['전기를 절약할 수 있고, 감전 사고나 화재를 막을 수 있고, 안전하고 지속가능한 사회를 만들 수 있어서! 이제 확실히 알겠어.', '마을 전력이 다 찼대! 볼트 박사님이 점등식을 준비하고 계셔. 구역 출구로 나가 광장으로 가 보자!'],
    check:{q:'전기를 효율적이고 안전하게 써야 하는 까닭이 아닌 것은?', o:['전기를 절약할 수 있어서', '감전 사고나 화재를 막을 수 있어서', '전기 요금을 더 많이 내려고'], a:2, why:'절약 · 안전 · 지속가능한 사회가 까닭이에요.'}},
 ];
 const actById = id => ACTS.find(a => a.id === id);
 const actIdxOf = id => ACTS.findIndex(a => a.id === id);
 const ACT_WHO = {volt:'볼트 박사', sun:'해님', boss:'무쇠 사장님', auto:'자동이', evdriver:'전기차 운전자', guard:'안전이', moon:'달님', star:'별님', mayor:'시장님'};
-const ACT_WHERE = {volt:'AI 연구소 앞', sun:'안전 마을 해님네 집', boss:'공장 지대 고철장', auto:'고철장 크레인 옆', evdriver:'도로를 달리는 초록 전기차', guard:'안전 마을 입구', moon:'안전 마을 달님네 집', star:'안전 마을 별님네 집', mayor:'시청 옆'};
+const ACT_WHERE = {volt:'마을 광장(AI 연구소)', sun:'안전 마을 해님네 집', boss:'공장 지대 고철장', auto:'고철장 크레인 옆', evdriver:'도로를 달리는 초록 전기차', guard:'안전 마을 입구', moon:'안전 마을 달님네 집', star:'안전 마을 별님네 집', mayor:'시청 옆'};
 
 function actState(){ if (!SAVE.act || typeof SAVE.act !== 'object') SAVE.act = {}; return SAVE.act; }
 function actDone(a){
@@ -82,20 +83,28 @@ function actGiverNow(){
   if (a.ev){ const st = SAVE.evq ? SAVE.evq.step : 0; return st >= 1 ? 'mayor' : 'evcar'; }
   return actTold(a) ? 'place' : a.giver;
 }
+/* 지금 만날 사람이 바로 이 사람인가 (같은 사람이 마을과 방에 함께 있을 때, 활동하는 곳에 있는 쪽만) */
+function actGiverHere(o){
+  if (o.id !== actGiverNow()) return false;
+  const a = actCur(); return !a || zoneActHere(a);
+}
 /* 이야기를 들었으면 다음 신호는 '장소': 직접 걸어가서 E로 시작한다 */
 const actTold = a => !!(a && a.place && actState().told && actState().told[a.id]);
 function actPlaceNow(){ const a = actCur(); return a && actTold(a) ? a.place : null; }
+const objDoneAct = o => { const a = ACTS.find(x => x.place === o.id); return !!a && actDone(a); };
 function actPlaceObj(){ const id = actPlaceNow(); return id && WORLD && WORLD.objects ? WORLD.objects.find(o => o.id === id) : null; }
 function actGiverObj(id = actGiverNow()){ return id && WORLD && WORLD.objects ? WORLD.objects.find(o => o.type === 'npc' && o.id === id) : null; }
 function actWaypoint(){
   const id = actGiverNow(); if (!id) { UI.waypoint = null; return; }
+  if (zoneRoute(actCur())) return;   /* 다른 방·다른 구역이면 포털이나 구역 문부터 */
   if (id === 'evcar'){ if (typeof evGuide === 'function') evGuide(); return; }
   if (id === 'place'){ const p = actPlaceObj(); if (p) UI.waypoint = {x:p.x, y:p.y, label:p.name}; return; }
   const o = actGiverObj(id); if (o) UI.waypoint = {x:o.x, y:o.y, label:ACT_WHO[id] || o.name};
 }
 /* 화면 위 목표 줄 */
 function actObjective(){
-  if (!SAVE.met || !SAVE.met.volt) return '<b>시작</b> AI 연구소 앞의 볼트 박사와 이야기하기';
+  if (!SAVE.met || !SAVE.met.volt) return '<b>시작</b> AI 연구소의 볼트 박사와 이야기하기';
+  const zo = zoneObjective(); if (zo) return zo;
   const a = actCur();
   if (!a) return SAVE.story.finale ? '<b>점등식 성공!</b> 모든 활동을 마쳤어요. [📘 활동]에서 다시 해 볼 수 있어요.' : '<b>모든 활동 완료!</b> 곧 점등식이 시작돼요.';
   const id = actGiverNow(), who = id === 'evcar' ? '달리는 초록 전기차를 붙잡기' : id === 'place' ? `📍 ${a.placeName}(으)로 가서 E` : `${ACT_WHO[id]}에게 말 걸기`;
@@ -103,7 +112,7 @@ function actObjective(){
 }
 
 /* 활동 길이 켜져 있나 (로그인한 학생이 이야기 마을에서 볼트 박사를 만난 뒤) */
-const actChainOn = () => !!(WORLD && WORLD.kind === 'story' && SAVE.met && SAVE.met.volt);
+const actChainOn = () => !!(WORLD && (WORLD.kind === 'story' || WORLD.kind === 'room') && SAVE.met && SAVE.met.volt);
 function actOf(g, s){ return ACTS.find(a => a.games && a.games.some(([x, y]) => x === g && y === s)); }
 function actSameAct(g, s1, s2){ const a = actOf(g, s1), b = actOf(g, s2); return !!a && a === b; }
 /* 끝낸 활동 다시 하기: 그 활동의 단계만 */
@@ -142,11 +151,11 @@ function actAtPlace(objId){
   const cur = actCur();
   if (!cur || cur.id !== A.id){
     const id = actGiverNow();
-    showDialog('안내', [cur ? `아직 이 활동 차례가 아니에요. 지금은 「${cur.title}」 차례예요. ${id === 'evcar' ? '달리는 초록 전기차를 붙잡아요!' : id === 'place' ? `${cur.placeName}(으)로 가요.` : `${ACT_WHERE[id]}의 ${ACT_WHO[id]}에게 가 봐요.`}` : '먼저 AI 연구소 앞의 볼트 박사와 이야기해요.'], () => actWaypoint());
+    showDialog('안내', [cur ? `아직 이 활동 차례가 아니에요. 지금은 「${cur.title}」 차례예요. ${id === 'evcar' ? '마을 도로를 달리는 초록 전기차를 붙잡아요!' : id === 'place' ? `${cur.placeName}(으)로 가요.` : `${actWhere(cur)}의 ${ACT_WHO[id]}에게 가 봐요.`}` : '먼저 AI 연구소의 볼트 박사와 이야기해요.'], () => actWaypoint());
     return true;
   }
   if (!actTold(A)){
-    showDialog('안내', [`여기가 「${A.title}」 하는 곳이에요. 먼저 ${ACT_WHERE[A.giver]}의 ${ACT_WHO[A.giver]}에게 이야기를 들어요!`], () => { const o = actGiverObj(A.giver); if (o) UI.waypoint = {x:o.x, y:o.y, label:ACT_WHO[A.giver]}; });
+    showDialog('안내', [`여기가 「${A.title}」 하는 곳이에요. 먼저 이 방의 ${ACT_WHO[A.giver]}에게 이야기를 들어요!`], () => { const o = actGiverObj(A.giver); if (o) UI.waypoint = {x:o.x, y:o.y, label:ACT_WHO[A.giver]}; });
     return true;
   }
   UI.waypoint = null; actLaunch(A); return true;
@@ -156,8 +165,8 @@ function actHintLine(o){
   const a = actCur(); if (!a) return null;
   const id = actGiverNow(); if (id === o.id) return null;
   if (id === 'place') return {who:o.name, text:`「${a.title}」 하러 가는 중이지? ${a.placeName}(으)로 가 봐요!`};
-  if (id === 'evcar') return {who:o.name, text:'지금은 도로를 달리는 초록 전기차를 붙잡아 운전자의 이야기를 들어 볼 차례예요. 차 앞은 위험하니 옆이나 뒤에서!'};
-  return {who:o.name, text:`지금 할 활동은 「${a.title}」이에요. ${ACT_WHERE[id] ? ACT_WHERE[id] + '의 ' : ''}${ACT_WHO[id]}에게 가 봐요!`};
+  if (id === 'evcar') return {who:o.name, text:'지금은 마을 도로를 달리는 초록 전기차를 붙잡아 운전자의 이야기를 들어 볼 차례예요. 차 앞은 위험하니 옆이나 뒤에서!'};
+  return {who:o.name, text:`지금 할 활동은 「${a.title}」이에요. ${actWhere(a)}의 ${ACT_WHO[id]}에게 가 봐요!`};
 }
 
 /* ----- 활동을 끝냈을 때: 맡은 사람이 정리 → 확인 질문 → 다음 사람 안내 ----- */
@@ -180,9 +189,7 @@ function actDoneBeat(id){
       next:[{who, text:`${k === c.a ? '⭕ 맞아요!' : '❌ 아쉬워요.'} ${c.why}`}]}))});
   }
   const nx = actCur(), nid = actGiverNow();
-  if (nx){
-    lines.push({who, text:nid === 'evcar' ? '👉 다음 활동: 「' + nx.title + '」 — 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아요!' : `👉 다음 활동: 「${nx.title}」 — ${ACT_WHERE[nid]}의 ${josa(ACT_WHO[nid], '을', '를')} 만나요! 노란 화살표를 따라가요.`});
-  }
+  if (nx) lines.push({who, text:zoneNextText(nx, nid)});
   showDialog(who, lines, () => { actWaypoint(); updateHUD(); });
 }
 
@@ -197,12 +204,18 @@ function openActs(){
       <div class="act-b"><b>${k + 1}. ${a.icon} ${esc(a.title)}</b>${a.ai ? ' <span class="ls-star">AI 개발</span>' : ''}<p>📘 ${esc(a.book)}</p><small>👤 ${esc(who)}</small></div>
       <div class="act-r">${done && a.games ? `<button class="btn small" data-replay="${a.id}">다시 하기</button>` : cur && MODE === 'play' ? '<button class="btn small primary" data-go>길 안내</button>' : ''}</div></div>`;
   };
+  /* 차시 구역별로 묶어 보여 준다 */
+  const needRow = k => { const N = ZONE_NEEDS[k], ok = N.ok();
+    return `<div class="act-row ${ok ? 'done' : ''}"><div class="act-n">${ok ? '✅' : '🚲'}</div><div class="act-b"><b>${N.label}</b><p>길가 친구 ${helpedCount()}/${WALKERS.length}명 만남 · 다 만나면 거치대에서 자전거를 꺼내 타요 (B)</p></div><div class="act-r"></div></div>`; };
+  const groups = COURSE.zones.map(z => `<div class="act-zone" style="--zc:${z.color}"><span class="zc-chip">${z.no}차시</span><b>${z.icon} ${esc(z.name)}</b>${zoneDone(z) ? ' ✅' : zoneOpen(z) ? '' : ' 🔒'}</div>`
+    + zoneActs(z).map(a => row(a, ACTS.indexOf(a))).join('') + (z.need || []).map(needRow).join('')).join('');
   const p = openPanel(`<h2>📘 활동</h2>
-    <p class="sub">교과서 활동 순서대로 하나씩 해요. <b>맡은 사람(👤)에게 말을 걸면</b> 활동할 장소를 알려 줘요. 그 장소까지 걸어가 E를 누르면 시작되고, 끝나면 다음에 만날 사람을 알려 줘요. 다음 사람은 머리 위에 <b>!</b>가 뜨고 폴짝폴짝 뛰어요.</p>
-    ${met ? '' : '<div class="okbox" style="margin-bottom:10px">먼저 AI 연구소 앞의 <b>볼트 박사</b>와 이야기해요.</div>'}
-    <div class="act-list">${ACTS.map(row).join('')}</div>
+    <p class="sub">1·2·3차시 구역마다 교과서 활동 순서대로 해요. 구역 문으로 들어가 방의 <b>맡은 사람(👤)에게 말을 걸면</b> 활동할 곳을 알려 줘요. 그곳에서 E를 누르면 시작되고, 끝내면 오른쪽 포털이 열려 다음 방으로 갈 수 있어요.</p>
+    ${met ? '' : '<div class="okbox" style="margin-bottom:10px">먼저 AI 연구소의 <b>볼트 박사</b>와 이야기해요.</div>'}
+    <div class="act-list">${groups}</div>
     ${met && typeof evQuestCard === 'function' ? evQuestCard() : ''}
-    <div class="row" style="margin-top:12px;gap:8px"><button class="btn" id="actRec">🗂️ 배움 기록</button>${SAVE.epi && SAVE.epi.got && MODE === 'play' ? '<button class="btn volt" id="actEpi">🏠 번개 트럭으로 집에 가기 (에필로그)</button>' : ''}</div>`, {wide:true});
+    <div class="row" style="margin-top:12px;gap:8px"><button class="btn" id="actZones">🗺️ 차시 구역 지도</button><button class="btn" id="actRec">🗂️ 배움 기록</button>${SAVE.epi && SAVE.epi.got && MODE === 'play' ? '<button class="btn volt" id="actEpi">🏠 번개 트럭으로 집에 가기 (에필로그)</button>' : ''}</div>`, {wide:true});
+  p.querySelector('#actZones').onclick = openZoneMap;
   const ep = p.querySelector('#actEpi'); if (ep) ep.onclick = () => { closePanel(); epiStart(); };
   const eg = p.querySelector('#evGo'); if (eg) eg.onclick = () => { closePanel(); evGuide(); };
   p.querySelectorAll('[data-replay]').forEach(b => b.onclick = () => actReplay(actById(b.dataset.replay)));

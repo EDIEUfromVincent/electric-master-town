@@ -93,7 +93,7 @@ function w3Build(src, kind){
   W3.chunks = []; for (let i = 0; i < W3.ncx * W3.ncz; i++) W3.chunks.push({op:null, tr:null, dirty:true});
   w3MeshDirty();
   w3Decals(src);
-  const G = 70, gc = [.43, .71, .26, 1], gv = [-G, -.02, W3.h + G, ...gc, W3.w + G, -.02, W3.h + G, ...gc, W3.w + G, -.02, -G, ...gc, -G, -.02, -G, ...gc];
+  const G = 70, gc = kind === 'room' ? [.2, .23, .28, 1] : [.43, .71, .26, 1],   /* 방 밖은 어두운 바닥 */ gv = [-G, -.02, W3.h + G, ...gc, W3.w + G, -.02, W3.h + G, ...gc, W3.w + G, -.02, -G, ...gc, -G, -.02, -G, ...gc];
   W3.ground = g3Mesh('flat', gv, [0, 1, 2, 0, 2, 3]);
   W3.rows = src.tiles.map(r => r.join(''));
 }
@@ -523,6 +523,10 @@ function cam3Update(dt){
     tx = 39; ty = 2.1; tz = 2.7; yaw = 0; pitch = .42; dist = Math.max(12.2, 7.4 / (Math.tan(fe / 2) * a)); sy = clamp(bh / Math.max(1, CH), .2, .5); rate = .02;
   } else if (MODE === 'epi'){
     const c = epiCam(); tx = c.tx; ty = c.ty; tz = c.tz; yaw = c.yaw; pitch = c.pitch; dist = c.dist; sy = c.sy; rate = c.rate;
+  } else if (MODE === 'gate' && ZONE.gate){
+    const c = zoneGateCam(); tx = c.tx; ty = c.ty; tz = c.tz; yaw = c.yaw; pitch = c.pitch; dist = c.dist; rate = c.rate;
+  } else if (MODE === 'play' && ZONE.focus){
+    const c = zoneCamAdjust(C); tx = c.tx; ty = c.ty; tz = c.tz; yaw = c.yaw; pitch = c.pitch; dist = c.dist; rate = c.rate;
   } else if (MODE === 'mg3' && MG3.sc){
     /* 미니 게임 무대: 게임 글 사이 빈 곳에 무대가 꽉 차게 */
     const c = mg3CamParams(); tx = c.tx; ty = c.ty; tz = c.tz; yaw = c.yaw; pitch = c.pitch; dist = c.dist; sy = c.sy; rate = .012;
@@ -537,7 +541,10 @@ function cam3Update(dt){
     const blocked = Math.min(b1, b2) > 0;
     yaw = Math.atan2(px, pz); pitch = blocked ? .55 : .26; dist = D; tx = mx; tz = mz; ty = 1.15; sy = .2; rate = .01;
   } else if (MODE === 'patrol'){ tx = ROBOT.x; tz = ROBOT.y; ty = 1; }
-  else { tx = player.x; tz = player.y; ty = (player.h || 0) + 1; }
+  else {
+    tx = player.x; tz = player.y; ty = (player.h || 0) + 1;
+    if (ZONE.ease > 0){ const e = ZONE.ease * ZONE.ease; dist = lerp(dist, 4.4, e); pitch = lerp(pitch, .3, e); rate = .03; }   /* 문을 지나온 직후: 가까이서 천천히 물러난다 */
+  }
   if (C.snap){ Object.assign(C, {tx, ty, tz, yaw, pitch, dist, sx, sy, snap:false}); return; }
   const k = 1 - Math.pow(rate, dt), ka = 1 - Math.pow(Math.min(rate, .0002), dt);
   C.tx += (tx - C.tx) * k; C.ty += (ty - C.ty) * k; C.tz += (tz - C.tz) * k;
@@ -642,7 +649,7 @@ function updatePlayer3D(dt){
     if (updatePlayer.saveT > 3){ updatePlayer.saveT = 0; SAVE.pos = {x:+player.x.toFixed(2), y:+player.y.toFixed(2)}; persist(); }
   }
 }
-function objMidY(o){ return ({npc:1.1, device:1.2, scene:1.0, mission:1.1, test:.5, sign:1.1, walker:.8})[o.type] || .8; }
+function objMidY(o){ return ({npc:1.1, device:1.2, scene:1.0, mission:1.1, test:.5, sign:1.1, walker:.8, gate:2.2, portal:1.1})[o.type] || .8; }
 function walkTo(tx, ty, obj){
   const sx = Math.floor(player.x), sy = Math.floor(player.y);
   const path = (obj || solidAt(tx, ty)) ? bfsPath(sx, sy, (x, y) => Math.abs(x - tx) + Math.abs(y - ty) === 1) : bfsPath(sx, sy, (x, y) => x === tx && y === ty);
@@ -700,6 +707,7 @@ function collectLights(env){
   if (MODE === 'crane'){ addLight(35.6, 4.4, 3.4, 13, [1, .97, .9]); addLight(42.4, 4.4, 3.4, 13, [1, .97, .9]); }   // 크레인 작업등
   if (MODE === 'mg3') mg3Lights();
   if (MODE === 'epi') epiLights();
+  else zoneLights();
   const talk = dialogNPC();
   if (talk && env.dk > .15) addLight((player.x + talk.x + .5) / 2 + Math.sin(CAM3.yaw) * 1.5, 2.2, (player.y + talk.y + .5) / 2 + Math.cos(CAM3.yaw) * 1.5, 10, [1, .95, .85]);
   if (env.dk > .25 && MODE !== 'title'){
@@ -793,10 +801,11 @@ function drawObjects3D(env, dt){
   const W = WORLD, t = TIME, story = W.kind === 'story', talk = dialogNPC(), playing = MODE !== 'title';
   for (const o of W.objects){
     const cx = o.x + .5, cz = o.y + .5, gy = surfY(cx, cz);
+    if (zoneDraw3D(o, t, gy)) continue;
     if (o.type === 'npc'){
       const near = playing && Math.hypot(player.x - cx, player.y - cz) < 3.2;
       const ry = faceTo(o, (talk === o || near) ? player.x : null, player.y, dt, 0);
-      const hop = playing && o.id === actGiverNow() && talk !== o ? Math.abs(Math.sin(t * 5.5)) * .38 : 0;   /* 다음에 만날 사람은 폴짝폴짝 */
+      const hop = playing && actGiverHere(o) && talk !== o ? Math.abs(Math.sin(t * 5.5)) * .38 : 0;   /* 다음에 만날 사람은 폴짝폴짝 */
       if (o.look === 'robot') robot3(cx, gy + hop, cz, ry, t); else person3(o.look, cx, gy + hop, cz, ry, 0);
     } else if (o.type === 'device'){
       const done = objDone(o), icon = story ? DEVICES.find(d => d.id === o.dev).icon : (o.icon || '⚡');
@@ -874,7 +883,7 @@ function drawFlats(env, U){
   gl.disable(gl.POLYGON_OFFSET_FILL);
   if (WORLD && WORLD.kind === 'story' && MODE !== 'mg3') craneFlats(U);
   if (MODE === 'mg3') mg3Flats(U);
-  if (WORLD && MODE === 'play' && WORLD.kind === 'story' && UI.waypoint && !uiBlocking()){
+  if (WORLD && MODE === 'play' && (WORLD.kind === 'story' || WORLD.kind === 'room') && UI.waypoint && !uiBlocking()){
     const wp = UI.waypoint; flatDraw(U, model('beam', flatBeam), M4.trs(wp.x + .5, 0, wp.y + .5, TIME * .6), [1, 1, 1, .75 + Math.sin(TIME * 4) * .15]);
   }
   gl.enable(gl.CULL_FACE); gl.depthMask(true); gl.disable(gl.BLEND);
@@ -919,7 +928,7 @@ function render3D(dt){
   collectLights(env);
   beginFrame(env);
   drawSky(env);
-  const third = (MODE === 'play' || MODE === 'patrol') && !CAM3.fpActive && !STORYFX.cam;
+  const third = (MODE === 'play' || MODE === 'patrol') && !CAM3.fpActive && !STORYFX.cam && !ZONE.focus;
   const fx = MODE === 'patrol' ? ROBOT.x : dialogNPC() ? CAM3.tx : player.x, fz = MODE === 'patrol' ? ROBOT.y : dialogNPC() ? CAM3.tz : player.y;
   CUT = third ? [fx, (MODE === 'patrol' ? 0 : (player.h || 0)) + 1, fz, 2.3] : MODE === 'crane' ? [39, 1.2, 5.6, G3.W < G3.H ? 6 : 4] : null;
   const FU = flatSetup(env); flatDraw(FU, W3.ground, M4.I(), [env.sun[0] + env.amb[0], env.sun[1] + env.amb[1], env.sun[2] + env.amb[2], 1]);
@@ -947,7 +956,9 @@ function overlay3D(){
     const W = WORLD, t = TIME, ox = CAM3.fpActive ? player.x : CAM3.tx, oz = CAM3.fpActive ? player.y : CAM3.tz;
     if (!UI.dialog && !UI.cutscene) for (const o of W.objects){
       if (o.type === 'deco' || o.type === 'sign') continue;
-      if (W.kind === 'story' && ((o.type === 'device' && !actReached('a2')) || (o.type === 'scene' && !actReached('a7')) || (o.type === 'mission' && o.id !== actPlaceNow()))) continue;   /* 활동 순서가 오기 전에는 표시를 숨긴다 */
+      if (o.type === 'gate' || o.type === 'portal') continue;
+      if (W.kind === 'story' && ((o.type === 'device' && !actReached('a2')) || (o.type === 'scene' && !actReached('a7')))) continue;   /* 활동 순서가 오기 전에는 표시를 숨긴다 */
+      if ((W.kind === 'story' || W.kind === 'room') && o.type === 'mission' && o.id !== actPlaceNow() && !objDoneAct(o)) continue;
       const cx = o.x + .5, cz = o.y + .5; if (Math.hypot(cx - ox, cz - oz) > 24) continue;
       const hy = surfY(cx, cz) + (o.type === 'npc' ? 2.35 : o.type === 'device' ? (o.dev === 'maglev' || o.dev === 'ev' ? 2.55 : 2.0) : o.type === 'mission' ? 2.45 : o.type === 'test' ? (testRevealed() ? 1.85 : 1.2) : 1.85);
       const p = proj3(cx, hy, cz); if (!p.ok || p.x < -40 || p.x > CW + 40 || p.y < -40 || p.y > CH + 40) continue;
@@ -981,6 +992,7 @@ function overlay3D(){
       if (p.ok) drawLabel(p.x, p.y, `${IS_TOUCH ? '' : 'E · '}${name}`);
     }
     if (MODE === 'play' && !uiBlocking()) evOverlay3D();
+    if (MODE === 'play' || MODE === 'gate') zoneOverlay3D();
     if (MODE === 'play' && !UI.cutscene) pedOverlay3D();
     if (MODE === 'play' && !uiBlocking()) waypoint3D();
     if (MODE === 'play' && !uiBlocking() && hasEquipped('compass')) compass3D();
@@ -1011,7 +1023,7 @@ function compass3D(){
   ctx.fillStyle = '#9fe6ff'; ctx.fillText(txt, lx, ly + 1);
 }
 function waypoint3D(){
-  const wp = UI.waypoint; if (!wp || WORLD.kind !== 'story') return;
+  const wp = UI.waypoint; if (!wp || (WORLD.kind !== 'story' && WORLD.kind !== 'room')) return;
   if (Math.hypot(player.x - (wp.x + .5), player.y - (wp.y + .5)) < 1.8){ UI.waypoint = null; return; }
   const p = proj3(wp.x + .5, 2.9, wp.y + .5), top = 70, m = 40, t = TIME;
   let tx = p.x, ty = p.y;

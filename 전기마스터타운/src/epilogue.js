@@ -26,8 +26,11 @@ function epiRoadDist(x, z){
 }
 
 /* ----- 모형 ----- */
-function mkBoltTruck(){
-  const b = new VB(), body = '#c3c9cf', dark = '#8d959d', glass = '#1d2733', W = .98;
+/* sil: 3차시 구역에 걸어 둔 '선물 그림자' — 같은 모양을 까맣게, ⚡ 표시만 빛나게 */
+function mkBoltTruck(sil){
+  const b = new VB(), body = sil ? '#1a1e25' : '#c3c9cf', dark = sil ? '#13161b' : '#8d959d', glass = sil ? '#22272f' : '#1d2733', W = .98;
+  const keep = c => !sil || c === '#ffd23f', dim = c => (c === '#ffffff' || c === '#ff3b30' ? '#3a4250' : c);
+  const BX = (b, x0, y0, z0, x1, y1, z1, col, emit = -1) => vbBox(b, Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1), keep(col) ? col : dim(col), keep(col) ? emit : -1);
   BX(b, -W, .38, -2.45, W, .95, 2.45, body);                                  // 차체 아래
   BX(b, -W - .02, .38, -2.45, W + .02, .5, 2.45, dark);                       // 아래 띠
   /* 각진 지붕: 앞(+z) 끝에서 꼭대기(z=-.2)까지 곧게 올라가고, 짐칸 끝(-z)까지 곧게 내려간다. 잘게 쌓아 매끈한 빗면처럼 */
@@ -106,7 +109,7 @@ function epiOffer(){
   const st = epiState();
   showDialog('시장님', [
     {who:'시장님', text:'전기 마스터! 활동을 모두 마치고 점등식까지 성공시켰군요. 마을을 대표해 큰 선물을 준비했어요.'},
-    {who:'시장님', text:'주차장 뒤편에 서 있던 은색 트럭 봤죠? 이름은 번개 트럭! 바퀴마다 달린 전동기 속 전자석이 힘차게 바퀴를 돌리는 전기 트럭이에요.'},
+    {who:'시장님', text:'3차시 구역에서 본 그 그림자, 기억나요? 바로 주차장 뒤편의 이 은색 트럭이에요. 이름은 번개 트럭! 바퀴마다 달린 전동기 속 전자석이 힘차게 바퀴를 돌리는 전기 트럭이지요.'},
     {who:'시장님', text:'오늘 밤은 이 트럭을 타고 집에 가요. 운전할 때도 횡단보도와 사람을 조심하고요!', choices:[
       {label:'🔑 열쇠를 받고 집으로 운전해 가기', fn:() => { UI.epiGo = true; }},
       {label:'열쇠만 받고 조금 더 둘러볼게요'},

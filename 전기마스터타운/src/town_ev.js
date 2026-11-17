@@ -170,7 +170,7 @@ function evSyncWorld(){
 function evQuestCard(){
   const q = evq(), canGo = WORLD && WORLD.kind === 'story' && MODE === 'play';
   const steps = ['초록 전기차(⚡)를 따라가 옆이나 뒤에서 붙잡기 (앞에 서면 부딪혀요!)', '시청 옆 시장님 설득하기: 에너지 절약 · 전자석의 실제 예 · 세울 곳', '완공! 주차장 입구의 충전소에서 전기차가 충전해요'];
-  return `<h3>⚡ 특별 퀘스트 <small style="font-size:13px;color:var(--text-dim)">(6번 활동 · 언제든 먼저 해도 돼요)</small></h3><div class="card" style="display:grid;gap:6px;border-color:${q.step >= 2 ? 'var(--ok)' : 'var(--volt)'}">
+  return `<h3>⚡ 특별 퀘스트 <small style="font-size:13px;color:var(--text-dim)">(6번 활동 · 2차시 마을 미션 · 언제든 먼저 해도 돼요)</small></h3><div class="card" style="display:grid;gap:6px;border-color:${q.step >= 2 ? 'var(--ok)' : 'var(--volt)'}">
     <div class="row" style="justify-content:space-between"><h4 style="margin:0">${q.step >= 2 ? '✅' : '⚡'} 전기차 충전소 프로젝트</h4>${canGo && q.step < 2 ? '<button class="btn small" id="evGo">길 안내</button>' : ''}</div>
     <div style="font-size:14px;color:var(--text-dim);line-height:1.5">마을을 달리는 전기차 운전자의 고민을 듣고, 시장님께 주차장 충전소가 왜 필요한지, 어디에 세울지 설득해요.</div>
     <div style="font-size:13px">${steps.map((s, i) => `${i < q.step ? '✅' : i === q.step ? '👉' : '⬜'} ${s}`).join('<br>')}</div></div>`;

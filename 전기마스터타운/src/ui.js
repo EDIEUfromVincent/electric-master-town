@@ -181,6 +181,7 @@ function updateHUD(){
   $('#pillEM').innerHTML = `🧲 전자석 마스터 <b>${c.em}/4</b>`; $('#pillEM').classList.toggle('done', c.em === 4);
   $('#pillES').innerHTML = `⚡ 전기 안전 마스터 <b>${c.es}/3</b>`; $('#pillES').classList.toggle('done', c.es === 3);
   $('#objective').innerHTML = WORLD && WORLD.kind === 'custom' ? `<b>친구 맵</b> ${esc(WORLD.title)} · 상황 카드와 기기를 찾아 판단해요` : objectiveHTML();
+  zoneBar();
   const pw = Math.round(stability() * 100), pp = $('#pillPower');
   pp.innerHTML = `💡 마을 전력 <b>${pw}%</b>`; pp.style.setProperty('--p', pw + '%');
   pp.classList.toggle('low', pw < 35); pp.classList.toggle('full', pw >= 100);
@@ -203,8 +204,8 @@ function showTitle(){
   const c = masterCounts();
   $('#titleBadges').innerHTML = `<span class="pill ${c.em === 4 ? 'done' : ''}">🧲 전자석 마스터 <b>${c.em}/4</b></span><span class="pill ${c.es === 3 ? 'done' : ''}">⚡ 전기 안전 마스터 <b>${c.es}/3</b></span>`;
   const chN = currentChapter();
-  $('#mStartSub').textContent = !SAVE.met.volt ? '처음 시작' : chN >= 7 ? '점등식 성공 · 이어하기' : `이어하기 · ${chapterLabel(chN)}`;
-  $('#storyTeaser').textContent = chN >= 7 ? '점등식 성공! 마을이 환하게 밝아졌어요.' : !SAVE.met.volt ? '점등식까지 D-5 · 깜빡이는 마을의 불을 지켜라' : `${chapterLabel(chN)} · 마을 전력 ${Math.round(stability() * 100)}%`;
+  $('#mStartSub').textContent = !SAVE.met.volt ? '처음 시작' : SAVE.story.finale ? '점등식 성공 · 이어하기' : `이어하기 · ${chapterLabel(chN)}`;
+  $('#storyTeaser').textContent = SAVE.story.finale ? '점등식 성공! 마을이 환하게 밝아졌어요.' : !SAVE.met.volt ? '점등식까지 D-5 · 깜빡이는 마을의 불을 지켜라' : `${chapterLabel(chN)} · 마을 전력 ${Math.round(stability() * 100)}%`;
   $('#mSound').textContent = SAVE.sound ? '소리 켜짐' : '소리 꺼짐';
 }
 function closePanelSilently(){ $('#modal').hidden = true; UI.modal = false; UI.panelClose = null; $('#panel').innerHTML = ''; }
@@ -213,7 +214,8 @@ function enterStory(){
   ensureStoryWorld(); MODE = 'play'; showHUD(true);
   $('#customBar').hidden = true; $('#patrolBar').hidden = true;
   const sp = SAVE.pos || WORLD.spawn; placePlayer(sp.x, sp.y); clampCam();
-  storyInit(); storySync(); updateHUD();
+  storyInit(); storySync(); updateHUD(); zoneBar();
+  if (SAVE.met.volt && zoneResume()) return;   /* 구역 방 안에 있었으면 그 방에서 이어 한다 */
   if (!SAVE.met.volt) setTimeout(() => { if (MODE === 'play' && !uiBlocking()) startPrologue(); }, 500);
 }
 
@@ -231,6 +233,8 @@ function interact(o){
   if (o.type === 'ped') return talkPed(o);
   if (o.type === 'truck') return talkTruck();
   if (o.type === 'walker') return talkWalker(o);
+  if (o.type === 'gate') return zoneGateTalk(o);
+  if (o.type === 'portal') return zonePortal(o);
   if (WORLD.kind === 'custom') return interactCustom(o);
   if (o.type === 'npc') return talkNPC(o);
   if (o.type === 'sign') return showDialog('표지판', [o.text]);
@@ -255,6 +259,7 @@ function talkNPC(o){
   SAVE.met[o.id] = true; persist();
   if (o.id === 'mayor') return evMayorTalk();
   if (o.id === 'evdriver') return evDriverTalk();
+  if (o.id === 'volt' && WORLD.kind === 'story') return zoneVoltTalk(o);   /* 광장의 볼트 박사는 차시 구역을 안내한다 */
   const a = actCur();
   if (a && !a.ev && a.giver === o.id) return actTalk(a, o);
   const lines = npcLines(o.id).slice(), hint = actHintLine(o); if (hint) lines.push(hint);
@@ -360,6 +365,8 @@ function openMenu(){
   const p = openPanel(`<h2>메뉴</h2><div class="menu" style="max-width:420px">
     <button class="btn primary" data-m="resume">계속하기</button>
     <button class="btn" data-m="quest">📘 활동 보기</button>
+    <button class="btn" data-m="zones">🗺️ 차시 구역 지도</button>
+    ${WORLD && WORLD.kind === 'room' ? '<button class="btn" data-m="exit">🚪 구역에서 나가기 (마을 광장으로)</button>' : ''}
     <button class="btn" data-m="unstick">🆘 끼었을 때 빠져나오기</button>
     <button class="btn" data-m="cert">마스터 인증서</button>
     <button class="btn" data-m="guide">교사용 안내</button>
@@ -371,6 +378,8 @@ function openMenu(){
     const m = b.dataset.m;
     if (m === 'resume') closePanel();
     else if (m === 'quest') openActs();
+    else if (m === 'zones') openZoneMap();
+    else if (m === 'exit'){ closePanel(); zoneExit(); }
     else if (m === 'unstick'){ closePanel(); if (!unstickPlayer(true)) toast('주변에 빈자리가 없어요. 처음 화면으로 갔다가 다시 들어와요.', 'bad'); }
     else if (m === 'logout') logout();
     else if (m === 'cert') openCert();
@@ -384,8 +393,13 @@ function openGuide(){
     <p class="sub">전기 마스터 타운은 초6 과학 '전기의 이용'([6과15-03], [6과15-04])과 실과 '인공지능이 만들어지는 과정 체험'([6실05-05])을 잇는 AI 프로그램 개발 수업용 게임이에요. 학생은 코드를 쓰지 않고 AI의 판단 방법을 설계·학습·시험·개선해요.</p>
     <h3>👤 학생 로그인과 기록</h3>
     <p class="sub">처음 화면 전에 학생이 <b>이름(또는 별명) · 비밀번호(숫자 4~8자리)</b>만으로 들어와요. 같은 이름은 한 사람만 쓸 수 있어서, 전국에서 겹치지 않는 별명을 정하게 해 주세요(예: 옥련초6반민준). 처음 들어오면 자동으로 만들어져요. 서버 주소로 열면 기록이 서버에 저장되어 어느 기기에서든 이어 해요. 파일로 열면 기록이 그 기기 안에 학생별로 따로 저장돼요. 비밀번호는 되찾을 수 없으니 수첩에 적어 두게 하고, 잊었다면 새 별명으로 다시 시작해요.</p>
+    <h3>🗺️ 1·2·3차시 구역 — 차시마다 문 하나</h3>
+    <p class="sub">마을 광장에 <b>큰 문 세 개(1·2·3차시 구역)</b>가 있어요. 볼트 박사가 오늘 차시의 구역을 안내하고, 학생이 문 앞에서 E를 누르면 카메라가 문을 가까이 비추며 구역 안으로 들어가요. 구역 안에는 <b>방이 옆으로 이어져</b> 있고, 방의 활동을 끝내야 오른쪽 포털이 열려 다음 방으로 가요. 앞 구역을 모두 끝내야 다음 구역 문이 열려요. 구역을 마치면 축하 창이 뜨고, 구역 안에 있다가 나가도 다음 시간에 그 방에서 이어 해요.</p>
+    <div class="tblwrap"><table class="tbl"><thead><tr><th>차시</th><th>구역</th><th>방 → 활동</th><th>마치는 조건</th></tr></thead><tbody>
+      ${COURSE.zones.map(z => `<tr><td><b>${z.no}차시</b></td><td>${z.icon} ${esc(z.name)}</td><td>${z.rooms.map((r, i) => `${'①②③④⑤'[i]} ${esc(r.name)} → ${ACTS.indexOf(actById(r.act)) + 1}. ${esc(actById(r.act).title)}`).join('<br>')}${(z.town || []).map(id => `<br>마을 → ${ACTS.indexOf(actById(id)) + 1}. ${esc(actById(id).title)}`).join('')}</td><td>${(z.need || []).map(k => ZONE_NEEDS[k].label).join('<br>') || '방 활동 모두'}${z.ride ? '<br>(처음엔 🚲 타고 입장)' : ''}${z.gift ? '<br>🎁 시장님의 번개 트럭 → 에필로그' : ''}</td></tr>`).join('')}
+    </tbody></table></div>
     <h3>📘 활동 순서 — 교과서 활동 순서 그대로</h3>
-    <p class="sub">활동은 한 줄로 이어져요. <b>맡은 사람에게 말을 걸면 활동할 장소를 알려 주고, 학생이 그 장소(바닥에 빛나는 동그라미)까지 직접 걸어가 E를 누르면 활동이 시작</b>되고, 끝나면 그 사람이 정리해 주고 확인 질문을 한 뒤 <b>다음에 만날 사람</b>을 알려 줘요. 다음 사람은 머리 위에 ! 가 뜨고 폴짝폴짝 뛰며, 노란 화살표가 길을 안내해요. 앞 활동을 끝내야 다음 활동이 열려요. 학생은 [📘 활동](Q 키)에서 순서와 진행을 봐요.</p>
+    <p class="sub">방마다 <b>맡은 사람에게 말을 걸면 활동할 곳을 알려 주고, 학생이 그곳(바닥에 빛나는 동그라미)까지 걸어가 E를 누르면 활동이 시작</b>돼요. 끝나면 그 사람이 정리해 주고 확인 질문을 한 뒤 다음에 갈 방을 알려 줘요. 노란 화살표가 사람·장소·포털·구역 문을 차례로 안내해요. 학생은 [📘 활동](Q 키)에서 구역별 진행을 봐요.</p>
     <div class="tblwrap"><table class="tbl"><thead><tr><th>#</th><th>활동</th><th>교과서 활동</th><th>맡은 사람</th><th>게임</th></tr></thead><tbody>
       ${ACTS.map((a, k) => `<tr><td>${k + 1}</td><td>${a.icon} <b>${esc(a.title)}</b>${a.ai ? '<br><small>AI 개발</small>' : ''}</td><td>${esc(a.book)}</td><td>${a.ev ? '전기차 운전자 → 시장님' : ACT_WHO[a.giver]}</td><td>${a.ev ? '전기차 붙잡기 · 시장님 설득' : a.games.map(([g, s]) => { const d = mgDef(g); return d ? `${d.icon} ${esc(d.title)}${d.single ? '' : ` ${s + 1}단계`}` : g; }).join('<br>')}</td></tr>`).join('')}
     </tbody></table></div>
@@ -393,9 +407,9 @@ function openGuide(){
     <p class="note">미니 게임은 마을과 같은 블록 3D 화면에서 하고, 게임마다 ❤️ · 콤보 · 점수 · 마지막 10초 초읽기 · 효과음이 있어요. ⚡과 경험치는 동기 부여용이고, 평가는 [🗂️ 배움 기록](확인 질문 · 게임 결과)과 결과물(수칙 카드 · 3컷 만화 · 영수증 · 새롭게 알게 된 점)로 해요.</p>
     <h3>길 건너기 안전(❤️)과 전기차 충전소 퀘스트</h3>
     <p>마을 도로에는 차가 다녀요. 차는 <b>횡단보도 위의 사람에게만</b> 멈추고, 횡단보도 밖에서 부딪히면 ❤️(5개) 하나를 잃어요. ❤️가 0이 되면 병원 앞에서 깨어나고(진행은 그대로) 40초마다 하나씩 다시 차요. 눌러서 가기도 횡단보도로만 길을 건너요.</p>
-    <p><b>⚡ 전기차 충전소 프로젝트</b>(6번 활동): ① 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아 운전자 이야기를 듣고 ② 시청 옆 시장님께 <b>왜 필요한지</b>(전기차는 에너지를 아낀다 · 전동기 속 전자석의 실제 예)와 <b>어디에 세울지</b>(깃발 세 곳 중 안전하고 편리한 곳)를 설득해요. 틀린 근거를 고르면 시장님이 반박하고 다시 물어요. 설득하면 남쪽 주차장 입구에 충전소가 생겨요. [6과15-03]의 전자석 이용 예와 [6과15-04]의 효율·안전을 근거로 말하는 활동이에요.</p>
+    <p><b>⚡ 전기차 충전소 프로젝트</b>(6번 활동 · 2차시 구역을 나와 마을에서): ① 도로를 달리는 초록 전기차를 옆이나 뒤에서 붙잡아 운전자 이야기를 듣고 ② 시청 옆 시장님께 <b>왜 필요한지</b>(전기차는 에너지를 아낀다 · 전동기 속 전자석의 실제 예)와 <b>어디에 세울지</b>(깃발 세 곳 중 안전하고 편리한 곳)를 설득해요. 틀린 근거를 고르면 시장님이 반박하고 다시 물어요. 설득하면 남쪽 주차장 입구에 충전소가 생겨요. [6과15-03]의 전자석 이용 예와 [6과15-04]의 효율·안전을 근거로 말하는 활동이에요.</p>
     <h3>🚲 전기 자전거와 거리의 행인</h3>
-    <p>충전소가 세워지면 시장님이 <b>전기 자전거</b>를 선물하고(바퀴 속 전동기의 전자석), 충전소 옆에 거치대가 생겨요. <b>길가 친구 8명(동물 3 · 로봇 삐삐 · 사람 4)을 모두 만나 대화해야</b> 탈 수 있고, 타면 빠르기가 2배예요(🚲 단추, <kbd>B</kbd>).</p>
+    <p>충전소가 세워지면 시장님이 <b>전기 자전거</b>를 선물하고(바퀴 속 전동기의 전자석), 충전소 옆에 거치대가 생겨요. <b>길가 친구 8명(동물 3 · 로봇 삐삐 · 사람 4)을 모두 만나 대화해야</b> 탈 수 있고, 타면 빠르기가 2배예요(🚲 단추, <kbd>B</kbd>). <b>이것이 2차시의 마지막 미션</b>이고, 노란 화살표가 아직 못 만난 친구를 가리켜요. 3차시 구역 문은 멀리 있어서 <b>처음 들어갈 때 자전거를 타고 와야</b> 열려요. 3차시 첫 방에는 시장님의 선물(번개 트럭)의 그림자가 걸려 있어요.</p>
     <p>할아버지·유모차 끄는 아주머니·뛰어다니는 아이·대학생 <b>행인 4명</b>과 길가 친구들이 <b>맵 곳곳을 돌아다녀요</b>. 사람마다 말투가 달라요. 부딪히면 서로 밀려나고, 동물은 펄쩍 뛰거나 날아오르거나 도망가요. <b>행인끼리도 부딪히고</b>, 세게 부딪히면 둘이 다투거나(💢) 어르신이 넘어져 다쳐요. 뛰어다니는 아이는 가끔 무단 횡단을 하다 차에 치여요.</p>
     <p><b>내가 부딪혀 다툼이 나면</b> 화면 위에 <b>⏰ 다툼 시간 알람</b>이 떠요. 사과하면 바로 끝나지만, 말대꾸할 때마다 15초씩 더 지체되고 세 번째에는 안전이가 말려요. <b>자전거로 사람을 치면</b> 그 사람이 다치고 경험치가 20 깎여요. ❤️는 차에 치일 때만 줄어요.</p>
     <p><b>🔎 숨은 퀘스트 · 병원의 전자석</b>: 다친 사람(🆘)이나 다투는 사람(💢)에게 가서 E를 누르면 도울 수 있어요. 바르게 도우면(움직이지 않게 하고 119 · 서로 사과하게 돕기) 그 사람이 MRI 검사를 걱정해요. MRI가 <b>센 전자석으로 몸속을 찍는 장치</b>이고 쇠붙이를 빼야 한다고 설명해 주면, 병원 옆 MRI에서 의사 선생님의 질문(MRI 전자석이 이용하는 성질)에 답해 퀘스트를 마쳐요. 교과서 '전자석을 사용하는 예'(자기 공명 영상 장치)와 이어져요.</p>

@@ -735,6 +735,7 @@ function openNBLab(){
 }
 function startPatrol(kind, pred){
   const m = trainedModel(); if (!m) return toast('먼저 로봇을 가르쳐요.', 'bad');
+  if (kind === 'story' && inRoom()) return toast('시험 마을 순찰은 마을에서 볼 수 있어요. 구역 출구로 나가서 다시 눌러요.', 'bad');
   closePanel();
   if (kind === 'story' && (!WORLD || WORLD.kind !== 'story' || MODE !== 'play')) enterStory();
   let list, sx, sy;

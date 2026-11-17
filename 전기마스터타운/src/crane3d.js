@@ -13,7 +13,8 @@ const IT3 = {can:[.34, .46, .34], pipe:[1.04, .26, .26], bottle:[.26, .54, .26],
 const itH = it => (IT3[it.shape] || [.5, .4, .5])[1];
 const CR3 = {mode:null, from:null, items:[], trolley:38.6, magY:CR_REST, on:false, batt:1, carry:null, busy:false, energy:0, speed:1,
   anims:[], hold:0, binCount:0, stats:{nostick:0, drop:0, waste:0}, finished:false, bubble:null, tree:null, pred:0, rows:0, gen:0, idleKey:'', ui:{}};
-const crane3Ready = () => G3.ok && WORLD && WORLD.kind === 'story';
+/* 방 안(2차시 고철장 조종실)에서도 연다: 시작할 때 마을 고철장을 잠깐 빌려 쓴다 */
+const crane3Ready = () => G3.ok && WORLD && (WORLD.kind === 'story' || WORLD.kind === 'room');
 
 /* ----- 고철 모형 ----- */
 function mkItem3(it){
@@ -205,6 +206,7 @@ function cr3Finish(){
 /* ----- 들어가기 · 나오기 ----- */
 function startCrane3D(mode, opt = {}){
   closePanelSilently(); $('#dialog').hidden = true; UI.dialog = null;
+  if (MODE !== 'crane') zoneBorrowTown();
   CR3.from = MODE === 'crane' ? CR3.from : MODE; CR3.mode = mode; CR3.gen++; CR3.anims = [];
   CR3.items = cr3Place(mode === 'auto' ? TEST_ITEMS : TRAIN_ITEMS);
   Object.assign(CR3, {trolley:33.4, magY:CR_REST, on:false, batt:1, carry:null, busy:false, energy:0, speed:1, hold:0, binCount:0,
@@ -228,7 +230,7 @@ function exitCrane3D(then){
   cr3Idle();
   const from = CR3.from;
   if (from === 'title') showTitle();
-  else { MODE = 'play'; showHUD(true); updateHUD(); }
+  else { MODE = 'play'; showHUD(true); updateHUD(); zoneReturn(); }
   if (then) then();
 }
 async function cr3RunAuto(){

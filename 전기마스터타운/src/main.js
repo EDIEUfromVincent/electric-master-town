@@ -15,7 +15,7 @@ function frame(now){
         updateWalkers(dt); updatePet(dt);
         updateCars(dt); carHitCheck(dt); evUpdate();
         updateStoryFx(dt);
-        storyPoll();
+        storyPoll(); zoneUpdate(dt);
         render3D(dt);
         if (MODE !== 'title') drawMinimap();
       }
@@ -27,7 +27,7 @@ function frame(now){
       updateWalkers(dt);
       updateCars(dt); carHitCheck(dt); evUpdate();
       updateStoryFx(dt);
-      storyPoll();
+      storyPoll(); zoneUpdate(dt);
       if (MODE === 'title'){ cam.x = WORLD.w / 2 + Math.sin(TIME * .06) * 16; cam.y = WORLD.h / 2 + Math.cos(TIME * .045) * 9; clampCam(); }
       else updateCamera(dt, STORYFX.cam || (MODE === 'patrol' ? ROBOT : player));
       renderWorld(TIME);
@@ -42,7 +42,7 @@ window.addEventListener('keydown', e => {
   const typing = e.target && e.target.closest && e.target.closest('input,textarea,select');
   if (UI.mg && !UI.modal && !UI.cutscene){ if (typing && e.code !== 'Escape') return; mgKey(e, true); return; }
   if (e.code === 'Escape'){
-    if (UI.cutscene) csSkip(); else if (UI.dialog) closeDialogAll(); else if (UI.modal) closePanel(); else if (MODE === 'epi') epiSkip(); else if (MODE === 'crane') exitCrane3D(); else if (MODE === 'play') openMenu();
+    if (UI.cutscene) csSkip(); else if (UI.dialog) closeDialogAll(); else if (UI.modal) closePanel(); else if (MODE === 'epi') epiSkip(); else if (MODE === 'gate') zoneSkip(); else if (MODE === 'crane') exitCrane3D(); else if (MODE === 'play') openMenu();
     return;
   }
   if (typing) return;
@@ -58,7 +58,7 @@ window.addEventListener('keydown', e => {
   if (MODE === 'play'){
     if (e.code === 'Space'){ e.preventDefault(); if (!e.repeat) playerJump(); return; }
     if (act){ if (!e.repeat) onAction(); return; }
-    if (e.code === 'KeyQ' && !e.repeat){ if (WORLD.kind === 'story') openActs(); return; }
+    if (e.code === 'KeyQ' && !e.repeat){ if (WORLD.kind === 'story' || WORLD.kind === 'room') openActs(); return; }
     if (e.code === 'KeyM' && !e.repeat){ MINI.big = !MINI.big; MINI.base = null; return; }
     if (e.code === 'KeyI' && !e.repeat){ openBag(); return; }
     if (e.code === 'KeyB' && !e.repeat){ toggleBike(); return; }
@@ -116,7 +116,7 @@ $('#csSkip').addEventListener('click', e => { e.stopPropagation(); csSkip(); });
 $('#panel').addEventListener('click', e => { if (e.target.closest('[data-close]')) closePanel(); });
 
 /* HUD */
-$('#bQuest').onclick = () => { if (WORLD.kind === 'story') openQuests(); else toast('친구 맵에서는 화면 위의 진행 상황을 봐요.'); };
+$('#bQuest').onclick = () => { if (WORLD.kind === 'story' || WORLD.kind === 'room') openQuests(); else toast('친구 맵에서는 화면 위의 진행 상황을 봐요.'); };
 $('#bMenu').onclick = openMenu;
 $('#bBag').onclick = openBag;
 $('#bBike').onclick = toggleBike;

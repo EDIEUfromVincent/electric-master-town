@@ -4,7 +4,7 @@
 const cv = document.getElementById('world');
 const ctx = cv.getContext('2d');
 let DPR = 1, CW = 0, CH = 0, TS = 40;
-let MODE = 'title';           // title | play | patrol | editor
+let MODE = 'title';           // title | play | patrol | editor | crane | mg3 | epi | gate(구역 문·포털을 지나는 중)
 let WORLD = null;
 let TIME = 0;
 const SPR = new Map();
@@ -287,13 +287,14 @@ function objDone(o){
   }
   if (o.type === 'device') return !!(SAVE.dex[o.dev] && SAVE.dex[o.dev].done);
   if (o.type === 'scene') return !!SAVE.judged[o.id];
-  if (o.type === 'npc') return o.id !== actGiverNow();
-  if (o.type === 'mission') return WORLD.kind === 'story' ? o.id !== actPlaceNow() : true;   /* 지금 가야 할 장소만 빛난다 */
+  if (o.type === 'npc') return !actGiverHere(o);
+  if (o.type === 'mission') return WORLD.kind === 'story' || WORLD.kind === 'room' ? o.id !== actPlaceNow() : true;   /* 지금 가야 할 장소만 빛난다 */
   return true;
 }
 function testRevealed(){ return SAVE.robotRuns.some(r => r.kind === 'story'); }
 function drawShadow(cx, cy, S, w = .34){ ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(cx, cy, S * w, S * .12, 0, 0, 7); ctx.fill(); }
 function drawObject(o, S, t){
+  if (zoneDraw2D(o, S)) return;
   const cx = (o.x + .5) * S, cy = (o.y + .5) * S;
   if (o.type === 'npc'){
     if (o.look === 'robot') drawRobot(cx, (o.y + .82) * S, S, t); else drawPerson(cx, (o.y + .82) * S, S, o.look, 'down', 0);
@@ -388,12 +389,17 @@ function loadWorld(def){
   WORLD.objects = def.objects;
   rebuildSolidMap();
   initWalkers(WORLD); initPeds(WORLD);
-  if (WORLD.kind === 'story'){ evSyncWorld(); epiTownSync(); }
+  if (WORLD.kind === 'story'){ zoneTownSync(); evSyncWorld(); epiTownSync(); }
   MINI.base = null;
 }
 function rebuildSolidMap(){
   const W = WORLD; W.solid = new Uint8Array(W.w * W.h);
-  for (const o of W.objects) if (o.x >= 0 && o.y >= 0 && o.x < W.w && o.y < W.h) W.solid[o.y * W.w + o.x] = 1;
+  /* 물체가 선 칸은 막힌다. span(좌우로 더 막을 칸 수)이 있으면 넓게, walk(깔개 등)는 막지 않는다 */
+  for (const o of W.objects){
+    if (o.walk) continue;
+    const s = o.span || 0;
+    for (let x = o.x - s; x <= o.x + s; x++) if (x >= 0 && o.y >= 0 && x < W.w && o.y < W.h) W.solid[o.y * W.w + x] = 1;
+  }
 }
 function solidAt(tx, ty){
   const W = WORLD; if (tx < 0 || ty < 0 || tx >= W.w || ty >= W.h) return true;
@@ -646,7 +652,7 @@ function renderWorld(t){
   if (MODE === 'play') drawWaypoint(camPX, camPY, S, t);
 }
 function drawWaypoint(camPX, camPY, S, t){
-  const wp = UI.waypoint; if (!wp || WORLD.kind !== 'story') return;
+  const wp = UI.waypoint; if (!wp || (WORLD.kind !== 'story' && WORLD.kind !== 'room')) return;
   if (Math.hypot(player.x - (wp.x + .5), player.y - (wp.y + .5)) < 1.8){ UI.waypoint = null; return; }
   const tx = (wp.x + .5) * S - camPX, ty = (wp.y + .1) * S - camPY;
   const top = 70, m = 40;
