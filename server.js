@@ -118,7 +118,7 @@ async function handleApi(req, res, p){
 }
 
 /* ----- 서버 ----- */
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   let p; try { p = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); return res.end('bad request'); }
   if (p.startsWith('/api/')) return handleApi(req, res, p).catch(e => { console.error(e); send(res, 500, {error:'서버 오류'}); });
   if (p === '/' || p === '') p = '/index.html';
@@ -129,3 +129,9 @@ http.createServer((req, res) => {
     res.end(buf);
   });
 }).listen(PORT, () => console.log('전기 마스터 타운: http://localhost:' + PORT + ' · 기록 폴더 ' + DATA_DIR));
+/* 새 배포로 바뀔 때 Railway가 보내는 종료 신호: 받던 요청을 마치고 조용히 끝낸다 (오류 종료로 보이지 않게) */
+for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => {
+  console.log('종료 신호 ' + sig + ' — 정상 종료합니다');
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 3000).unref();
+});
