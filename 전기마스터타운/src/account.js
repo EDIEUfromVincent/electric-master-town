@@ -84,9 +84,9 @@ function showLogin(msg){
   setTimeout(() => { const i = last.no ? $('#lgPin') : $('#lgNo'); if (i) i.focus(); }, 50);
 }
 async function doLogin(){
-  const cls = $('#lgCls').value.trim().slice(0, 10), no = parseInt($('#lgNo').value, 10), name = $('#lgName').value.trim().slice(0, 12), pin = $('#lgPin').value.trim();
+  const cls = $('#lgCls').value.trim().slice(0, 20), no = parseInt($('#lgNo').value, 10), name = $('#lgName').value.trim().slice(0, 12), pin = $('#lgPin').value.trim();
   const say = (m, ok) => { $('#lgMsg').textContent = m; $('#lgMsg').className = ok ? 'ok' : 'bad'; };
-  if (!(no >= 1 && no <= 99)) return say('번호를 1~99 사이 숫자로 써요.');
+  if (!(no >= 1 && no <= 99999)) return say('번호를 1~99999 사이 숫자로 써요.');
   if (!name) return say('이름(또는 별명)을 써요.');
   if (!/^\d{4}$/.test(pin)) return say('비밀번호는 숫자 4자리예요.');
   const id = accId(cls, no), btn = $('#lgGo'); btn.disabled = true; say('들어가는 중…', true);

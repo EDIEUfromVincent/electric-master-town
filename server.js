@@ -51,7 +51,7 @@ function limited(req, key, max){
   if (HITS.size > 5000) HITS.clear();
   return arr.length > max;
 }
-const cleanCls = s => String(s || '').trim().slice(0, 10) || '우리반';
+const cleanCls = s => String(s || '').trim().slice(0, 20) || '우리반';
 
 /* ----- API ----- */
 async function handleApi(req, res, p){
@@ -64,7 +64,7 @@ async function handleApi(req, res, p){
   if (p === '/api/login'){
     if (limited(req, 'login', 30)) return send(res, 429, {error:'잠시 뒤에 다시 해요'});
     const cls = cleanCls(body.cls), no = parseInt(body.no, 10), name = String(body.name || '').trim().slice(0, 12), pin = String(body.pin || '');
-    if (!(no >= 1 && no <= 99) || !name || !/^\d{4}$/.test(pin)) return send(res, 400, {error:'번호 · 이름 · 비밀번호(숫자 4자리)를 확인해요'});
+    if (!(no >= 1 && no <= 99999) || !name || !/^\d{4}$/.test(pin)) return send(res, 400, {error:'번호 · 이름 · 비밀번호(숫자 4자리)를 확인해요'});
     const id = `${cls}-${no}`;
     let s = readStu(id), created = false;
     if (!s){ const salt = crypto.randomBytes(12).toString('hex'); s = {id, cls, no, name, salt, hash:pinHash(salt, pin), created:Date.now(), save:null, sum:null, updated:0}; created = true; }
