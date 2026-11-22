@@ -380,7 +380,7 @@ function recommendMRI(p){
       {label:'아무것도 안 빼도 돼요.', next:[L('정말? 전자석은 철을 끌어당긴다던데… 다시 말해 줄래?')]},
     ]}]},
     {label:'방사선을 엄청 쏘는 무서운 기계예요.', next:[L('어머, 그래? 그런데 MRI는 이름에 \'자기\'가 들어가던데… 다시 말해 줄래?')]},
-    {label:'그냥 커다란 영구 자석이에요.', next:[L('영구 자석이면 끄지도 못하겠네? 의사 선생님이 켜고 끈다던데… 다시 말해 줄래?')]},
+    {label:'아무 물체나 다 끌어당기는 기계예요.', next:[L('전자석은 철 같은 물체만 끌어당긴단다. 그래서 시계·열쇠를 빼라는 거야. 다시 말해 줄래?')]},
   ]};
   q.choices[1].next.push(q); q.choices[2].next.push(q);
   q.choices[0].next[1].choices[1].next.push(q.choices[0].next[1]);
@@ -399,8 +399,8 @@ function mriFinale(dev, onSolved){
   const st = streetState(), first = !st.hqDone;
   const D = t => ({who:'병원 의사 선생님', text:t});
   const q = {who:'병원 의사 선생님', text:'MRI의 커다란 전자석은 전자석의 어떤 성질을 이용할까요?', choices:[
-    {label:'전기가 흐를 때만 자석이 되고, 전류로 세기를 아주 세게 조절할 수 있어요.', next:[D('정답! 검사할 때만 켜고, 전기를 많이 흘려 아주 센 자석을 만들지. 영구 자석으로는 이렇게 못 한단다.')], fn:() => { st.ok = true; }},
-    {label:'항상 자석이라서 끌 수 없어요.', next:[D('그건 영구 자석이란다. 전자석은 켜고 끌 수 있지. 다시 생각해 볼래?')]},
+    {label:'전기를 많이 흘려 아주 센 자석을 만들 수 있어요.', next:[D('정답! 전기를 아주 많이 흘려서 엄청나게 센 자석을 만들지. 그래서 이 방에 들어올 때는 쇠붙이를 꼭 빼야 해.')], fn:() => { st.ok = true; }},
+    {label:'철이 아닌 물체만 끌어당겨요.', next:[D('전자석도 철 같은 물체를 끌어당긴단다. 그래서 쇠붙이를 빼는 거야. 다시 생각해 볼래?')]},
     {label:'자석과는 관계없어요.', next:[D('이름에 \'자기\'가 들어 있잖니? 다시 생각해 볼래?')]},
   ]};
   q.choices[1].next.push(q); q.choices[2].next.push(q);

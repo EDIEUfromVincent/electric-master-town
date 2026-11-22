@@ -14,7 +14,7 @@ function placeState(){
 const MUSEUM = {
   e1:{icon:'💡', year:'1879', title:'오래 켜지는 백열전구', text:'에디슨은 수많은 재료로 필라멘트를 시험한 끝에, 집에서 오래 쓸 수 있는 백열전구를 만들었어요.', link:'전구는 전기 에너지를 빛으로 바꿔요. 오늘날에는 같은 밝기에 전기를 훨씬 덜 쓰는 LED 전구를 써요. (3차시 효율 등급과 이어져요)'},
   e2:{icon:'🏭', year:'1882', title:'펄 스트리트 발전소', text:'뉴욕에 전기를 만들어 여러 건물에 전선으로 보내는 발전소를 열었어요. 발전기 안에서는 전자석과 코일이 돌며 전기를 만들었어요.', link:'전자석은 전기를 쓰는 곳뿐 아니라 전기를 만드는 발전기 안에도 들어 있어요.'},
-  e3:{icon:'🎵', year:'1877', title:'축음기', text:'소리를 녹음했다가 다시 들려주는 기계를 발명했어요. 사람들은 처음으로 녹음된 목소리를 들었어요.', link:'오늘날 스피커는 전자석의 세기를 빠르게 바꿔 진동판을 떨게 해서 소리를 내요. (1차시 교실 속 전자석)'},
+  e3:{icon:'🎵', year:'1877', title:'축음기', text:'소리를 녹음했다가 다시 들려주는 기계를 발명했어요. 사람들은 처음으로 녹음된 목소리를 들었어요.', link:'오늘날 스피커는 코일(전자석)에 흐르는 전기의 세기와 방향을 빠르게 바꿔 진동판을 떨게 해서 소리를 내요. (1차시 교실 속 전자석)'},
   e4:{icon:'🧪', year:'1876~', title:'발명 연구소와 1,093개의 특허', text:'멘로파크에 여러 사람이 함께 실험하는 연구소를 세우고, 미국에서만 특허를 1,093개 받았어요.', link:'예상하고, 실험하고, 틀리면 고쳐서 다시 해 보는 방법은 우리가 AI를 가르칠 때와 같아요.'},
   e5:{icon:'💬', year:'에디슨의 말', title:'“천재는 1%의 영감과 99%의 노력으로 이루어진다.”', text:'전구를 완성하기까지 셀 수 없이 실패했지만, 그때마다 “안 되는 방법 하나를 찾았다”고 생각했대요.', link:'AI 크레인 두뇌가 틀렸을 때 질문을 고쳐 다시 굴려 본 것처럼, 실패도 배움이에요.'},
   t1:{icon:'🌀', year:'1888', title:'교류 유도 전동기', text:'테슬라는 전자석 여러 개에 차례로 전류를 흘려 빙글빙글 도는 자기장을 만들고, 그 힘으로 전동기를 돌렸어요.', link:'선풍기·세탁기·전기 자동차의 전동기 속 전자석이 바로 이렇게 극을 바꿔 가며 돌아가요.'},
@@ -79,7 +79,7 @@ function mriThing(){
   const dev = DEVICES.find(d => d.id === 'mri');
   if (typeof streetMRIReady === 'function' && streetMRIReady()) return mriFinale(dev, () => { SAVE.dex.mri = {done:true}; persist(); updateHUD(); checkMasters(); });
   showDialog('MRI (자기 공명 영상 장치)', ['커다란 둥근 통 안에 아주 센 전자석이 들어 있어요. 전류를 크게 흘려 냉장고 자석보다 수백 배 센 자석을 만들어요.',
-    '검사할 때만 켜고, 전류의 세기로 자석의 세기를 조절해요. 그래서 시계·열쇠 같은 쇠붙이는 꼭 빼고 들어가야 해요.', '의자에 앉아 영상을 보면 더 자세히 알 수 있어요!']);
+    '센 전자석은 철을 아주 세게 끌어당겨요. 그래서 시계·열쇠 같은 쇠붙이는 꼭 빼고 들어가야 해요.', '의자에 앉아 영상을 보면 더 자세히 알 수 있어요!']);
 }
 /* 영상관: 의자에 앉으면 카메라가 화면을 비추고, 영상 창이 열린다 */
 function watchVideo(o){
@@ -95,12 +95,12 @@ function watchVideo(o){
       <div class="cine-frame"><iframe src="${MRI_VIDEO.embed}" title="MRI 영상" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
       <p class="sub">영상이 안 보이면 <a href="${MRI_VIDEO.url}" target="_blank" rel="noopener">유튜브에서 열기</a></p>
       <div class="cine-q"><b>보고 나서 답해 봐요 · MRI는 전자석의 어떤 성질을 이용할까요?</b>
-        <div class="choice-grid">${mgShuffle([['ok', '전류를 크게 흘려 아주 센 자석을 만든다 (세기)'], ['x1', '전기가 없어도 늘 자석이라 끌 수 없다'], ['x2', '전자석과는 상관없고 빛으로만 찍는다']]).map(([k, t]) => `<button class="btn choice" data-a="${k}">${t}</button>`).join('')}</div><div id="cineRes"></div></div>
+        <div class="choice-grid">${mgShuffle([['ok', '전류를 크게 흘려 아주 센 자석을 만든다 (세기)'], ['x1', '철이 아닌 물체만 끌어당긴다'], ['x2', '전자석과는 상관없고 빛으로만 찍는다']]).map(([k, t]) => `<button class="btn choice" data-a="${k}">${t}</button>`).join('')}</div><div id="cineRes"></div></div>
       <div class="row" style="margin-top:10px"><button class="btn" data-close>일어나기</button></div></div>`, {wide:true, onClose:standUp});
     p.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
       const ok = b.dataset.a === 'ok';
-      if (ok){ SND.ok(); p.querySelector('#cineRes').innerHTML = '<div class="okbox"><b>맞아요!</b> MRI는 전자석에 큰 전류를 흘려 아주 센 자석을 만들고, 검사할 때만 켜요. 전자석의 세기를 바꿀 수 있는 성질을 이용해요.</div>'; if (!P.video){ P.video = 1; persist(); award('em', 8); } }
-      else { SND.bad(); b.disabled = true; p.querySelector('#cineRes').innerHTML = '<div class="warnbox">다시 생각해 봐요. 이름에 ‘자기’가 들어 있고, 의사 선생님이 켜고 끈대요.</div>'; }
+      if (ok){ SND.ok(); p.querySelector('#cineRes').innerHTML = '<div class="okbox"><b>맞아요!</b> MRI는 전자석에 전기를 아주 많이 흘려 엄청나게 센 자석을 만들어요. 전자석의 세기를 크게 만들 수 있는 성질을 이용해요. 그래서 쇠붙이는 꼭 빼고 들어가요.</div>'; if (!P.video){ P.video = 1; persist(); award('em', 8); } }
+      else { SND.bad(); b.disabled = true; p.querySelector('#cineRes').innerHTML = '<div class="warnbox">다시 생각해 봐요. 이름에 ‘자기’가 들어 있어요. 아주 센 자석을 만들려면 전자석에 전기를 어떻게 흘려야 할까요?</div>'; }
     });
   }, 1300);
 }
@@ -155,7 +155,7 @@ function placeLights(){
 /* ===== 🧲 전자석 제품 상점 게임 ===== */
 const SHOP_ITEMS = [
   {id:'fan', name:'선풍기', icon:'🌀', price:31800, em:true, clues:['안에 든 전동기가 전자석의 힘으로 돌아가요.', '전자석의 세기를 바꿔 바람 세기를 조절해요.', '여름에 날개를 돌려 바람을 만들어요.']},
-  {id:'speaker', name:'스피커', icon:'🔊', price:17600, em:true, clues:['전자석의 세기를 아주 빠르게 바꿔 얇은 판을 떨게 해요.', '판이 크게 떨리면 큰 소리가 나요.', '음악을 들을 때 써요.']},
+  {id:'speaker', name:'스피커', icon:'🔊', price:17600, em:true, clues:['코일(전자석)에 흐르는 전기의 세기와 방향을 아주 빠르게 바꿔 얇은 판을 떨게 해요.', '판이 크게 떨리면 큰 소리가 나요.', '음악을 들을 때 써요.']},
   {id:'dryer', name:'헤어드라이어', icon:'💨', price:24900, em:true, clues:['전동기 속 전자석으로 작은 날개를 돌려요.', '약한 바람과 센 바람을 골라요.', '젖은 머리를 말릴 때 써요.']},
   {id:'bell', name:'전기 초인종', icon:'🔔', price:8900, em:true, clues:['버튼을 누를 때만 전자석이 쇠막대를 끌어당겨요.', '전기가 끊기면 쇠막대가 제자리로 돌아가요.', '딩동 소리로 손님이 온 것을 알려요.']},
   {id:'robovac', name:'로봇 청소기', icon:'🤖', price:58700, em:true, clues:['바퀴 전동기의 극의 방향을 바꿔 앞뒤로 움직여요.', '먼지를 빨아들이는 힘의 세기를 바꿔요.', '스스로 집 안을 돌아다니며 청소해요.']},

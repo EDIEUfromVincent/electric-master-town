@@ -10,7 +10,8 @@
     "lint:lessons": "node tools/lint-lessons.js lessons/L1.json lessons/L2.json lessons/L3.json",
     "gas:ping": "node scripts/gas-check.js ping",
     "gas:smoke": "node scripts/gas-check.js smoke",
-    "dev:mock": "node scripts/mock-gas.js"
+    "dev:mock": "node scripts/mock-gas.js",
+    "lint:content": "node tools/lint-content.js"
   },
   "engines": {
     "node": ">=18"
