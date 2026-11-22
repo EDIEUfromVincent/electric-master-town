@@ -126,13 +126,13 @@ function cr3Release(){
   it.x = CR3.trolley; it.z = CRZ; cr3Fall(it, 0); return 'ground';
 }
 function cr3SetBatt(n){
-  if (CR3.busy) return;
+  if (CR3.busy || CR3.frozen) return;
   CR3.batt = n;
   if (CR3.carry && CR3.carry.heavy && n < 2){ const it = CR3.carry; CR3.carry = null; it.held = false; cr3Fall(it, 0); cr3Event('weakdrop', {it}); }
   cr3UI(true);
 }
 async function cr3Toggle(){
-  if (CR3.busy || CR3.finished) return;
+  if (CR3.busy || CR3.finished || CR3.frozen) return;
   if (!CR3.on){ CR3.on = true; cr3UI(true); const r = await cr3Grab(); cr3Event('grab', r); }
   else { const r = cr3Release(); cr3Event('release', {where:r}); }
   cr3UI(true);
@@ -144,8 +144,8 @@ function updateCrane3D(dt){
     a.set(a.from + (a.to - a.from) * e); if (k >= 1) done.push(a);
   }
   if (done.length){ CR3.anims = CR3.anims.filter(a => !done.includes(a)); done.forEach(a => a.res()); }
-  if (CR3.hold && !CR3.busy && CR3.mode === 'manual' && !CR3.finished) CR3.trolley = clamp(CR3.trolley + CR3.hold * 3.4 * dt, CR_X0, CR_X1);
-  if (CR3.on && CR3.mode) CR3.energy += CR3.batt * dt * 10;
+  if (CR3.hold && !CR3.busy && !CR3.frozen && CR3.mode === 'manual' && !CR3.finished) CR3.trolley = clamp(CR3.trolley + CR3.hold * 3.4 * dt, CR_X0, CR_X1);
+  if (CR3.on && CR3.mode && !CR3.frozen) CR3.energy += CR3.batt * dt * 10;   /* 정전 중(frozen)에는 전기가 쓰이지 않는다 */
   for (const it of CR3.items){
     if (it.held){ it.x = CR3.trolley; it.z = CRZ; it.y = CR3.magY - itH(it); }
     else if (it.falling){
@@ -178,6 +178,7 @@ function cr3Event(type, r){
     if (r.kind === 'drop'){ cr3Msg(`${nm(r.it, '이', '가')} 너무 무거워 떨어졌어요! 전자석을 더 세게 하려면 어떻게 할까요?`); SND.bad(); S.drop++; }
     if (r.kind === 'ok'){ cr3Msg(`${nm(r.it, '이', '가')} 붙었어요! 철 고철함 위로 옮겨 자석을 꺼요.`); SND.ok(); }
     if (r.kind === 'waste'){ cr3Msg(`${nm(r.it, '이', '가')} 붙었어요. 그런데 가벼운 고철에 전지 2개는 전기 낭비일지도 몰라요.`); SND.ok(); S.waste++; }
+    if (r.kind === 'ok' || r.kind === 'waste') craneBlackoutMaybe();   /* 정전 사건 X1→X2 (judge.js) */
   }
   if (type === 'weakdrop'){ cr3Msg('세기를 약하게 바꾸자 무거운 고철이 떨어졌어요!'); SND.bad(); }
   if (type === 'release' && r.where === 'ground') cr3Msg('고철함 밖에 떨어뜨렸어요. 다시 집어 고철함 위에서 꺼요.');
@@ -209,7 +210,7 @@ function startCrane3D(mode, opt = {}){
   CR3.from = MODE === 'crane' ? CR3.from : MODE; CR3.mode = mode; CR3.gen++; CR3.anims = [];
   CR3.items = cr3Place(mode === 'auto' ? TEST_ITEMS : TRAIN_ITEMS);
   Object.assign(CR3, {trolley:33.4, magY:CR_REST, on:false, batt:1, carry:null, busy:false, energy:0, speed:1, hold:0, binCount:0,
-    stats:{nostick:0, drop:0, waste:0}, finished:false, bubble:null, rows:0, ui:{}, tree:opt.tree || null, pred:opt.pred || 0});
+    stats:{nostick:0, drop:0, waste:0}, finished:false, frozen:false, blackDone:false, bubble:null, rows:0, ui:{}, tree:opt.tree || null, pred:opt.pred || 0});
   MODE = 'crane'; KEYS.clear(); JOY.x = JOY.y = 0; PATH3.nodes = null; NEAR = null;
   $('#title').hidden = true; showHUD(false); $('#craneBar').hidden = false;
   $('#cbTitle').textContent = mode === 'auto' ? 'AI 크레인 두뇌 시험 · 새 고철 트럭' : '고철장 크레인 조종';
@@ -224,7 +225,7 @@ function startCrane3D(mode, opt = {}){
 function exitCrane3D(then){
   if (MODE !== 'crane') return;
   CR3.gen++; const pend = CR3.anims; CR3.anims = []; pend.forEach(a => a.res());
-  CR3.mode = null; CR3.hold = 0;
+  CR3.mode = null; CR3.hold = 0; CR3.frozen = false;
   $('#craneBar').hidden = true;
   cr3Idle();
   const from = CR3.from;
@@ -263,7 +264,7 @@ function cr3AutoDone(){
 }
 function cr3Key(e, down){
   const c = e.code;
-  if (CR3.mode !== 'manual' || CR3.finished) return;
+  if (CR3.mode !== 'manual' || CR3.finished || CR3.frozen) return;
   if (c === 'ArrowLeft' || c === 'KeyA'){ e.preventDefault(); if (down) CR3.hold = -1; else if (CR3.hold === -1) CR3.hold = 0; }
   else if (c === 'ArrowRight' || c === 'KeyD'){ e.preventDefault(); if (down) CR3.hold = 1; else if (CR3.hold === 1) CR3.hold = 0; }
   else if (!down) return;
@@ -283,7 +284,7 @@ function drawCrane3D(t){
   drawM(model('trolley3', mkTrolley3), M4.trs(x, CR_BEAM - .24, CRZ));
   const top = CR_BEAM - .24, mt = CR3.magY + .36;
   drawM(model('cable', () => mkUnit('#2b323b', .025)), M4.trs(x, mt, CRZ, 0, 1, Math.max(.01, top - mt)));
-  drawM(CR3.on ? model('mag3on', () => mkMagnet3(true)) : model('mag3', () => mkMagnet3(false)), M4.trs(x, CR3.magY, CRZ));
+  drawM(CR3.on && !CR3.frozen ? model('mag3on', () => mkMagnet3(true)) : model('mag3', () => mkMagnet3(false)), M4.trs(x, CR3.magY, CRZ));
   for (const it of CR3.items){
     const m = model('it:' + it.id, () => mkItem3(it));
     if (it.inBin && !it.falling){ const s = cr3BinPos(it.slot); drawM(m, M4.trs(s.x, s.y, s.z, (it.slot % 2 ? .3 : -.3), .55)); continue; }
@@ -295,7 +296,7 @@ function drawCrane3D(t){
   SHADOWS.push([x, 0, CRZ, .55], [CR_BIN.cx, 0, CRZ, 1.1]);
 }
 function craneFlats(U){
-  if (!CR3.on) return;
+  if (!CR3.on || CR3.frozen) return;
   const ring = model('ringB', () => flatRing(.9, 1.0, [.25, .6, 1, 1])), a = CR3.batt === 1 ? .38 : .7;
   for (let k = 1; k <= 3; k++){
     const ph = (TIME * 1.6 + k / 3) % 1, r = .45 + ph * .55;

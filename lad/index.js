@@ -20,8 +20,9 @@ const { createAi } = require('./ai');
 const R = require('./rules');
 
 const flag = (v, def) => v == null || v === '' ? def : !/^(0|false|no|off)$/i.test(String(v).trim());
-const CLASS_RE = /^[A-Za-z0-9-]{1,20}$/, ID_RE = /^[A-Za-z0-9-]{8,64}$/, NODE_RE = /^[A-Za-z0-9_-]{1,60}$/;
-const CLIENT_TAGS = ['session-start', 'session-end', 'quest-complete'];
+const CLASS_RE = /^[A-Za-z0-9-]{1,20}$/, ID_RE = /^[A-Za-z0-9-]{8,64}$/, NODE_RE = /^[A-Za-z0-9_.-]{1,60}$/;
+const CLIENT_TAGS = ['session-start', 'session-end', 'quest-complete', 'judgment'];
+const JUDGE_RESULTS = ['correct', 'partial', 'miss'];   /* 판단 기록: 인정 · 되묻기 · 다시 생각 */
 
 function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeStu, idFromToken, send, logger = console }) {
   const cfg = {
@@ -126,10 +127,18 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
         if (tooMany('ev:' + id, 60)) break;
         const tag = CLIENT_TAGS.includes(e.tag) ? e.tag : null, lesson = String(e.lesson || '');
         if (!tag || !/^L\d{1,3}$/.test(lesson)) { accepted.push(e.eventId); continue; }   // 모르는 것은 받았다고만 하고 버린다
+        /* 판단 기록(judgment): 학생이 고른 문장이나 자유 응답 — 서버에서 다시 가리고 안전망을 거친다 */
+        let studentText = '', npcText = '', result = 'info', flags = [];
+        if (tag === 'judgment') {
+          const sc = R.screen(R.cleanText(e.studentText, 200), null);
+          studentText = sc.masked; npcText = R.cleanText(e.npcText, 300);
+          result = JUDGE_RESULTS.includes(e.result) ? e.result : 'info';
+          if (sc.kind === 'danger') flags.push('위험'); if (sc.kind === 'pii') flags.push('개인정보'); if (sc.kind === 'profanity') flags.push('욕설');
+        }
         relay.enqueue({
           eventId: e.eventId, clientTime: R.cleanText(e.clientTime, 40), lesson, classCode: player.classCode, studentNo: player.studentNo,
-          playerKey: player.playerKey, sessionId: player.sessionId, npc: '', nodeId: NODE_RE.test(String(e.nodeId || '')) ? e.nodeId : '',
-          stage: '', tag, npcText: '', studentText: '', result: 'info', hintLevel: 0, flags: [],
+          playerKey: player.playerKey, sessionId: player.sessionId, npc: tag === 'judgment' ? R.cleanText(e.npc, 20) : '', nodeId: NODE_RE.test(String(e.nodeId || '')) ? e.nodeId : '',
+          stage: '', tag, npcText, studentText, result, hintLevel: 0, flags,
         });
         remember(e.eventId); accepted.push(e.eventId);
       }

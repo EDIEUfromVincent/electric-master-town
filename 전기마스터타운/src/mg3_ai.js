@@ -94,12 +94,12 @@ function sl3Build(api, st){
     ctx.tries++; upd(); if (s1) SAVE.mgTree1 = slClone(ctx.T); else SAVE.mgTreeDraft = slClone(ctx.T); persist();
     slRoll(api, ctx, mgShuffle(items), res => {
       const ok = res.filter(r => r.out.ok).length, n = res.length, size = treeSize(ctx.T);
-      if (s1 && ok === n) return api.end(ctx.tries === 1 ? 3 : ctx.tries === 2 ? 2 : 1, `고철 ${n}개를 모두 알맞게 처리했어요! (굴린 횟수 ${ctx.tries}번)`, resultTable(res));
+      if (s1 && ok === n) return api.end(ctx.tries === 1 ? 3 : ctx.tries === 2 ? 2 : 1, `고철 ${n}개를 모두 알맞게 처리했어요! (굴린 횟수 ${ctx.tries}번)`, resultTable(res) + slPowerNote(res));
       if (!s1 && ok >= 7){
         SAVE.mgTree = slClone(ctx.T); if (!SAVE.tree || !treeComplete(SAVE.tree)) SAVE.tree = slClone(ctx.T);
         if (!SAVE.badges.em3){ SAVE.badges.em3 = true; toast('AI 크레인 두뇌 미션 성공!', 'ok'); }
         persist();
-        return api.end(ok === 8 && size <= 2 ? 3 : ok === 8 ? 2 : 1, `연습 고철 ${n}개 중 <b>${ok}개</b>를 알맞게 처리했어요. 질문 ${size}개.${ok === 8 && size > 2 ? ' 질문을 2개로 줄여도 모두 맞힐 수 있을까요?' : ok < 8 ? ' 틀린 고철까지 맞히면 번개가 늘어요.' : ''}`, resultTable(res));
+        return api.end(ok === 8 && size <= 2 ? 3 : ok === 8 ? 2 : 1, `연습 고철 ${n}개 중 <b>${ok}개</b>를 알맞게 처리했어요. 질문 ${size}개.${ok === 8 && size > 2 ? ' 질문을 2개로 줄여도 모두 맞힐 수 있을까요?' : ok < 8 ? ' 틀린 고철까지 맞히면 번개가 늘어요.' : ''}`, resultTable(res) + slPowerNote(res));
       }
       api.say(`${n}개 중 ${ok}개를 알맞게 처리했어요. <b>✗</b>가 붙은 고철을 보고 질문이나 결정을 고쳐 다시 굴려요.`, 'bad');
     });

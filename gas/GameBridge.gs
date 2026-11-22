@@ -52,7 +52,7 @@ const GB_ALLOWED = {
   STAGE: ['S', 'E', 'R', ''],
   RESULT: ['correct', 'partial', 'miss', 'misconception', 'avoid', 'offtopic', 'blocked', 'info', 'skip'],
   FLAG: ['이탈', '욕설', '욕설-3회', '개인정보', '위험', '지원필요', '중단'],
-  TAG: ['', 'reflection', 'blank', 'feedback-reply', 'session-start', 'session-end', 'quest-complete', 'lesson-complete']
+  TAG: ['', 'reflection', 'blank', 'feedback-reply', 'session-start', 'session-end', 'quest-complete', 'lesson-complete', 'judgment']
 };
 
 

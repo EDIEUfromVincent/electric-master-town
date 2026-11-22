@@ -24,7 +24,7 @@ try { for (const line of fs.readFileSync(LOG, 'utf8').split('\n').slice(1)) { co
 const readJ = (f, d) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return d; } };
 const writeJ = (f, o) => fs.writeFileSync(f, JSON.stringify(o, null, 2));
 const cell = v => { let s = String(v == null ? '' : v); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-const TAGS = ['', 'reflection', 'blank', 'feedback-reply', 'session-start', 'session-end', 'quest-complete', 'lesson-complete'];
+const TAGS = ['', 'reflection', 'blank', 'feedback-reply', 'session-start', 'session-end', 'quest-complete', 'lesson-complete', 'judgment'];
 const RESULTS = ['correct', 'partial', 'miss', 'misconception', 'avoid', 'offtopic', 'blocked', 'info', 'skip'];
 const FLAGS = ['이탈', '욕설', '욕설-3회', '개인정보', '위험', '지원필요', '중단'];
 let stats = { calls: 0, written: 0, dup: 0, skipped: 0 };

@@ -200,7 +200,7 @@ function actDoneBeat(id){
   const nx = actCur(), nid = actGiverNow(), L0 = zoneOfAct(id), wz = L0 && wrapReady(L0.z) && !wrapOk(L0.z) ? L0.z : null;
   if (wz) lines.push({who, text:wrapNextText(wz)});   /* 이 차시 퀘스트를 다 마쳤으면 정리 교실로 */
   else if (nx) lines.push({who, text:zoneNextText(nx, nid)});
-  showDialog(who, lines, () => { actWaypoint(); updateHUD(); });
+  showDialog(who, lines, () => { actWaypoint(); updateHUD(); if (id === 'a2') setTimeout(counterHuntOffer, 500); });   /* a2 뒤 볼트 박사의 반례 사냥 (judge.js) */
 }
 
 /* ----- 활동 목록 (Q) ----- */

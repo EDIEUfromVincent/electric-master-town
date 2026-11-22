@@ -68,6 +68,30 @@ else for (const b of BI.value){
 /* 5. 배기가스: 전기차는 '달릴 때' 배기가스가 없다 */
 for (const f of srcFiles) read(f).split('\n').forEach((line, n) => { if (/배기가스(도|가)? 나오지 않/.test(line) && !/달릴 때/.test(line)) errors.push(`${path.relative(ROOT, f)}:${n + 1} 배기가스 문장에 '달릴 때'가 빠졌어요`); });
 
+/* 6. 판단 기준 (P2): 전이 질문 X2는 근거가 있는 답을 2개 이상 인정하고, X1에는 정답이 하나 있어야 한다 */
+function objectConst(name){
+  for (const f of srcFiles){
+    const s = read(f), i = s.indexOf(`const ${name} = {`); if (i < 0) continue;
+    let d = 0, j = s.indexOf('{', i);
+    for (let k = j; k < s.length; k++){ const c = s[k]; if (c === '{') d++; else if (c === '}'){ d--; if (!d) return { file: path.basename(f), value: new Function('return ' + s.slice(j, k + 1))() }; } }
+  }
+  return null;
+}
+const X1 = objectConst('BLACKOUT_Q1'), X2 = objectConst('BLACKOUT_Q2');
+if (!X1 || !X2) warns.push('크레인 정전 질문(BLACKOUT_Q1·Q2)이 아직 없어요');
+else {
+  if (X1.value.opts.filter(o => o.ok === 'ok').length !== 1) errors.push('BLACKOUT_Q1: 정답(ok)은 하나여야 해요');
+  if (X2.value.opts.filter(o => o.ok === 'ok').length < 2) errors.push('BLACKOUT_Q2: 근거가 있는 답(ok)을 2개 이상 인정해야 해요 (지시서 5-3)');
+  for (const o of X1.value.opts.concat(X2.value.opts)){
+    if (!o.tag || !/^[a-z-]+$/.test(o.tag)) errors.push(`정전 질문 "${o.t}": 기록용 tag(영어 소문자)가 있어야 해요`);
+    if (o.ok === 'part' && !(o.follow && o.follow.opts && o.follow.opts.some(x => x.ok === 'ok'))) errors.push(`정전 질문 "${o.t}": 되묻기(part)에는 이어지는 질문과 정답이 있어야 해요`);
+  }
+}
+const GEN = srcFiles.map(read).join('\n').match(/const CONCEPT_GEN = '([^']+)'/);
+if (!GEN) warns.push('개념적 일반화(CONCEPT_GEN)가 아직 없어요');
+else if (!/조절/.test(GEN[1]) || !/전기/.test(GEN[1])) errors.push("CONCEPT_GEN: '조절'과 '전기'(대가)가 들어 있어야 해요");
+else if (!read(path.join(SRC, 'ui.js')).includes(GEN[1])) errors.push('CONCEPT_GEN: 교사용 안내(ui.js)의 일반화 문장과 같아야 해요');
+
 warns.forEach(w => console.log('△ ' + w));
 errors.forEach(e => console.log('✗ ' + e));
 console.log(errors.length ? `\n과학 내용 검사: 오류 ${errors.length}개` : `✓ 과학 내용 검사 통과 (주의 ${warns.length}개)`);

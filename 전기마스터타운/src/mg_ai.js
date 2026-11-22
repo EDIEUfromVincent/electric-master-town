@@ -9,6 +9,14 @@
 const SLIDE = {pred:0, tree:null};
 const SL_S1_ITEMS = ['i1', 'i2', 'i8', 'i4'];
 const SL_ACT = {skip:{t:'안 집기', c:'#5b6573'}, weak:{t:'약하게 (전지 1개)', c:'#1f8a4c'}, strong:{t:'세게 (전지 2개)', c:'#c4621f'}};
+/* 전기 사용량 (EM 재설계 P2 · a5): 점수는 그대로 두고, 끝 화면에 '정확도가 같다면 전기를 덜 쓰는 길' 생각을 덧붙인다
+   약하게 = 전지 1칸, 세게 = 전지 2칸, 안 집기 = 0칸. 꼭 필요한 만큼 = 무거운 철 2칸 · 가벼운 철 1칸 · 철이 아닌 물체 0칸 */
+const SL_USE = {skip:0, weak:1, strong:2};
+function slPowerNote(res){
+  const use = res.reduce((s, r) => s + (SL_USE[r.tr.action] || 0), 0), need = res.reduce((s, r) => s + (r.it.material === '철' ? (r.it.heavy ? 2 : 1) : 0), 0);
+  const w = res.filter(r => r.tr.action === 'weak').length, st = res.filter(r => r.tr.action === 'strong').length;
+  return `<div class="mg-power">⚡ <b>전기 사용량</b>: 약하게 ${w}번 + 세게 ${st}번 = 전지 <b>${use}칸</b> 분량 (꼭 필요한 만큼만 쓰면 ${need}칸)${use > need ? ' · 가벼운 고철을 세게 들거나 붙지 않는 물체에 자석을 켜면 전기가 더 들어요' : ''}.<br>정확도가 같다면, <b>전기를 덜 쓰는 질문 길</b>이 더 좋은 두뇌예요.</div>`;
+}
 const SL_KEYCOL = {재료:'#c4621f', 무게:'#2f74c0', 크기:'#1f8a4c', 색:'#8456c2'};
 const slBlank = () => ({t:'q', q:null, yes:{t:'a', a:null}, no:{t:'a', a:null}});
 const slClone = n => JSON.parse(JSON.stringify(n));
@@ -181,12 +189,12 @@ function slideBuild(api, st){
     ctx.tries++; upd(); if (s1) SAVE.mgTree1 = slClone(ctx.T); else SAVE.mgTreeDraft = slClone(ctx.T); persist();
     slRoll(api, ctx, mgShuffle(items), res => {
       const ok = res.filter(r => r.out.ok).length, n = res.length, size = treeSize(ctx.T);
-      if (s1 && ok === n) return api.end(ctx.tries === 1 ? 3 : ctx.tries === 2 ? 2 : 1, `고철 ${n}개를 모두 알맞게 처리했어요! (굴린 횟수 ${ctx.tries}번)`, resultTable(res));
+      if (s1 && ok === n) return api.end(ctx.tries === 1 ? 3 : ctx.tries === 2 ? 2 : 1, `고철 ${n}개를 모두 알맞게 처리했어요! (굴린 횟수 ${ctx.tries}번)`, resultTable(res) + slPowerNote(res));
       if (!s1 && ok >= 7){
         SAVE.mgTree = slClone(ctx.T); if (!SAVE.tree || !treeComplete(SAVE.tree)) SAVE.tree = slClone(ctx.T);
         if (!SAVE.badges.em3){ SAVE.badges.em3 = true; toast('AI 크레인 두뇌 미션 성공!', 'ok'); }
         persist();
-        return api.end(ok === 8 && size <= 2 ? 3 : ok === 8 ? 2 : 1, `연습 고철 ${n}개 중 <b>${ok}개</b>를 알맞게 처리했어요. 질문 ${size}개.${ok === 8 && size > 2 ? ' 질문을 2개로 줄여도 모두 맞힐 수 있을까요?' : ok < 8 ? ' 틀린 고철까지 맞히면 번개가 늘어요.' : ''}`, resultTable(res));
+        return api.end(ok === 8 && size <= 2 ? 3 : ok === 8 ? 2 : 1, `연습 고철 ${n}개 중 <b>${ok}개</b>를 알맞게 처리했어요. 질문 ${size}개.${ok === 8 && size > 2 ? ' 질문을 2개로 줄여도 모두 맞힐 수 있을까요?' : ok < 8 ? ' 틀린 고철까지 맞히면 번개가 늘어요.' : ''}`, resultTable(res) + slPowerNote(res));
       }
       api.say(`${n}개 중 ${ok}개를 알맞게 처리했어요. <b>✗</b>가 붙은 고철을 보고 질문이나 결정을 고쳐 다시 굴려요.`, 'bad');
     });

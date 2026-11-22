@@ -328,3 +328,32 @@ test('AI 튜터: AI 답이 깨지면 기록하지 않고 다시 말해 달라고
   r = await t.turn(p, r0.dialogueId, { blanks: { '①': '흐를' } });
   assert.ok(ai.calls.slice(-1)[0].contents.slice(-1)[0].parts[0].text.includes('전자석은 전기가 흐를 때만'));
 });
+
+/* ---------- 6. 판단 기록 (EM 재설계 P2) ---------- */
+const { createLad } = require('../lad/index');
+test('판단 기록: judgment 이벤트는 학생 문장을 서버에서 다시 가리고, 판정·노드ID를 걸러 시트 대기열에 넣는다', async () => {
+  const DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'lad-j-'));
+  const stu = { cls: { code: 'TEST', no: 7 } }, sent = [];
+  const lad = createLad({ ROOT: path.join(__dirname, '..'), DATA_DIR, SECRET: 'x'.repeat(40), env: { AI_TUTOR_ENABLED: 'false' },
+    readStu: () => stu, writeStu: () => {}, idFromToken: t => t === 'tok' ? 'n:judge' : null, send: (res, code, body) => sent.push({ code, body }), logger: quiet });
+  const evs = [
+    { eventId: 'jdg-0000-0001', tag: 'judgment', lesson: 'L1', nodeId: 'a2.counterexample.fits', studentText: '냉장고 문은 늘 붙어 있으면 돼요 010-1234-5678', result: 'correct', npcText: '반례 사냥', npc: 'volt' },
+    { eventId: 'jdg-0000-0002', tag: 'judgment', lesson: 'L2', nodeId: 'a4.blackout.permanent', studentText: '영구 자석 집게로 바꾼다', result: 'partial', npcText: '정전 대비', npc: 'boss' },
+    { eventId: 'jdg-0000-0003', tag: 'judgment', lesson: 'L2', nodeId: 'bad node!<script>', studentText: 'x', result: 'hacked' },
+    { eventId: 'jdg-0000-0004', tag: 'judgment', lesson: 'L1', nodeId: 'a2.counterexample.none', studentText: '죽고 싶어', result: 'miss' },
+  ];
+  const before = lad.relay.buffer.length;
+  await lad.handle({}, {}, '/api/events', { token: 'tok', events: evs });
+  assert.deepEqual(sent.pop().body.accepted.sort(), evs.map(e => e.eventId).sort());
+  const got = lad.relay.buffer.slice(before);
+  assert.equal(got.length, 4);
+  const [a, b, c, d] = got;
+  assert.equal(a.tag, 'judgment'); assert.equal(a.nodeId, 'a2.counterexample.fits'); assert.equal(a.result, 'correct'); assert.equal(a.npc, 'volt');
+  assert.equal(a.classCode, 'TEST'); assert.equal(a.studentNo, 7);
+  assert.ok(!a.studentText.includes('1234-5678'), '전화번호는 가린다'); assert.ok(a.flags.includes('개인정보'));
+  assert.equal(b.result, 'partial'); assert.equal(b.lesson, 'L2');
+  assert.equal(c.nodeId, '', '이상한 노드ID는 비운다'); assert.equal(c.result, 'info', '모르는 판정은 info');
+  assert.ok(d.flags.includes('위험'), '위험 낱말은 표시해 선생님께 알린다');
+  assert.ok(!JSON.stringify(got).includes('n:judge'), '계정 이름은 보내지 않는다');
+  await lad.shutdown();
+});
