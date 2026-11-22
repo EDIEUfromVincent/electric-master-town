@@ -112,7 +112,7 @@ function checkMasters(){
 
 /* ----- 패널·대화·알림 ----- */
 const UI = {modal:false, dialog:null, cutscene:null, waypoint:null, panelClose:null, pending:[]};
-function uiBlocking(){ return UI.modal || !!UI.dialog || !!UI.cutscene || !!UI.mg; }
+function uiBlocking(){ return UI.modal || !!UI.dialog || !!UI.cutscene || !!UI.mg || !!UI.wrap; }
 function openPanel(html, opts = {}){
   const m = $('#modal'), p = $('#panel');
   if (UI.modal && UI.panelClose){ const f = UI.panelClose; UI.panelClose = null; f(); }
@@ -130,7 +130,7 @@ function closePanel(){
   if (f) f();
   runPending();
 }
-function runPending(){ if (!UI.modal && !UI.dialog && !UI.cutscene && !UI.mg && UI.pending.length) UI.pending.shift()(); }
+function runPending(){ if (!UI.modal && !UI.dialog && !UI.cutscene && !UI.mg && !UI.wrap && UI.pending.length) UI.pending.shift()(); }
 /* lines: 글자 또는 {who, text}. 말하는 사람이 바뀌는 대화도 돼요. */
 function dlgShow(i){
   const D = UI.dialog, L = D.lines[i], d = $('#dialog');
@@ -215,12 +215,14 @@ function enterStory(){
   $('#customBar').hidden = true; $('#patrolBar').hidden = true;
   const sp = SAVE.pos || WORLD.spawn; placePlayer(sp.x, sp.y); clampCam();
   storyInit(); storySync(); updateHUD(); zoneBar();
+  ladOnEnter();   /* 선생님 편지가 와 있으면 우체부가 전해 준다 */
   if (SAVE.met.volt && zoneResume()) return;   /* 구역 방 안에 있었으면 그 방에서 이어 한다 */
   if (!SAVE.met.volt) setTimeout(() => { if (MODE === 'play' && !uiBlocking()) startPrologue(); }, 500);
 }
 
 /* ----- 상호작용 ----- */
 function onAction(){
+  if (UI.wrap && !UI.modal && !UI.dialog){ wrapKey({code:'Enter'}); return; }
   if (UI.cutscene){ csAdvance(); return; }
   if (UI.dialog){ advanceDialog(); return; }
   if (UI.modal || MODE !== 'play' || !NEAR) return;
@@ -257,6 +259,7 @@ function interact(o){
 function talkNPC(o){
   if (!o) return;
   if (o.id === 'volt' && !SAVE.met.volt) return startPrologue();
+  if (inRoom() && ZONE.room && (ZONE.room.wrap || ZONE.room.finale)) return wrapNpcTalk(o);   /* 정리 교실 · 시청 기록실 */
   SAVE.met[o.id] = true; persist();
   if (o.id === 'mayor') return evMayorTalk();
   if (o.id === 'evdriver') return evDriverTalk();
@@ -398,7 +401,7 @@ function openGuide(){
     <h3>🗺️ 1·2·3차시 구역 — 차시마다 문 하나</h3>
     <p class="sub">마을 광장에 <b>큰 문 세 개(1·2·3차시 구역)</b>가 있어요. 볼트 박사가 오늘 차시의 구역을 안내하고, 학생이 문 앞에서 E를 누르면 카메라가 문을 가까이 비추며 구역 안으로 들어가요. 구역 안에는 <b>방이 옆으로 이어져</b> 있고, 방의 활동을 끝내야 오른쪽 포털이 열려 다음 방으로 가요. 구역은 <b>차시 순서와 상관없이</b> 들어갈 수 있어서, 결석한 학생도 그날 차시의 구역부터 해요. 단, 3차시 문은 2차시 마지막 미션(전기 자전거)을 마쳐야 열려요. 구역을 마치면 축하 창이 뜨고, 구역 안에 있다가 나가도 다음 시간에 그 방에서 이어 해요.</p>
     <div class="tblwrap"><table class="tbl"><thead><tr><th>차시</th><th>구역</th><th>방 → 활동</th><th>마치는 조건</th></tr></thead><tbody>
-      ${COURSE.zones.map(z => `<tr><td><b>${z.no}차시</b></td><td>${z.icon} ${esc(z.name)}</td><td>${z.rooms.map((r, i) => `${'①②③④⑤'[i]} ${esc(r.name)} → ${ACTS.indexOf(actById(r.act)) + 1}. ${esc(actById(r.act).title)}`).join('<br>')}${(z.town || []).map(id => `<br>마을 → ${ACTS.indexOf(actById(id)) + 1}. ${esc(actById(id).title)}`).join('')}</td><td>${(z.need || []).map(k => ZONE_NEEDS[k].label).join('<br>') || '방 활동 모두'}${z.ride ? '<br>(처음엔 🚲 타고 입장)' : ''}${z.gift ? '<br>🎁 시장님의 번개 트럭 → 에필로그' : ''}</td></tr>`).join('')}
+      ${COURSE.zones.map(z => `<tr><td><b>${z.no}차시</b></td><td>${z.icon} ${esc(z.name)}</td><td>${z.rooms.map((r, i) => r.wrap ? `${'①②③④⑤'[i]} ${esc(r.name)} → 📋 정리 회의(S-E-R, 칠판)` : `${'①②③④⑤'[i]} ${esc(r.name)} → ${ACTS.indexOf(actById(r.act)) + 1}. ${esc(actById(r.act).title)}`).join('<br>')}${(z.town || []).map(id => `<br>마을 → ${ACTS.indexOf(actById(id)) + 1}. ${esc(actById(id).title)}`).join('')}</td><td>${(z.need || []).map(k => ZONE_NEEDS[k].label).join('<br>') || '방 활동 모두'}${z.ride ? '<br>(처음엔 🚲 타고 입장)' : ''}${z.gift ? '<br>🎁 시장님의 번개 트럭 → 에필로그' : ''}</td></tr>`).join('')}
     </tbody></table></div>
     <h3>📘 활동 순서 — 교과서 활동 순서 그대로</h3>
     <p class="sub">방마다 <b>맡은 사람에게 말을 걸면 활동할 곳을 알려 주고, 학생이 그곳(바닥에 빛나는 동그라미)까지 걸어가 E를 누르면 활동이 시작</b>돼요. 끝나면 그 사람이 정리해 주고 확인 질문을 한 뒤 다음에 갈 방을 알려 줘요. 노란 화살표가 사람·장소·포털·구역 문을 차례로 안내해요. 학생은 [📘 활동](Q 키)에서 구역별 진행을 봐요.</p>

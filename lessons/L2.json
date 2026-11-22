@@ -1,0 +1,800 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "L2",
+  "zone": "z2",
+  "status": "ready",
+  "title": "2차시 · AI 크레인 두뇌와 전기 자동차",
+  "unit": "6학년 과학 · 전기의 이용 + 실과 인공지능",
+  "standards": [
+    "[6과15-03] 전자석을 만들어 전자석의 성질을 탐색하고 전자석이 사용되는 예를 조사할 수 있다.",
+    "[6실05-05] 인공지능이 만들어지는 과정을 체험하고, 인공지능이 사회에 미치는 영향을 탐색한다."
+  ],
+  "_standardsNote": "TODO(교사 확인): 성취기준 코드·문구를 2022 개정 교육과정 고시 원문과 대조해 주세요. 지도안과 같은 문구를 썼습니다.",
+  "concepts": [
+    "고철을 고를 때는 겉모습(색·크기)이 아니라 재료(철인지, 전자석에 붙는지)로 판단한다",
+    "질문 길(의사결정트리)은 좋은 질문을 먼저 해야 바르게 나눈다",
+    "AI도 틀릴 수 있어 사람이 시험하고 고쳐야 한다",
+    "전기 자동차의 전동기 속에는 전자석이 들어 있다"
+  ],
+  "rubric": {
+    "S": "철을 고르는 기준을 겉모습(색·크기)으로 말하거나 기준을 설명하지 못함",
+    "E": "재료를 묻는 질문이 필요한 까닭이나 AI가 틀렸을 때 고치고 시험해야 함을 자기 말로 설명함",
+    "R": "좋은 질문과 AI를 고치는 방법을 한 문장 안에 스스로 정리함"
+  },
+  "npcs": {
+    "boss": {
+      "name": "무쇠 사장님"
+    },
+    "auto": {
+      "name": "자동이"
+    },
+    "mayor": {
+      "name": "시장님"
+    },
+    "evdriver": {
+      "name": "전기차 운전자"
+    }
+  },
+  "lead": "boss",
+  "vocabulary": [
+    "고철",
+    "철",
+    "쇠",
+    "크레인",
+    "전자석",
+    "자석",
+    "질문",
+    "두뇌",
+    "통",
+    "알루미늄",
+    "캔",
+    "은색",
+    "색",
+    "크기",
+    "무게",
+    "재료",
+    "붙",
+    "틀리",
+    "고치",
+    "ai",
+    "인공지능",
+    "자동이",
+    "로봇",
+    "전기",
+    "자동차",
+    "전기차",
+    "충전",
+    "바퀴",
+    "모터",
+    "전동기",
+    "시험",
+    "굴려"
+  ],
+  "messages": {
+    "avoidPrefix": "괜찮아요, 같이 천천히 찾아봐요.",
+    "profanity": "그 말은 우리 약속과 맞지 않아요. 바른 말로 다시 이야기해 줄래요?",
+    "profanityLimit": "규칙 위반이 세 번이라 정리 회의를 잠시 멈출게요. 선생님께 도움을 요청해요.",
+    "pii": "개인정보는 적지 않기로 약속했지요? 그 부분은 빼고 다시 말해 줄래요?",
+    "danger": "그 이야기를 들으니 걱정돼요. 지금 바로 선생님이나 보호자께 꼭 말씀드려요.",
+    "mild": "친구를 배려하는 말로 이야기해 주면 더 좋겠어요.",
+    "empty": "한 낱말이라도 좋아요. 생각나는 대로 적어 줄래요?",
+    "offtopic": "재미있는 이야기지만, 지금은 고철장 AI 이야기에 집중해 볼까요?"
+  },
+  "checkpoints": {
+    "S1": {
+      "label": "철을 고르는 기준",
+      "stage": "S",
+      "praise": "겉모습이 아니라 재료(철인지)로 판단해야 한다는 것을 스스로 말했어요.",
+      "next": "은색인데 철이 아닌 고철과, 은색이 아닌데 철인 고철을 하나씩 떠올려 볼래요?"
+    },
+    "E1": {
+      "label": "좋은 첫 질문과 까닭",
+      "stage": "E",
+      "praise": "질문 길의 첫 질문과 그 까닭을 함께 설명했어요.",
+      "next": "내 질문 길에서 질문 순서를 바꾸면 결과가 어떻게 달라질지 생각해 볼래요?"
+    },
+    "E2": {
+      "label": "AI가 틀렸을 때",
+      "stage": "E",
+      "praise": "AI가 틀리면 사람이 시험하고 고쳐야 한다는 것을 스스로 말했어요.",
+      "next": "AI가 틀린 것을 아무도 확인하지 않으면 누가 어떤 피해를 볼지 생각해 볼래요?"
+    },
+    "E3": {
+      "label": "전기 자동차 속 전자석",
+      "stage": "E",
+      "praise": "전기 자동차의 전동기 속 전자석까지 연결해서 설명했어요.",
+      "next": "우리 주변에서 전동기(모터)로 움직이는 물건을 하나 더 찾아볼래요?"
+    },
+    "R1": {
+      "label": "오늘의 한 문장",
+      "stage": "R",
+      "praise": "좋은 질문과 AI를 고치는 방법을 한 문장에 스스로 정리했어요.",
+      "next": "AI 안전 로봇은 크레인 두뇌처럼 규칙으로 가르칠 수 있을지 생각해 올래요?"
+    }
+  },
+  "praiseHint": "힌트를 보고도 포기하지 않고 끝까지 스스로 답을 찾아냈어요.",
+  "praiseDefault": "정리 회의에 끝까지 참여했어요. 칠판에 남긴 문장을 다시 소리 내어 읽어 봐요.",
+  "nextAll": "AI 안전 로봇은 크레인 두뇌처럼 규칙을 짜서 가르칠 수 있을까요, 예시로 가르쳐야 할까요?",
+  "fallbackNode": "R1blank",
+  "start": "greet",
+  "nodes": {
+    "greet": {
+      "type": "say",
+      "who": "boss",
+      "stage": "",
+      "say": "2차시 정리 회의를 시작하자! 오늘 크레인을 몰고, 자동이 두뇌를 고치고, 충전소까지 세웠지. 대화는 선생님이 보시니까 이름이나 전화번호 같은 개인정보는 적지 말자.",
+      "next": "greet2"
+    },
+    "greet2": {
+      "type": "say",
+      "who": "auto",
+      "stage": "",
+      "say": "삐릭! 나도 칠판 앞에 왔다. 네 말로 정리해 주면 내 두뇌에도 새겨 두겠다.",
+      "next": "S1"
+    },
+    "S1": {
+      "type": "free",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 0,
+      "say": "크레인으로 철만 골라 옮길 때, 고철의 무엇을 보고 판단해야 했지?",
+      "match": {
+        "groups": {
+          "material": [
+            "재료",
+            "철",
+            "쇠",
+            "자석에붙",
+            "전자석에붙",
+            "붙는지",
+            "붙는것",
+            "붙나",
+            "무엇으로만들",
+            "뭐로만들"
+          ]
+        },
+        "correct": [
+          [
+            "material"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "색",
+          "번쩍",
+          "은색",
+          "반짝",
+          "크기",
+          "크면",
+          "무거우면",
+          "무게"
+        ]
+      },
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1h1",
+        "miss": "S1h1",
+        "avoid": "S1h1",
+        "misconception": "S1mis"
+      }
+    },
+    "S1mis": {
+      "type": "free",
+      "who": "auto",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 1,
+      "say": "삐릭! 나도 번쩍이면 철이라고 했다가 알루미늄 캔에서 틀렸다. 은색이어도 철이 아닌 고철은 무엇이 달랐을까?",
+      "matchRef": "S1",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1h2",
+        "miss": "S1h2",
+        "avoid": "S1h2",
+        "misconception": "S1h2"
+      }
+    },
+    "S1h1": {
+      "type": "free",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 1,
+      "say": "철 고철과 알루미늄 캔을 전자석에 가까이 댔을 때를 떠올려 봐. 둘은 어떻게 달랐지?",
+      "matchRef": "S1",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1h2",
+        "miss": "S1h2",
+        "avoid": "S1h2",
+        "misconception": "S1mis"
+      }
+    },
+    "S1h2": {
+      "type": "choice",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 2,
+      "say": "철만 골라내려면 어떤 질문을 하는 게 더 좋을까?",
+      "options": [
+        {
+          "text": "은색인가요?",
+          "result": "miss",
+          "next": "S1sup"
+        },
+        {
+          "text": "철로 만들었나요?",
+          "result": "correct",
+          "next": "S1ok"
+        }
+      ]
+    },
+    "S1sup": {
+      "type": "say",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮다, 크레인 조종을 한 번 더 해 보면 금방 보일 거야. 자동이 이야기로 넘어가자.",
+      "next": "E1"
+    },
+    "S1ok": {
+      "type": "say",
+      "who": "boss",
+      "stage": "S",
+      "say": "바로 그거다! 겉모습보다 무엇으로 만들었는지, 전자석에 붙는지가 중요하지.",
+      "next": "E1"
+    },
+    "E1": {
+      "type": "free",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 0,
+      "say": "내 처음 두뇌는 '은색인가요?'부터 물어서 자꾸 틀렸다. 질문 길을 고칠 때 어떤 질문을 먼저 해야 하는지, 그 까닭과 함께 말해 줘.",
+      "match": {
+        "groups": {
+          "material": [
+            "재료",
+            "철",
+            "쇠",
+            "자석에붙",
+            "전자석에붙",
+            "붙는지",
+            "붙는것",
+            "붙나",
+            "무엇으로만들",
+            "뭐로만들"
+          ],
+          "reason": [
+            "때문",
+            "왜냐",
+            "그래야",
+            "까닭",
+            "이유",
+            "틀리",
+            "헷갈",
+            "다른",
+            "붙지",
+            "안붙",
+            "알루미늄",
+            "캔",
+            "색이같",
+            "은색이어도",
+            "은색인데"
+          ]
+        },
+        "correct": [
+          [
+            "material",
+            "reason"
+          ]
+        ],
+        "partial": [
+          [
+            "material"
+          ]
+        ],
+        "misconception": [
+          "은색인가",
+          "크기부터",
+          "색부터",
+          "무게부터"
+        ]
+      },
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1p",
+        "miss": "E1h1",
+        "avoid": "E1h1",
+        "misconception": "E1h1"
+      }
+    },
+    "E1p": {
+      "type": "free",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 1,
+      "say": "삐릭, 좋은 질문이다! 그 질문을 먼저 해야 하는 까닭도 한 문장으로 알려 줄래?",
+      "match": {
+        "groups": {
+          "reason": [
+            "때문",
+            "왜냐",
+            "그래야",
+            "까닭",
+            "이유",
+            "틀리",
+            "헷갈",
+            "다른",
+            "붙지",
+            "안붙",
+            "알루미늄",
+            "캔",
+            "색이같",
+            "은색이어도",
+            "은색인데",
+            "철이아닌"
+          ]
+        },
+        "correct": [
+          [
+            "reason"
+          ]
+        ],
+        "partial": [],
+        "misconception": []
+      },
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1ok",
+        "miss": "E1why",
+        "avoid": "E1why",
+        "misconception": "E1why"
+      }
+    },
+    "E1why": {
+      "type": "choice",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 2,
+      "say": "그 질문을 먼저 해야 하는 까닭으로 더 알맞은 것은 무엇일까?",
+      "options": [
+        {
+          "text": "질문이 짧아서",
+          "result": "miss",
+          "next": "E1sup"
+        },
+        {
+          "text": "은색이어도 철이 아닌 고철이 있어서",
+          "result": "correct",
+          "next": "E1ok"
+        }
+      ]
+    },
+    "E1h1": {
+      "type": "free",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 1,
+      "say": "질문 미끄럼틀에서 알루미늄 캔이 어느 통으로 갔는지 떠올려 봐. 그 캔을 바르게 보내려면 어떤 질문이 필요했을까?",
+      "matchRef": "E1",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1p",
+        "miss": "E1h2",
+        "avoid": "E1h2",
+        "misconception": "E1h2"
+      }
+    },
+    "E1h2": {
+      "type": "choice",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 2,
+      "say": "질문 길의 첫 질문으로 더 알맞은 것은 무엇일까?",
+      "options": [
+        {
+          "text": "크기가 큰가요?",
+          "result": "miss",
+          "next": "E1sup"
+        },
+        {
+          "text": "철로 만들었나요? (은색이어도 철이 아닌 고철이 있으니까)",
+          "result": "correct",
+          "next": "E1ok"
+        }
+      ]
+    },
+    "E1sup": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "삐릭, 괜찮다. 질문 미끄럼틀의 💡 힌트를 다시 보면 알 수 있다.",
+      "next": "E2"
+    },
+    "E1ok": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "say": "삐릭! 그 까닭이면 내 두뇌가 다시는 캔에 속지 않겠다.",
+      "next": "E2"
+    },
+    "E2": {
+      "type": "free",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 0,
+      "say": "그런데 고친 두뇌도 처음 보는 고철을 틀리게 옮길 수 있다. 그럴 때 사람은 무엇을 해야 할까?",
+      "match": {
+        "groups": {
+          "fix": [
+            "고치",
+            "고쳐",
+            "바꾸",
+            "바꿔",
+            "수정",
+            "다시만들",
+            "질문을바",
+            "고칠",
+            "고친",
+            "바꿀",
+            "바꾼"
+          ],
+          "test": [
+            "시험",
+            "굴려",
+            "굴리",
+            "확인",
+            "살펴",
+            "검사",
+            "테스트",
+            "다시해",
+            "다시돌",
+            "굴릴",
+            "굴린",
+            "살필",
+            "살핀",
+            "살피"
+          ]
+        },
+        "correct": [
+          [
+            "fix",
+            "test"
+          ]
+        ],
+        "partial": [
+          [
+            "fix"
+          ],
+          [
+            "test"
+          ]
+        ],
+        "misconception": [
+          "버려",
+          "포기",
+          "그냥둬",
+          "그대로믿",
+          "믿으면"
+        ]
+      },
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2p",
+        "miss": "E2h1",
+        "avoid": "E2h1",
+        "misconception": "E2h1"
+      }
+    },
+    "E2p": {
+      "type": "free",
+      "who": "boss",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 1,
+      "say": "좋은 생각이야! 고친 다음에는, 또는 고치기 전에는 무엇을 하면 좋을지도 이어서 말해 줄래?",
+      "matchRef": "E2",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2h2",
+        "avoid": "E2h2",
+        "misconception": "E2h2"
+      }
+    },
+    "E2h1": {
+      "type": "free",
+      "who": "boss",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 1,
+      "say": "질문 길을 굴렸더니 통과 개수가 모자랐던 순간을 떠올려 봐. 그때 너는 어떻게 했지?",
+      "matchRef": "E2",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2h2",
+        "avoid": "E2h2",
+        "misconception": "E2h2"
+      }
+    },
+    "E2h2": {
+      "type": "choice",
+      "who": "boss",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 2,
+      "say": "AI가 틀렸을 때 더 알맞은 행동은 무엇일까?",
+      "options": [
+        {
+          "text": "AI가 한 일이니 그대로 믿는다",
+          "result": "miss",
+          "next": "E2sup"
+        },
+        {
+          "text": "틀린 고철을 살펴보고 질문을 고쳐 다시 시험한다",
+          "result": "correct",
+          "next": "E2ok"
+        }
+      ]
+    },
+    "E2sup": {
+      "type": "say",
+      "who": "boss",
+      "stage": "E",
+      "cp": "E2",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아, 다음 시간에 질문 길을 한 번 더 굴려 보며 확인해 보자.",
+      "next": "E3"
+    },
+    "E2ok": {
+      "type": "say",
+      "who": "boss",
+      "stage": "E",
+      "say": "그렇지! AI도 틀릴 수 있으니 사람이 시험하고 고쳐야 해.",
+      "next": "E3"
+    },
+    "E3": {
+      "type": "free",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3",
+      "hintLevel": 0,
+      "say": "충전소를 세우자고 설득해 줘서 고마워요. 전기 자동차의 바퀴를 돌리는 부품 속에는 무엇이 들어 있을까요?",
+      "match": {
+        "groups": {
+          "magnet": [
+            "전자석",
+            "자석",
+            "코일"
+          ],
+          "motor": [
+            "전동기",
+            "모터"
+          ]
+        },
+        "correct": [
+          [
+            "magnet"
+          ]
+        ],
+        "partial": [
+          [
+            "motor"
+          ]
+        ],
+        "misconception": [
+          "엔진",
+          "휘발유",
+          "기름",
+          "경유"
+        ]
+      },
+      "on": {
+        "correct": "E3ok",
+        "partial": "E3p",
+        "miss": "E3h1",
+        "avoid": "E3h1",
+        "misconception": "E3h1"
+      }
+    },
+    "E3p": {
+      "type": "free",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3",
+      "hintLevel": 1,
+      "say": "맞아요, 바퀴를 돌리는 건 전동기예요! 그 전동기 안에서 빙글빙글 돌며 힘을 만드는 것은 무엇일까요?",
+      "matchRef": "E3",
+      "on": {
+        "correct": "E3ok",
+        "partial": "E3h1",
+        "miss": "E3h1",
+        "avoid": "E3h1",
+        "misconception": "E3h1"
+      }
+    },
+    "E3h1": {
+      "type": "choice",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3",
+      "hintLevel": 2,
+      "say": "전동기 속에서 바퀴를 돌리는 힘을 만드는 것은 무엇일까요?",
+      "options": [
+        {
+          "text": "휘발유 엔진",
+          "result": "miss",
+          "next": "E3sup"
+        },
+        {
+          "text": "전자석",
+          "result": "correct",
+          "next": "E3ok"
+        }
+      ]
+    },
+    "E3sup": {
+      "type": "say",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 과학 박물관 테슬라 방의 전동기 액자를 보면 더 알 수 있어요.",
+      "next": "R1"
+    },
+    "E3ok": {
+      "type": "say",
+      "who": "mayor",
+      "stage": "E",
+      "say": "맞아요! 전기 자동차도 전동기 속 전자석의 힘으로 달리지요.",
+      "next": "R1"
+    },
+    "R1": {
+      "type": "free",
+      "who": "boss",
+      "stage": "R",
+      "cp": "R1",
+      "hintLevel": 0,
+      "say": "이제 칠판에 남길 한 문장이다. 'AI 크레인 두뇌에게 좋은 질문'과 'AI가 틀렸을 때 할 일'을 넣어 한 문장으로 말해 볼래?",
+      "match": {
+        "groups": {
+          "question": [
+            "질문",
+            "재료",
+            "철로",
+            "철인지",
+            "자석에붙",
+            "붙는지",
+            "전자석에"
+          ],
+          "error": [
+            "틀리",
+            "틀렸",
+            "고치",
+            "고쳐",
+            "시험",
+            "확인",
+            "다시",
+            "고칠",
+            "고친"
+          ]
+        },
+        "correct": [
+          [
+            "question",
+            "error"
+          ]
+        ],
+        "partial": [
+          [
+            "question"
+          ],
+          [
+            "error"
+          ]
+        ],
+        "misconception": [
+          "은색인지"
+        ]
+      },
+      "on": {
+        "correct": "Rend",
+        "partial": "R1p",
+        "miss": "R1blank",
+        "avoid": "R1blank",
+        "misconception": "R1blank"
+      },
+      "tag": "reflection"
+    },
+    "R1p": {
+      "type": "free",
+      "who": "auto",
+      "stage": "R",
+      "cp": "R1",
+      "hintLevel": 1,
+      "say": "삐릭, 한 가지는 새겨 두었다! 나머지 한 가지도 이어서 한 문장으로 말해 줘.",
+      "matchRef": "R1",
+      "on": {
+        "correct": "Rend",
+        "partial": "Rend",
+        "miss": "R1blank",
+        "avoid": "R1blank",
+        "misconception": "R1blank"
+      },
+      "tag": "reflection"
+    },
+    "R1blank": {
+      "type": "blank",
+      "who": "boss",
+      "stage": "R",
+      "cp": "R1",
+      "hintLevel": 2,
+      "tag": "blank",
+      "say": "그럼 빈칸을 채워 문장을 완성해 보자.",
+      "template": "고철을 고를 때는 색이나 크기보다 [①]를 묻는 질문이 좋고, AI가 틀리면 질문을 [②] 다시 시험해야 해.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "재료",
+            "철",
+            "무엇으로",
+            "자석에붙"
+          ]
+        },
+        {
+          "id": "②",
+          "accept": [
+            "고쳐",
+            "고치",
+            "바꿔",
+            "바꾸",
+            "수정"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "Rend",
+        "partial": "Rend",
+        "miss": "Rend"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "Rend": {
+      "type": "end",
+      "who": "boss",
+      "stage": "R",
+      "tag": "lesson-complete",
+      "say": "고맙다! 네가 정리한 문장 '{{reflection}}'은 칠판에 남기고 선생님께도 전해 둘게. 3차시에는 전기를 아끼고 안전하게 쓰는 법을 로봇에게 가르쳐 보자!"
+    }
+  }
+}

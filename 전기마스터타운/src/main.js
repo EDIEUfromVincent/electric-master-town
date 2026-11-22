@@ -42,11 +42,15 @@ window.addEventListener('keydown', e => {
   const typing = e.target && e.target.closest && e.target.closest('input,textarea,select');
   if (UI.mg && !UI.modal && !UI.cutscene){ if (typing && e.code !== 'Escape') return; mgKey(e, true); return; }
   if (e.code === 'Escape'){
-    if (UI.cutscene) csSkip(); else if (UI.dialog) closeDialogAll(); else if (UI.modal) closePanel(); else if (MODE === 'epi') epiSkip(); else if (MODE === 'gate') zoneSkip(); else if (MODE === 'crane') exitCrane3D(); else if (MODE === 'play') openMenu();
+    if (UI.cutscene) csSkip(); else if (UI.dialog) closeDialogAll(); else if (UI.modal) closePanel(); else if (UI.wrap) wrapPause(); else if (MODE === 'epi') epiSkip(); else if (MODE === 'gate') zoneSkip(); else if (MODE === 'crane') exitCrane3D(); else if (MODE === 'play') openMenu();
     return;
   }
   if (typing) return;
   if (MODE === 'crane'){ if (!UI.modal) cr3Key(e, true); return; }
+  if (UI.wrap && !UI.modal && !UI.dialog && !UI.cutscene){
+    if (/^(Digit|Numpad)[1-4]$/.test(e.code) || e.code === 'KeyE' || e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter'){ e.preventDefault(); if (!e.repeat) wrapKey(e); }
+    return;
+  }
   const act = e.code === 'KeyE' || e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter';
   if (UI.cutscene){ if (act){ e.preventDefault(); if (!e.repeat) csAdvance(); } return; }
   if (UI.dialog){

@@ -11,7 +11,7 @@ function currentChapter(){
   if (!Q().met) return 0;
   const n = COURSE.zones.length;
   if (SAVE.story.finale) return n + 2;
-  if (actAllDone()) return n + 1;
+  if (actAllDone() && wrapsAllDone()) return n + 1;
   const z = zoneNow(); return z ? z.no : n + 1;
 }
 function chapterLabel(n){ const C = chapters(), c = C[Math.min(n, C.length - 1)]; return c.day ? `${c.day} · ${c.title}` : c.title; }
@@ -127,7 +127,7 @@ function storySync(){
     if (q[m.key] && !S.done[m.key]){ S.done[m.key] = true; if (OUTRO_KEYS.includes(m.key)) storyEnqueue('out:' + m.key); }
   }
   S.chapter = Math.max(S.chapter || 0, currentChapter());   /* 장이 바뀌는 장면은 구역 문을 지날 때 이름 카드로 보여 준다 */
-  if (actAllDone() && !S.finale && !S.finQ){ S.finQ = true; storyEnqueue('fin'); }
+  if (actAllDone() && wrapsAllDone() && !S.finale && !S.finQ){ S.finQ = true; storyEnqueue('fin'); }   /* 세 차시 정리 회의까지 마쳐야 점등식 */
   persist();
 }
 function storyPoll(){
@@ -154,8 +154,7 @@ function afterChapter(n){
   if (n !== 'fin') return;
   SAVE.story.finale = true; persist(); updateHUD(); rpgSync();
   toast('점등식 성공! 마을이 환하게 밝아졌어요.', 'ok');
-  UI.pending.push(() => openCert());
-  UI.pending.push(() => epiOffer());   /* 모든 구역을 마친 선물: 번개 트럭 → 에필로그 */
+  UI.pending.push(() => finaleInvite());   /* 시장님과 볼트 박사가 시청 기록실에서 배움 기록 문서를 만들어 준다 → 게임 끝 (wrap.js) */
 }
 function startPrologue(){
   const S = SAVE.story;

@@ -91,6 +91,7 @@ function actGiverNow(){
 }
 /* 지금 만날 사람이 바로 이 사람인가 (같은 사람이 마을과 방에 함께 있을 때, 활동하는 곳에 있는 쪽만) */
 function actGiverHere(o){
+  if (inRoom() && ZONE.room && (ZONE.room.wrap || ZONE.room.finale)) return wrapHop(o);   /* 정리 교실: 회의를 여는 사람 */
   if (o.id !== actGiverNow()) return false;
   const a = actCur(); return !a || zoneActHere(a);
 }
@@ -101,6 +102,7 @@ const objDoneAct = o => { const a = ACTS.find(x => x.place === o.id); return !!a
 function actPlaceObj(){ const id = actPlaceNow(); return id && WORLD && WORLD.objects ? WORLD.objects.find(o => o.id === id) : null; }
 function actGiverObj(id = actGiverNow()){ return id && WORLD && WORLD.objects ? WORLD.objects.find(o => o.type === 'npc' && o.id === id) : null; }
 function actWaypoint(){
+  if (wrapRoute()) return;   /* 퀘스트를 다 마친 차시는 정리 교실로 먼저 */
   const id = actGiverNow(); if (!id) { UI.waypoint = null; return; }
   if (zoneRoute(actCur())) return;   /* 다른 방·다른 구역이면 포털이나 구역 문부터 */
   if (id === 'evcar'){ if (typeof evGuide === 'function') evGuide(); return; }
@@ -183,6 +185,7 @@ function actSync(){
   const fresh = done.filter(id => !S.seen.includes(id));
   if (!fresh.length) return;
   S.seen = done; persist();
+  fresh.forEach(id => { const L = zoneOfAct(id); if (L) ladEvent('quest-complete', wrapLessonOf(L.z), id); });   /* 시트 기록: 활동 완료 */
   if (SAVE.story && Array.isArray(SAVE.story.queue)) fresh.forEach(id => storyEnqueue('act:' + id));
 }
 function actDoneBeat(id){
@@ -194,8 +197,9 @@ function actDoneBeat(id){
     lines.push({who, text:`확인 질문! ${c.q}`, choices:c.o.map((op, k) => ({label:op, fn:() => { const r = actState(); r.check = r.check || {}; if (r.check[a.id] == null) r.check[a.id] = k === c.a; persist(); k === c.a ? SND.ok() : SND.bad(); },
       next:[{who, text:`${k === c.a ? '⭕ 맞아요!' : '❌ 아쉬워요.'} ${c.why}`}]}))});
   }
-  const nx = actCur(), nid = actGiverNow();
-  if (nx) lines.push({who, text:zoneNextText(nx, nid)});
+  const nx = actCur(), nid = actGiverNow(), L0 = zoneOfAct(id), wz = L0 && wrapReady(L0.z) && !wrapOk(L0.z) ? L0.z : null;
+  if (wz) lines.push({who, text:wrapNextText(wz)});   /* 이 차시 퀘스트를 다 마쳤으면 정리 교실로 */
+  else if (nx) lines.push({who, text:zoneNextText(nx, nid)});
   showDialog(who, lines, () => { actWaypoint(); updateHUD(); });
 }
 

@@ -141,6 +141,7 @@ function applySave(s){
 function afterLogin(fresh, moved){
   HP.inv = 0; UI.waypoint = null;
   rpgSync(true); storyInit(); updateRpgHUD();
+  ladInit();   /* 정리 회의 · 기록 · 편지 (wrap.js) */
   loadWorld(buildStoryWorld());
   if (G3.ok && SAVE.pos){ player.x = SAVE.pos.x; player.y = SAVE.pos.y; }
   showTitle();

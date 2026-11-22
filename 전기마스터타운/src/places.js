@@ -42,6 +42,7 @@ function openFrame(key){
 
 /* ===== 다가가 E ===== */
 function placeInteract(o){
+  if (o.kind === 'wrapBoard') return wrapBoardTalk(o);
   if (o.kind === 'shopDesk') return mgOpenGame('shop');
   if (o.kind === 'screen' || o.kind === 'seat') return watchVideo(o);
   if (o.kind === 'mri') return mriThing();
@@ -66,6 +67,7 @@ function placeNpcTalk(o){
   return false;
 }
 function placeThingDone(o){
+  if (o.kind === 'wrapBoard') return wrapBoardDone(o);
   if (o.kind === 'frame') return !!placeState().museum[o.key];
   if (o.kind === 'seat') return true;   /* ! 표시는 화면에만 */
   if (o.kind === 'screen') return placeState().video > 0;
@@ -130,6 +132,7 @@ function mkThing(kind, arg){
   return b.mesh();
 }
 function placeDraw3D(o, t, gy){
+  if (o.kind === 'wrapBoard') return wrapBoardDraw3D(o, t, gy);
   const cx = o.x + .5, cz = o.y + .5;
   if (o.kind === 'screen') drawM(model('thing:screen' + (PLACE.playing ? 1 : 0), () => mkThing('screen', PLACE.playing)), M4.trs(cx, gy, cz));
   else if (o.kind === 'frame'){ drawM(model('thing:frame' + (o.stand ? 1 : 0), () => mkThing('frame', o.stand)), M4.trs(cx, gy, cz)); const f = MUSEUM[o.key]; if (f) sprAdd(cx, gy + (o.stand ? 1.48 : 1.6), cz + (o.stand ? .02 : -.36), iconBadge('scene', f.icon), .34); }

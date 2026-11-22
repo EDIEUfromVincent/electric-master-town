@@ -651,4 +651,60 @@ button.mg-st:hover{border-color:var(--volt)}
 #delayAlarm.hot{animation:alarmPulse .6s infinite alternate}
 @keyframes alarmPulse{from{background:#3a1714}to{background:#a3271c}}
 #epiBar{position:absolute;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:10px;background:rgba(21,32,43,.86);border:2px solid var(--volt);border-radius:999px;padding:6px 8px 6px 16px;font-weight:800;white-space:nowrap}
+
+/* 📋 정리 회의 대화판: 위쪽은 3D 칠판이 보이게 두고 아래에 붙는다 */
+#wrapUI{--zc:#3ee0ff;position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(860px,calc(100% - 24px));z-index:16;background:var(--paper);color:var(--text-dark);border:3px solid #1c2733;border-top:7px solid var(--zc);border-radius:14px;box-shadow:0 8px 0 rgba(0,0,0,.4);padding:10px 16px 12px}
+#wrapUI .wu-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#wrapUI .wu-zone{font-family:var(--font-display);font-size:15px;color:var(--text-dark-dim)}
+#wrapUI .wu-stage{font-family:var(--font-display);font-size:14px;border-radius:999px;padding:1px 10px;background:#e3e8ee;color:#1c2733}
+#wrapUI .wu-stage[data-s="S"]{background:#ffe9a3}#wrapUI .wu-stage[data-s="E"]{background:#cfe9ff}#wrapUI .wu-stage[data-s="R"]{background:#ffd3df}
+#wrapUI #wuPause{margin-left:auto;background:#e3e8ee;color:#1c2733;box-shadow:none}
+#wrapUI .wu-who{font-family:var(--font-display);font-size:20px;color:var(--copper-2);margin-top:4px;min-height:1.2em}
+#wrapUI .wu-line{font-size:17px;line-height:1.6;min-height:2.6em;margin:2px 0 8px;white-space:pre-wrap}
+#wrapUI .wu-input{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+#wrapUI .wu-input.free{flex-wrap:nowrap}
+#wrapUI .wu-input.free input{flex:1;min-width:0;font-size:17px;padding:10px 12px;border:2px solid #9fb0c2;border-radius:10px;background:#fff;color:#1c2733}
+#wrapUI .wu-input.free input:focus{outline:none;border-color:var(--zc);box-shadow:0 0 0 3px rgba(62,224,255,.25)}
+#wrapUI .wu-cnt{color:var(--text-dark-dim);font-size:12px;white-space:nowrap}
+#wrapUI .wu-input.choice{justify-content:stretch}
+#wrapUI .wu-input.choice .btn{flex:1 1 260px;text-align:left;background:#fff;color:#1c2733;border:2px solid #9fb0c2;box-shadow:0 3px 0 #9fb0c2}
+#wrapUI .wu-input.choice .btn:hover{border-color:var(--zc)}
+#wrapUI .wu-input.blank{justify-content:space-between}
+#wrapUI .wu-tpl{flex:1 1 100%;font-size:17px;line-height:2.2;background:#24493a;color:#f4f1e6;border-radius:10px;padding:8px 12px}
+#wrapUI .wu-tpl input{width:6.5em;font-size:16px;padding:3px 6px;margin:0 4px;border:none;border-bottom:3px solid #ffe27a;background:rgba(255,255,255,.12);color:#fff;border-radius:4px;text-align:center}
+#wrapUI .wu-tpl input.ok{border-bottom-color:#b6f0b0;background:rgba(182,240,176,.2)}
+#wrapUI .wu-tpl input.retry{border-bottom-color:#ffb3c8}
+#wrapUI .wu-wait{color:var(--text-dark-dim);font-size:15px}
+@media (max-width:640px){#wrapUI{padding:8px 10px 10px}#wrapUI .wu-line{font-size:16px}#wrapUI .wu-input.free{flex-wrap:wrap}#wrapUI .wu-input.free input{flex:1 1 100%}}
+/* 칠판 정리 크게 보기 */
+.chalk{background:#24493a;color:#f4f1e6;border:8px solid #7a5233;border-radius:10px;padding:14px 18px;display:grid;gap:12px}
+.chalk small{font-family:var(--font-display);font-size:15px;color:#ffe27a}
+.chalk .ch-title{font-family:var(--font-display);font-size:24px;border-bottom:2px solid rgba(244,241,230,.4);padding-bottom:6px}
+.chalk .ch-one p{font-size:21px;margin:4px 0 0;line-height:1.5}
+.chalk .ch-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.chalk .ch-two p{margin:4px 0 0}
+.chalk .ch-two div+div small{color:#a8dcff}
+.chalk .ch-cps{display:flex;flex-wrap:wrap;gap:6px}
+.chalk .ch-cp{border:1px solid rgba(244,241,230,.4);border-radius:999px;padding:2px 10px;font-size:13px}
+.chalk .ch-cp.self{border-color:#b6f0b0;color:#b6f0b0}.chalk .ch-cp.support{border-color:#ffb3c8;color:#ffb3c8}
+.chalk .ch-log summary{cursor:pointer;color:#a8dcff}.chalk .ch-log li{margin:6px 0;font-size:14px}.chalk .ch-st{display:inline-block;background:rgba(255,255,255,.15);border-radius:4px;padding:0 6px;font-weight:800}
+.chalk .ch-sent{margin:0;font-size:13px;color:#b6f0b0}
+@media (max-width:640px){.chalk .ch-two{grid-template-columns:1fr}}
+.cls-msg{color:#ffb3a8;min-height:1.2em;margin:4px 0}
+.cls-row label{display:grid;gap:4px;font-weight:800}.cls-row input{font-size:18px;width:150px}
+/* 📮 선생님 편지 */
+.letter{background:#fdf4e3;color:#1c2733;border-radius:12px;border:3px solid #e2a93a;padding:16px 18px;display:grid;gap:8px;box-shadow:inset 0 0 0 6px #fff8ea}
+.letter .lt-head{font-family:var(--font-display);font-size:22px;color:#b85a19}
+.letter .lt-body{font-size:18px;line-height:1.7;margin:0;white-space:pre-wrap}
+.letter .lt-ai{font-size:13px;color:#8a6d3b;margin:0}
+.letter .lt-ask{font-weight:800;margin-top:6px}
+.letter input{font-size:16px;padding:9px 11px;border:2px solid #d6b56b;border-radius:10px;background:#fff;color:#1c2733}
+.letter .note{color:#8a6d3b}
+/* 📜 배움 기록 문서 */
+.doc-frame{width:100%;height:min(48vh,460px);border:2px solid var(--line);border-radius:10px;background:#fff;display:block;margin:8px 0}
+.doc-name{align-items:center;gap:10px}.doc-name input{font-size:16px;width:160px;margin-left:6px}
+.doc-btns{gap:8px;flex-wrap:wrap}
+.ending{display:grid;gap:10px;justify-items:center;text-align:center;padding:6px 0}
+.ending .end-icon{font-size:78px;line-height:1}.ending h2{margin:0;font-size:30px}
+.ending .end-list{list-style:none;padding:0;margin:4px 0;display:grid;gap:4px}
+.ending .end-btns{justify-content:center;gap:8px;flex-wrap:wrap}
 </style>

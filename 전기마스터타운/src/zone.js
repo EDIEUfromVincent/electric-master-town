@@ -37,10 +37,10 @@ function zState(){
 }
 
 /* ----- 찾기 ----- */
-const zoneById = id => COURSE.zones.find(z => z.id === id) || (COURSE.places || []).find(z => z.id === id);
+const zoneById = id => COURSE.zones.find(z => z.id === id) || (COURSE.places || []).find(z => z.id === id) || (COURSE.finale && COURSE.finale.id === id ? COURSE.finale : undefined);
 const zoneLabel = z => z.free ? z.name : `${z.no}차시 · ${z.name}`;
 const zoneTag = z => z.free ? (z.tag || '자유 탐험') : `${z.no}차시`;
-const zoneAll = () => COURSE.zones.concat(COURSE.places || []);
+const zoneAll = () => COURSE.zones.concat(COURSE.places || [], COURSE.finale ? [COURSE.finale] : []);
 const inRoom = () => !!(WORLD && WORLD.kind === 'room');
 const ROOM_NO = '①②③④⑤⑥⑦⑧⑨';
 /* '로/으로' 고르기: 받침이 없거나 ㄹ이면 '로' */
@@ -54,11 +54,12 @@ function zoneOfAct(id){
 }
 const zoneActs = z => z.rooms.map(r => r.act).concat(z.town || []).map(actById).filter(Boolean);
 const zoneNeedsOk = z => (z.need || []).every(k => ZONE_NEEDS[k] && ZONE_NEEDS[k].ok());
-const zoneDone = z => zoneActs(z).every(actDone) && zoneNeedsOk(z);
+const zoneDone = z => zoneActs(z).every(actDone) && zoneNeedsOk(z) && wrapOk(z);   /* 정리 회의까지 마쳐야 차시 완료 (wrap.js) */
 const zoneRoomOk = (z, i) => z.rooms.slice(0, i).every(r => !r.act || actDone(actById(r.act)));   /* 앞 방을 다 끝내야 들어갈 수 있다 */
 /* 구역 문은 차시 순서와 상관없이 열린다. open에 적은 것(예: 3차시의 전기 자전거)만 먼저 갖춰야 한다 */
-const zoneOpen = z => !!(SAVE.met && SAVE.met.volt) && (z.free || (z.open || []).every(k => ZONE_NEEDS[k] && ZONE_NEEDS[k].ok()));
+const zoneOpen = z => z.final ? !!(SAVE.story && SAVE.story.finale) : !!(SAVE.met && SAVE.met.volt) && (z.free || (z.open || []).every(k => ZONE_NEEDS[k] && ZONE_NEEDS[k].ok()));
 function zoneLockText(z){
+  if (z.final) return '세 차시 정리 회의를 모두 마치고 광장의 점등식이 끝나면 열려요.';
   if (!SAVE.met || !SAVE.met.volt) return '먼저 볼트 박사와 이야기해요.';
   return `${(z.open || []).filter(k => !ZONE_NEEDS[k].ok()).map(k => ZONE_NEEDS[k].label).join(', ')} 해야 열려요. (2차시 마지막 미션)`;
 }
@@ -101,7 +102,7 @@ function zoneTownSync(){
   if (!WORLD || WORLD.kind !== 'story') return;
   const H = COURSE.townHide || {}, keep = new Set(COURSE.townKeep || []), moved = new Set(H.ids || []);
   for (const z of COURSE.zones) for (const r of z.rooms){
-    moved.add(r.station.id);
+    if (r.station) moved.add(r.station.id);
     const a = actById(r.act); if (a && a.giver && !keep.has(a.giver)) moved.add(a.giver);
   }
   WORLD.objects = WORLD.objects.filter(o => o.type !== 'gate' && !moved.has(o.id) && !(H.types || []).includes(o.type));
@@ -129,7 +130,10 @@ function zoneBuildRoom(z, i){
         continue;
       }
       row.push('_');
-      if (ch === 'N' && (r.npc || (a && a.giver))){
+      if (/[1-4]/.test(ch) && r.npcs && r.npcs[+ch - 1]){   /* 정리 교실 · 시청 기록실: 그 차시 인물들이 모인다 */
+        const n = npcDef(r.npcs[+ch - 1]);
+        objects.push({type:'npc', id:n.id, x, y, name:n.name, look:n.look});
+      } else if (ch === 'N' && (r.npc || (a && a.giver))){
         const n = r.npc || NPCS.find(q => q.id === a.giver) || {id:a.giver, name:ACT_WHO[a.giver] || a.giver, look:'guide'};
         objects.push({type:'npc', id:n.id || a.giver, x, y, name:n.name, look:n.look});
       } else if (r.things && r.things[ch]){   /* 장소의 볼거리·놀거리 (places.js가 그리고 다룬다) */
@@ -198,12 +202,13 @@ function zoneGateFinish(){
   ZONE.gate = null;
   const z = G.z, st = zState(), first = !st.seen[z.id];
   ZONE.town = WORLD;   /* 마을은 그대로 두었다가 나올 때 다시 쓴다 (차·행인 자리 그대로) */
-  const k = z.rooms.findIndex(r => r.act && !actDone(actById(r.act)));
-  const i = k < 0 ? 0 : k;
+  const k = z.rooms.findIndex(r => r.act && !actDone(actById(r.act))), w = z.rooms.findIndex(r => r.wrap);
+  const i = k >= 0 ? k : w >= 0 && !wrapOk(z) ? w : 0;   /* 방 활동을 다 했으면 정리 교실로 */
   zoneLoadRoom(z, i, 'left');
   zoneCard(z, z.rooms.length > 1 ? `${ROOM_NO[i]} ${z.rooms[i].name} · 방 ${i + 1}/${z.rooms.length}` : z.goal || z.rooms[i].name);
   st.seen[z.id] = true; persist();
   if (first && z.gift && !st.teased) ZONE.teaseAt = TIME + 3.2;
+  if (!z.free) ladZoneEnter(z);   /* 차시 첫 진입 기록 · 반 번호 · 선생님 편지 (wrap.js) */
 }
 function zoneSkip(){
   if (ZONE.gate) zoneGateFinish();
@@ -223,6 +228,7 @@ function zoneLoadRoom(z, i, from){
   ZONE.armed = false; ZONE.ease = 1; ZONE.focus = null;
   zoneFade(0, null, .6);
   updateHUD(); zoneBar(); actWaypoint();
+  wrapRoomEnter(z, i);
 }
 function zonePortalOpen(o){
   if (o.side < 0) return true;
@@ -253,7 +259,7 @@ function zoneExit(){ if (inRoom()){ ZONE.hop = {t:0, o:{to:-1}}; MODE = 'gate'; 
 function zoneExitNow(){
   const z = ZONE.zone, st = zState();
   loadWorld(zoneTownWorld());
-  ZONE.zone = null; ZONE.room = null; st.cur = null; st.pos = null; persist();
+  ZONE.zone = null; ZONE.room = null; ZONE.focus = null; st.cur = null; st.pos = null; persist();
   MODE = 'play'; showHUD(true);
   if (z){ const d = z.gate.face === 'N' ? -1 : 1; placePlayer(z.gate.x + .5, z.gate.y + .5 + d * 1.8); player.ang = d > 0 ? 0 : Math.PI; }
   ZONE.ease = .7; ZONE.armed = true;
@@ -304,8 +310,8 @@ function zoneBar(){
   const z = ZONE.zone;
   el.style.setProperty('--zc', z.color);
   el.innerHTML = `<span class="zb-z">${z.icon} ${zoneTag(z)} ${esc(z.name)}</span>` + z.rooms.map((r, i) => {
-    const done = r.act && actDone(actById(r.act)), cls = i === ZONE.idx ? 'on' : done ? 'done' : zoneRoomOk(z, i) ? '' : 'lock';
-    return `<span class="zb-r ${cls}">${ROOM_NO[i]} ${esc(r.name)}</span>`;
+    const done = r.wrap ? wrapOk(z) : r.act && actDone(actById(r.act)), cls = i === ZONE.idx ? 'on' : done ? 'done' : zoneRoomOk(z, i) ? '' : 'lock';
+    return `<span class="zb-r ${cls}">${ROOM_NO[i]} ${r.wrap ? '📋 ' : ''}${esc(r.name)}</span>`;
   }).join('<i>›</i>');
   el.hidden = false;
 }
@@ -338,7 +344,8 @@ function zoneRoute(a){
 }
 /* 화면 위 목표 줄 (구역 이야기가 필요할 때만, 아니면 null) */
 function zoneObjective(){
-  const a = actCur(), L = a && zoneOfAct(a.id);
+  const a = actCur(), L = a && zoneOfAct(a.id), wo = wrapObjective();
+  if (wo) return wo;
   if (inRoom()){
     const z = ZONE.zone;
     if (z.free) return `<b>${z.icon} ${esc(z.name)}</b> ${esc(z.goal || '')} · 다 보면 🚪 출구로 나가요`;
@@ -380,7 +387,10 @@ function zoneNextText(nx, nid){
 function zoneVoltTalk(o){
   const z = zoneNow(), lines = [];
   if (!z) lines.push(SAVE.story.finale ? '점등식은 대성공이에요! 구역 문으로 들어가면 어느 활동이든 다시 해 볼 수 있어요.' : '세 구역을 모두 마쳤어요! 곧 광장에서 점등식이 시작돼요.');
-  else {
+  else if (wrapReady(z) && !wrapOk(z)){
+    lines.push(`찌릿! ${z.icon} ${zoneLabel(z)} 퀘스트를 모두 마쳤군요!`);
+    lines.push(`이제 구역 안 「${wrapRoomOf(z).name}」에서 친구들과 큰 칠판 앞에 모여 오늘 배운 것을 정리해요. 광장의 ${z.no}번 문으로 들어가요!`);
+  } else {
     lines.push(`찌릿! 지금은 ${z.icon} ${zoneLabel(z)} 차례예요.`);
     lines.push(z.goal);
     lines.push(zoneOpen(z) ? `광장의 ${z.no}번 문으로 들어가요. 노란 화살표가 길을 알려 줄 거예요!` : `🔒 ${zoneLockText(z)}`);
@@ -390,18 +400,20 @@ function zoneVoltTalk(o){
 function zoneStatus(z){
   if (zoneDone(z)) return {cls:'done', txt:'✅ 완료 · 다시 해 볼 수 있어요'};
   if (!zoneOpen(z)) return {cls:'lock', txt:'🔒 ' + zoneLockText(z)};
+  if (wrapReady(z) && !wrapOk(z)) return {cls:'cur', txt:'📋 퀘스트 완료! 정리 교실의 정리 회의만 남았어요'};
   if (z === zoneNow()) return {cls:'cur', txt:'▶ 차시 순서로 다음 구역 (다른 구역도 들어갈 수 있어요)'};
   return {cls:'', txt:''};
 }
 function openZoneMap(){
   const canGo = MODE === 'play' && WORLD && WORLD.kind === 'story';
   const card = z => {
-    const s = zoneStatus(z), acts = z.rooms.map((r, i) => ({a:actById(r.act), where:`${ROOM_NO[i]} ${r.name}`})).concat((z.town || []).map(id => ({a:actById(id), where:'마을'})));
+    const s = zoneStatus(z), acts = z.rooms.map((r, i) => ({a:actById(r.act), where:`${ROOM_NO[i]} ${r.name}`})).filter(q => q.a).concat((z.town || []).map(id => ({a:actById(id), where:'마을'})));
     return `<div class="zone-card ${s.cls}" style="--zc:${z.color}">
       <div class="zc-head"><span class="zc-chip">${z.no}차시</span><b>${z.icon} ${esc(z.name)}</b></div>
       <p class="zc-goal">${esc(z.goal)}</p>
       <ul class="zc-acts">${acts.map(({a, where}) => `<li class="${actDone(a) ? 'ok' : ''}">${actDone(a) ? '✅' : '⬜'} ${ACTS.indexOf(a) + 1}. ${esc(a.title)} <small>${esc(where)}</small></li>`).join('')}
-        ${(z.need || []).map(k => `<li class="${ZONE_NEEDS[k].ok() ? 'ok' : ''}">${ZONE_NEEDS[k].ok() ? '✅' : '⬜'} ${ZONE_NEEDS[k].label}</li>`).join('')}</ul>
+        ${(z.need || []).map(k => `<li class="${ZONE_NEEDS[k].ok() ? 'ok' : ''}">${ZONE_NEEDS[k].ok() ? '✅' : '⬜'} ${ZONE_NEEDS[k].label}</li>`).join('')}
+        ${wrapLessonOf(z) ? `<li class="${wrapOk(z) ? 'ok' : ''}">${wrapOk(z) ? '✅' : '⬜'} 📋 정리 회의 <small>${esc(wrapRoomOf(z).name)} · 칠판 앞에서 오늘 배운 것 정리</small></li>` : ''}</ul>
       ${z.ride ? `<p class="zc-note">🚲 처음 들어갈 때는 ${josa(ZONE_RIDES[z.ride].label, '을', '를')} 타고 와야 해요.</p>` : ''}
       ${z.gift ? '<p class="zc-note">🎁 이 구역을 마치면 시장님의 큰 선물이 기다려요.</p>' : ''}
       <div class="zc-foot"><small>${s.txt}</small>${canGo && zoneOpen(z) ? `<button class="btn small ${s.cls === 'cur' ? 'primary' : ''}" data-zgo="${z.id}">🚪 문까지 길 안내</button>` : ''}</div></div>`;
@@ -424,11 +436,11 @@ function openZoneMap(){
 function zoneClearCard(z){
   const i = COURSE.zones.indexOf(z), nx = COURSE.zones[i + 1];
   const next = nx ? `<p>다음은 <b>${nx.icon} ${zoneLabel(nx)}</b> 구역이에요.${nx.ride ? ` 🚲 ${josa(ZONE_RIDES[nx.ride].label, '을', '를')} 타고 광장의 ${nx.no}번 문으로 가요!` : ` 광장의 ${nx.no}번 문으로 가요.`}</p>`
-    : '<p>세 구역을 모두 마쳤어요! 구역 출구로 나가 광장에서 <b>점등식</b>을 지켜봐요.</p>';
+    : COURSE.zones.every(zoneDone) ? '<p>세 구역을 모두 마쳤어요! 구역 출구로 나가 광장에서 <b>점등식</b>을 지켜봐요.</p>' : '<p>아직 끝내지 않은 구역이 있어요. 🗺️ 차시 구역 지도에서 확인해요.</p>';
   SND.fanfare();
   openPanel(`<div class="zone-clear" style="--zc:${z.color}"><div class="zcl-icon">${z.icon}</div>
     <span class="zc-chip">${z.no}차시 완료!</span><h2>${esc(z.name)}</h2>
-    <ul class="zc-acts">${zoneActs(z).map(a => `<li class="ok">✅ ${ACTS.indexOf(a) + 1}. ${esc(a.title)}</li>`).join('')}${(z.need || []).map(k => `<li class="ok">✅ ${ZONE_NEEDS[k].label}</li>`).join('')}</ul>
+    <ul class="zc-acts">${zoneActs(z).map(a => `<li class="ok">✅ ${ACTS.indexOf(a) + 1}. ${esc(a.title)}</li>`).join('')}${(z.need || []).map(k => `<li class="ok">✅ ${ZONE_NEEDS[k].label}</li>`).join('')}${wrapLessonOf(z) ? '<li class="ok">✅ 📋 정리 회의</li>' : ''}</ul>
     ${next}<button class="btn primary" data-close>계속하기</button></div>`, {onClose:() => { actWaypoint(); updateHUD(); }});
   award('em', 5); award('eco', 5);
 }
@@ -473,6 +485,7 @@ function zoneUpdate(dt){
     const needPending = now && zoneActs(now).every(actDone) && !zoneNeedsOk(now);
     const ridePending = L && L.r >= 0 && L.z.ride && zoneOpen(L.z) && !st.seen[L.z.id];
     if (needPending){ for (const k of now.need || []){ const w = ZONE_NEEDS[k].route && ZONE_NEEDS[k].route(); if (w){ UI.waypoint = w; break; } } }
+    else if (!(UI.waypoint && UI.waypoint.wrap) && wrapFocus()) wrapRoute();   /* 자전거까지 받으면 정리 회의로 안내 */
     else if (ridePending) zoneRoute(a);
   }
 }

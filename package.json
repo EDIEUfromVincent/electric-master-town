@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "description": "전기 마스터 타운 — 초6 과학 '전기의 이용' AI 프로그램 개발 수업용 3D 블록 마을 게임",
-  "scripts": { "start": "node server.js", "build": "bash 전기마스터타운/build.sh" },
-  "engines": { "node": ">=18" }
+  "scripts": {
+    "start": "node server.js",
+    "build": "bash 전기마스터타운/build.sh",
+    "test": "node --test test/",
+    "lint:lessons": "node tools/lint-lessons.js lessons/L1.json lessons/L2.json lessons/L3.json",
+    "gas:ping": "node scripts/gas-check.js ping",
+    "gas:smoke": "node scripts/gas-check.js smoke",
+    "dev:mock": "node scripts/mock-gas.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "_note": "차시 ↔ 게임 구역 ↔ 정리 대본 연결표. 차시 구역과 방은 전기마스터타운/src/course.js, 대본은 이 폴더의 L*.json.",
+  "lessons": [
+    {
+      "lessonId": "L1",
+      "zone": "z1",
+      "title": "1차시 · 전자석의 쓰임과 성질",
+      "reflectionScript": "L1.json",
+      "npcs": [
+        "volt",
+        "sun"
+      ],
+      "feedbackLetterAtStart": true
+    },
+    {
+      "lessonId": "L2",
+      "zone": "z2",
+      "title": "2차시 · AI 크레인 두뇌와 전기 자동차",
+      "reflectionScript": "L2.json",
+      "npcs": [
+        "boss",
+        "auto",
+        "mayor",
+        "evdriver"
+      ],
+      "feedbackLetterAtStart": true
+    },
+    {
+      "lessonId": "L3",
+      "zone": "z3",
+      "title": "3차시 · 전기를 아끼고 안전하게, AI 안전 로봇 가르치기",
+      "reflectionScript": "L3.json",
+      "npcs": [
+        "guard",
+        "volt",
+        "moon",
+        "star"
+      ],
+      "feedbackLetterAtStart": true
+    }
+  ]
+}

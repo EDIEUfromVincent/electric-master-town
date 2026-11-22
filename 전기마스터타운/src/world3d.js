@@ -500,6 +500,7 @@ const CAM3 = {yaw:0, pitch:.92, dist:13, tx:30, ty:0, tz:22, sx:0, sy:0, uYaw:0,
   fpActive:false, eye:[0, 0, 0], V:null, P:null, VP:null, fov:.8, csYaw:0, inCs:false, snap:true};
 function cam3Snap(){ CAM3.snap = true; }
 function dialogNPC(){
+  if (UI.wrap && WRAP.speak && WORLD && !UI.dialog) return WORLD.objects.find(q => q.type === 'npc' && q.id === WRAP.speak) || null;   /* 정리 회의에서 말하는 사람 */
   const D = UI.dialog; if (!D || !WORLD || MODE !== 'play') return null;
   const ln = D.lines[D.i], who = (ln && typeof ln === 'object' && ln.who) || D.who; if (!who) return null;
   const o = WORLD.objects.find(q => q.type === 'npc' && q.name === who) || (WORLD.walkers || []).find(q => q.name === who);

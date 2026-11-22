@@ -54,6 +54,8 @@ const nameId = n => 'n:' + n.toLowerCase();
 /* 예전 방식(반 · 번호) 기록: 이름 → 파일 목록을 시작할 때 한 번만 모아 둔다 (로그인마다 폴더 전체를 읽지 않게) */
 const LEGACY = new Map();
 try { for (const f of fs.readdirSync(STU_DIR)){ if (!f.endsWith('.json')) continue; try { const o = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); if (o && o.id && !String(o.id).startsWith('n:') && !o.migrated){ const k = cleanName(o.name); LEGACY.set(k, (LEGACY.get(k) || []).concat(f)); } } catch (e) {} } } catch (e) {}
+/* 정리 회의 · 구글 시트 기록 · 선생님 편지 (lad/). 구글 시트 연결은 환경 변수 GAS_WEBAPP_URL · GAS_SHARED_SECRET */
+const LAD = require('./lad').createLad({ROOT, DATA_DIR, SECRET, readStu, writeStu, idFromToken, send});
 /* 어떤 오류가 나도 서버가 꺼지지 않게 기록만 남긴다 */
 process.on('uncaughtException', e => console.error('uncaught', e));
 process.on('unhandledRejection', e => console.error('unhandled', e));
@@ -65,6 +67,7 @@ async function handleApi(req, res, p){
   let body;
   try { body = await readBody(req, p === '/api/save' ? 4 * 1024 * 1024 : 16 * 1024); }
   catch (e) { return send(res, e.code || 400, {error:'잘못된 요청'}); }
+  if (await LAD.handle(req, res, p, body)) return;
 
   if (p === '/api/login'){
     /* 전국 어디서든: 이름(또는 별명) + 비밀번호(숫자 4~8자리)만으로 들어온다. 같은 이름은 한 사람만 쓸 수 있다 */
@@ -116,6 +119,6 @@ const server = http.createServer((req, res) => {
 /* 새 배포로 바뀔 때 Railway가 보내는 종료 신호: 받던 요청을 마치고 조용히 끝낸다 (오류 종료로 보이지 않게) */
 for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => {
   console.log('종료 신호 ' + sig + ' — 정상 종료합니다');
-  server.close(() => process.exit(0));
-  setTimeout(() => process.exit(0), 3000).unref();
+  LAD.shutdown().catch(() => {}).finally(() => server.close(() => process.exit(0)));
+  setTimeout(() => process.exit(0), 8000).unref();
 });
