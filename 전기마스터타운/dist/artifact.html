@@ -415,6 +415,10 @@ kbd{font-family:var(--font-display);background:var(--ink);border:2px solid var(-
 .ds-sent select{font-size:15px;padding:4px 6px;border-radius:8px;max-width:100%}
 .ds-sent label{display:block;margin-top:4px}
 .ds-prev{background:#132231;border-radius:8px;padding:8px 12px;font-weight:700}
+.wu-judge{max-height:34vh;overflow:auto;background:rgba(19,34,49,.96);border:2px solid #2f74c0;border-radius:10px;padding:8px 12px;margin:6px 0;font-size:14px}
+.wu-judge .jd-head{margin:0 0 4px;color:var(--text-dim);font-size:13px}
+.jd-list{margin:0;padding-left:18px}.jd-list li{margin:5px 0;line-height:1.5}.jd-list small{color:var(--text-dim)}
+.jd-correct{color:var(--ok)}.jd-partial{color:#ffd23f}.jd-miss{color:#ffaaa1}
 #mgCount{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:120px;color:var(--volt);text-shadow:0 6px 0 rgba(0,0,0,.4);background:rgba(10,16,24,.35);pointer-events:none}
 .mg-say{width:min(1180px,100%);background:#fffdf4;color:var(--text-dark);border:3px solid #1c2733;border-radius:12px;padding:8px 12px;font-size:15px;line-height:1.45;font-weight:700}
 .mg-say[hidden]{display:none}
@@ -832,7 +836,8 @@ button.mg-st:hover{border-color:var(--volt)}
   </div>
 
   <div id="wrapUI" hidden role="dialog" aria-label="정리 회의">
-    <div class="wu-head"><span class="wu-zone" id="wuZone"></span><span class="wu-stage" id="wuStage"></span><span class="wu-ai" id="wuAi" hidden></span><button class="btn small" id="wuPause" type="button">잠시 멈추기</button></div>
+    <div class="wu-head"><span class="wu-zone" id="wuZone"></span><span class="wu-stage" id="wuStage"></span><span class="wu-ai" id="wuAi" hidden></span><button class="btn small" id="wuJudge" type="button" hidden></button><button class="btn small" id="wuPause" type="button">잠시 멈추기</button></div>
+    <div class="wu-judge" id="wuJudgeList" hidden></div>
     <div class="wu-who" id="wuWho"></div>
     <div class="wu-line" id="wuLine" aria-live="polite"></div>
     <div class="wu-input" id="wuInput"></div>
@@ -4031,6 +4036,13 @@ function openGuide(){
     <p>3차시 <b>AI 안전 로봇실</b> 오른쪽의 🛠️ 컴퓨터(미니 게임 목록에도 있어요). 활동 1~10, 전자석 배지, 인증서, 차시 완료 조건에는 들어가지 않는 <b>선택 활동</b>이고, 끝내면 선택 배지 <b>‘AI 발명가’</b>를 받아요. (배치와 필수 여부는 선생님이 정해 주세요)</p>
     <p>흐름: <b>Z1</b> 마을 민원 카드 고르기(선풍기 · 크레인 · 세탁기 · 전기차) → <b>Z2</b> 필요한 전자석 성질 모두 고르기(부분 점수, 스위치로 끄는 것은 전자석의 ‘켜고 끄기’가 아니라는 피드백) → <b>Z3</b> 감지 카드(센서 · 인식) 고르기 → 예/아니요 질문 길(판단 · 표현·추론) → 통에 전자석 행동(끄기 · 약하게 · 세게 · 극 바꾸기) → <b>Z4</b> 처음 보는 장면 8개로 시험(정확도 · 전기 사용량, 고양이 · 센서 고장 같은 가장자리 장면 포함) → <b>Z5</b> 틀린 장면의 까닭(감지/판단/행동) · "센서가 틀리면 사람이 무엇을 확인해야 할까?" · 설계 한 문장("만약 ___을 감지하면, 전자석의 ___을 ___ 한다. 왜냐하면 ___") · 확장 질문(에어컨과 열선 난로 / 전기차의 방향과 빠르기).</p>
     <p class="note">센서 값이 ‘?’(가려짐 · 고장)이면 어떤 질문이든 답이 ‘아니요’로 가요. 그래서 "1m 안으로 가까운가요?" 대신 "1m보다 먼가요?"처럼 <b>‘아니요’ 쪽이 안전한 행동으로 이어지게</b> 질문을 고르는 것이 설계의 핵심 장면이에요(센서가 모를 때 안전한 쪽으로 — 사회적 영향). 설계 한 문장은 📣 캠페인 갤러리에 모이고, 판단 기록은 <code>a11.props.카드</code> · <code>a11.wrongWhy.sensor|split|action</code> · <code>a11.sensorCheck.maintain|human|failsafe|trust</code> · <code>a11.design.카드</code> · <code>a11.ext.태그</code>로 3차시(L3) 게임로그에 남아요. 예상 시간 10~15분(시험 2~3번 기준).</p>
+    <h3>판단 기록과 성찰 잇기</h3>
+    <p>게임 속 판단(반례 사냥 · 냉장고 문 · 판단 카드의 경계 사례 · 상점 '목적에 맞게 고르기'의 영구 자석 카드 · 크레인 정전 · 시장님 질문 · 설계실)은 이렇게 이어져요.</p>
+    <p>· <b>정리 회의</b>: 화면 위 <b>🧭 내 판단</b> 단추로 그 차시에 한 판단을 펼쳐 볼 수 있어요. AI 튜터가 켜져 있으면 튜터도 같은 기록을 <b>참고 자료</b>로만 받아 "게임에서 ~라고 판단했지?"처럼 떠올리게 해요(판정을 대신하지 않고, 위험 표시가 붙은 문장은 넘기지 않아요).<br>
+    · <b>1차시 정리 회의</b>에 경계 판단 확인점 <b>'영구 자석이 알맞은 곳'</b>(냉장고 문에는 왜 영구 자석을 쓸까? → 만약: 정전이면 전자석 냉장고 문은?)이 E1 다음에 들어갔어요. 모두 막혀도 끝까지 다루도록 1차시만 규칙 엔진의 턴 한도를 40 → 52로 늘렸어요.<br>
+    · <b>배움 기록</b>(활동 목록의 배움 기록 · 시청 기록실 문서)에 차시마다 '🧭 게임 속 나의 판단'이 들어가요. 질문마다 마지막으로 인정받은 답(없으면 마지막 답)을 한 줄로 보여 줘요.<br>
+    · <b>설계실 마지막 질문</b>: 볼트 박사가 "지금까지 대화한 시장님과 마을 사람들은 AI일까, 규칙일까?"를 묻고 정직하게 답해요 — 마을 사람들은 미리 만든 규칙(대본)이고, 정리 회의에서 선생님이 AI 튜터를 켜 두었을 때만 AI가 인물의 목소리로 질문하며 🤖 표시가 나와요.</p>
+    <p class="note">설계실 정리 대본 초안은 <code>lessons/L3-design.json</code>(status: draft)이에요. 서버는 draft 대본을 쓰지 않으니, 설계실의 배치를 정한 뒤 정리 교실과 lessonId를 맞추고 ready로 바꿔 주세요.</p>
     <h3>개인정보와 안전</h3>
     <p>학습 문장·상황 카드·모둠 이름에 실명, 학교, 연락처를 쓰지 않도록 지도해 주세요. 숫자가 길게 이어지거나 '학교'가 들어간 문장은 프로그램이 경고해요. 위험 장면은 게임 속에서만 다루고 실제 콘센트로 따라 하지 않도록 지도해요.</p>
     <h3>AI 모델에 대해</h3>
@@ -7542,6 +7554,7 @@ function detS4(api){
     if (S.step !== 1) return;
     const d = deck[S.i], want = judgeKindOf(d), ok = k === want;
     document.querySelectorAll('[data-k]').forEach(b => { b.disabled = true; b.classList.toggle('good', b.dataset.k === want); });
+    if (BOUNDARY_ITEMS.includes(d)) ladJudge('a2', `a2.judge.${d.id}.${k}`, `${d.name} → ${(JUDGE_KIND.find(x => x[0] === k) || [])[2] || k}`, ok ? 'correct' : 'miss', '판단 카드: 이 물건에 전자석이 있을까?', 'sun');   /* 경계 사례 판단 기록 (EM 재설계 P5) */
     if (ok && want === 'em'){
       S.score += 1; S.step = 2; SND.ok();
       const f = $('#jFb'); f.innerHTML = `<p class="mg-q">✓ 맞아요! <b>② 이 물건이 쓰는 전자석의 성질을 모두 골라요.</b></p><div class="mg-choices">${[['onoff', '🔌', '켜고 끄기', '전기가 흐를 때만 자석'], ['power', '🔆', '세기', '자석의 세기를 바꿈'], ['pole', '🧭', '극의 방향', '극의 방향을 바꿈']].map(([p, i, t, s]) => `<button class="btn mg-ch" data-pp="${p}"><span>${i}</span><b>${t}</b><small>${s}</small></button>`).join('')}</div><div class="row" style="justify-content:center;margin-top:6px"><button class="btn primary" id="jOk" disabled>다 골랐어요 ✓</button></div>`;
@@ -10082,7 +10095,7 @@ function dsBuild(api){
     const c = ctx.card, test = ctx.test || dsTest(c, ctx.T), wrong = test.res.filter(r => !r.ok);
     api.bot(''); api.pop(); ctx.tok = null; ctx.sel = null; ctx.phase = 'z5';
     const steps = [];
-    if (wrong.length) steps.push(why1); steps.push(check2, sentence3, ext4);
+    if (wrong.length) steps.push(why1); steps.push(check2, sentence3, ext4, meta5);
     let si = 0; const go = () => (si < steps.length ? steps[si++](go) : finish());
     function why1(nx){
       const r = wrong[0], cause = dsCause(c, test, r);
@@ -10143,6 +10156,15 @@ function dsBuild(api){
       setTimeout(() => { if (!IS_TOUCH) Dd.focus(); }, 60);
     }
     function ext4(nx){ const E = DS_EXT[c.ext]; api.say('🚀 <b>확장 질문</b> · 오늘 설계한 것을 다른 기기로 넓혀 봐요.'); choose('🚀 확장 질문', E.q, mgShuffle(E.opts), 'a11.ext', nx); }
+    /* 상호작용 메타 질문 (P5): 지금까지 대화한 마을 사람들은 AI일까, 규칙일까? — 정직하게 밝힌다 */
+    function meta5(nx){
+      const tutorOn = !!(typeof LAD !== 'undefined' && LAD.st && LAD.st.ai);
+      api.say('🤖 <b>마지막 질문</b> · 볼트 박사가 묻는 AI와 상호작용 이야기예요.');
+      choose('🤖 볼트 박사의 질문', '그런데 지금까지 너랑 대화한 시장님과 마을 사람들은 AI일까, 자동이처럼 규칙으로 움직일까?', mgShuffle([
+        {t:'게임을 만든 사람이 미리 만든 규칙(대본)대로 대답했다', ok:'ok', tag:'rules', r:`맞아요! 마을 사람들은 미리 만든 규칙(대본)과 선택지 안에서만 대답해요. 오늘 만든 기기와 자동이의 질문 길도 규칙이에요.${tutorOn ? ' 단, 정리 회의 칠판에서는 선생님이 켜 둔 AI 튜터가 인물의 목소리로 함께 질문해요. 그때는 화면 위에 🤖 표시가 나오고, 선생님이 대화를 봐요.' : ' 정리 회의에서 선생님이 AI 튜터를 켜 두면, 그때만 AI가 인물의 목소리로 질문하고 화면에 🤖 표시가 나와요.'}`},
+        {t:'스스로 생각하는 AI라서 무엇이든 알아서 대답했다', ok:'no', tag:'ai', r:'그렇게 느껴질 수 있어요! 그런데 시장님은 정해진 질문과 선택지 안에서만 대답했지요? 다시 골라 볼래요?'},
+        {t:'화면 뒤에서 진짜 사람이 대답했다', ok:'no', tag:'human', r:'화면 뒤에 사람이 있는 건 아니에요. 대답이 늘 정해진 모양이었던 걸 떠올려 다시 골라 볼래요?'}]), 'a11.meta', nx);
+    }
     function finish(){
       dom('');
       const ok = test.ok, bolts = ok === 8 ? (ctx.tries <= 2 ? 3 : 2) : ok >= 6 ? (ctx.tries <= 2 ? 2 : 1) : 1;
@@ -10800,8 +10822,14 @@ function portfolioText(){
     }
     if (a.id === 'a5'){ const runs = (SAVE.treeRuns || []).filter(t => t.kind === 'test'); if (runs.length) lines.push(`- 새 고철 시험: ${runs.length}번 · 처음 ${Math.round(runs[0].acc * 100)}% → 가장 좋을 때 ${Math.round(Math.max(...runs.map(x => x.acc)) * 100)}%`); }
     if (a.ev && SAVE.evq && SAVE.evq.step >= 2) lines.push(`- 시장님 설득: ${SAVE.evq.miss ? `다시 말한 횟수 ${SAVE.evq.miss}번` : '한 번에 성공'}`);
+    judgeOfAct(a.id).forEach(l => lines.push(`- 내 판단: ${judgeLine(l)}`));   /* 게임 속 판단 기록 (judge.js) */
     lines.push('');
   });
+  /* 선택 활동 · 자유 탐험의 판단 */
+  for (const [id, title] of [['a11', '🛠️ 스마트 기기 설계실 (선택 활동)'], ['shop', '🧲 전자석 제품 상점 (자유 탐험)']]){
+    const jd = judgeOfAct(id); if (!jd.length) continue;
+    lines.push(`■ ${title}`); jd.forEach(l => lines.push(`- 내 판단: ${judgeLine(l)}`)); lines.push('');
+  }
   return lines.join('\n');
 }
 function portfolioHTMLDoc(){
@@ -11778,9 +11806,9 @@ function openFrame(key){
 /* ===== 영구 자석이 맞는 자리 · 해님네 냉장고 문 ===== */
 const QUIZ_THINGS = {
   fridge:{who:'해님', q:'우리 집 냉장고 문에는 왜 전자석이 아니라 영구 자석을 쓸까?', choices:[
-    {t:'늘 붙어 있으면 되니까 켜고 끌 필요가 없고, 전기도 들지 않아서', ok:true, r:'맞아! 조절할 일이 없으면 전기를 들일 까닭이 없지. 그래서 영구 자석이 알맞아.'},
-    {t:'전자석은 철에 붙지 않아서', r:'전자석도 철에 붙어. 고철장 크레인을 떠올려 봐. 다시 골라 볼래?'},
-    {t:'영구 자석이 전자석보다 항상 더 세서', r:'세기는 전자석도 아주 세게 만들 수 있어. 핵심은 조절이 필요한가야. 다시 골라 볼래?'}],
+    {t:'늘 붙어 있으면 되니까 켜고 끌 필요가 없고, 전기도 들지 않아서', ok:true, tag:'no-control', r:'맞아! 조절할 일이 없으면 전기를 들일 까닭이 없지. 그래서 영구 자석이 알맞아.'},
+    {t:'전자석은 철에 붙지 않아서', tag:'em-nostick', r:'전자석도 철에 붙어. 고철장 크레인을 떠올려 봐. 다시 골라 볼래?'},
+    {t:'영구 자석이 전자석보다 항상 더 세서', tag:'perm-stronger', r:'세기는 전자석도 아주 세게 만들 수 있어. 핵심은 조절이 필요한가야. 다시 골라 볼래?'}],
     after:'전자석은 켜고 끄거나 세기·방향을 바꿔야 할 때 쓰고, 늘 붙어 있기만 하면 되는 곳에는 영구 자석을 써요.'},
 };
 function quizState(){ if (!SAVE.quiz || typeof SAVE.quiz !== 'object') SAVE.quiz = {}; return SAVE.quiz; }
@@ -11788,7 +11816,7 @@ function quizThing(o){
   const Q = QUIZ_THINGS[o.key]; if (!Q) return;
   const st = quizState(), first = !st[o.key];
   const node = {who:Q.who, text:Q.q, choices:[]};
-  node.choices = mgShuffle(Q.choices).map(c => ({label:c.t, fn:() => { if (c.ok){ st[o.key] = st[o.key] || {at:Date.now(), tries:(st._t || 0) + 1}; } else st._t = (st._t || 0) + 1; },
+  node.choices = mgShuffle(Q.choices).map(c => ({label:c.t, fn:() => { if (c.tag) ladJudge(Q.act || 'a2', `${Q.act || 'a2'}.${o.key}.${c.tag}`, c.t, c.ok ? 'correct' : 'miss', Q.q, Q.npc || 'sun'); if (c.ok){ st[o.key] = st[o.key] || {at:Date.now(), tries:(st._t || 0) + 1}; } else st._t = (st._t || 0) + 1; },
     next:c.ok ? [{who:Q.who, text:c.r}, {who:Q.who, text:Q.after}] : [{who:Q.who, text:c.r}, node]}));
   st._t = 0;
   showDialog(Q.who, [node], () => { delete st._t; persist(); if (first && st[o.key]){ award('em', 6); award('eco', 3); rpgToast('🧲 <b>영구 자석의 자리</b>를 찾았어요! 조절이 필요 없으면 영구 자석이 알맞아요.', 'item'); } updateHUD(); });
@@ -12029,12 +12057,12 @@ function shopClue(api){
 }
 /* 4단계 · 목적에 맞게 고르기: 영구 자석에게도 '맞는 자리'가 있다 (조절이 필요한가, 전기를 들일 만한가) */
 const PURPOSE_CARDS = [
-  {q:'냉장고에 메모를 붙여 두기', icon:'📝', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 켜고 끌 필요가 없어요. 전기도 들지 않는 영구 자석이 알맞아요.'},
+  {id:'memo', q:'냉장고에 메모를 붙여 두기', icon:'📝', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 켜고 끌 필요가 없어요. 전기도 들지 않는 영구 자석이 알맞아요.'},
   {q:'버튼을 누를 때만 딩동 울리기', icon:'🔔', a:'em', why:'누를 때만 자석이 되어야 하니까 전기가 흐를 때만 자석이 되는 전자석이 필요해요.'},
   {q:'선풍기 바람 세기를 1·2·3단으로 바꾸기', icon:'🌀', a:'em', why:'세기를 바꿔야 하니까 전자석(전동기)이 필요해요.'},
-  {q:'산에서 방향 찾기', icon:'🧭', a:'perm', why:'바늘이 늘 같은 극이면 되니까 영구 자석 나침반이 알맞아요. 전기가 없어도 돼요.'},
+  {id:'compass', q:'산에서 방향 찾기', icon:'🧭', a:'perm', why:'바늘이 늘 같은 극이면 되니까 영구 자석 나침반이 알맞아요. 전기가 없어도 돼요.'},
   {q:'고철을 들었다가 원하는 곳에 내려놓기', icon:'🏗️', a:'em', why:'내려놓으려면 자석을 꺼야 하니까 켜고 끌 수 있는 전자석이 필요해요.'},
-  {q:'필통 뚜껑이 저절로 닫혀 있게 하기', icon:'✏️', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 작은 영구 자석이면 충분해요.'},
+  {id:'pencil', q:'필통 뚜껑이 저절로 닫혀 있게 하기', icon:'✏️', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 작은 영구 자석이면 충분해요.'},
   {q:'책상 위를 밝게 비추기', icon:'💡', a:'none', why:'빛만 내면 되니까 자석이 필요 없어요. (LED 스탠드)'},
   {q:'세탁통을 왼쪽·오른쪽으로 번갈아 돌리기', icon:'🧺', a:'em', why:'극의 방향을 바꿔야 하니까 전자석(전동기)이 필요해요.'},
   {q:'물을 따뜻하게 데우기', icon:'🫖', a:'none', why:'열선이 뜨거워지면 되니까 자석이 필요 없어요. (전기 주전자)'},
@@ -12052,6 +12080,7 @@ function shopPurpose(api){
   const answer = a => {
     if (S.lock) return; S.lock = true;
     const c = deck[S.i], ok = a === c.a; if (ok) S.ok++;
+    if (c.id) ladJudge('shop', `shop.perm-${c.id}.${a}`, `${c.q} → ${(PURPOSE_OPTS.find(x => x[0] === a) || [])[2] || a}`, ok ? 'correct' : 'miss', '목적에 맞게 고르기: 이 일에는 무엇이 알맞을까?', 'shopkeeper');   /* 영구 자석이 맞는 자리 판단 기록 (P5) */
     (ok ? SND.ok : SND.bad).call(SND);
     document.querySelectorAll('[data-a]').forEach(b => { b.disabled = true; b.classList.toggle('good', b.dataset.a === c.a); });
     const extra = !ok && a === 'em' && c.hold ? ' 전자석도 쓸 수는 있지만, 늘 켜 두려면 전기가 계속 들어요. 조절이 필요 없으면 영구 자석이 알맞아요.' : '';
@@ -12242,6 +12271,7 @@ function wrapOpen(z, lesson){
   wrapStandAside(b); showHUD(false);
   $('#wrapUI').hidden = false; $('#wrapUI').style.setProperty('--zc', z.color);
   $('#wuZone').textContent = `${z.icon} ${z.no}차시 정리 회의`; $('#wuAi').hidden = true;
+  judgeWrapUI(lesson);   /* 🧭 게임 속 판단 기록 (judge.js) */
   wrapLine('', '🪑 모두 칠판 앞에 모이는 중…'); wrapInput(null);
   SFX.ping();
 }
@@ -12816,6 +12846,8 @@ function buildLearningDoc(){
     T.push('한 활동: ' + acts.map(a => `${actDone(a) ? '✔' : '□'} ${a.title}`).join(' / '));
     let h = `<section><h2><span class="no">${z.no}차시</span> ${esc(z.icon)} ${esc(z.name)}</h2>
       <p class="acts">${acts.map(a => `<span class="${actDone(a) ? 'ok' : ''}">${actDone(a) ? '✔' : '□'} ${esc(a.title)}</span>`).join('')}</p>`;
+    const jd = judgeOfLesson(L);   /* 🧭 게임 속 나의 판단 (반례 사냥 · 정전 사건 · 시장님 질문 · 판단 카드 · 설계실) */
+    if (jd.length){ h += `<div class="jd"><small>🧭 게임 속 나의 판단</small>${judgeListHTML(jd)}</div>`; T.push('게임 속 나의 판단:'); jd.forEach(l => T.push('  · ' + judgeLine(l))); }
     if (rec && rec.done){
       h += `<div class="one"><small>📌 오늘의 한 문장</small><p>${esc(rec.sentence || '—')}</p></div>`;
       T.push(`오늘의 한 문장: ${rec.sentence || '—'}`);
@@ -12853,6 +12885,7 @@ function buildLearningDoc(){
     .cps span{display:inline-block;font-size:12px;border:1px solid #d5dbe2;border-radius:999px;padding:1px 8px;margin:6px 6px 0 0}.cps .self{border-color:#25a862;color:#1d7a46}.cps .support{border-color:#e5737f;color:#b23a48}
     .letter{background:#fdf4e3;border-left:5px solid #e2a93a;border-radius:8px;padding:8px 12px;margin-top:10px}.letter i{font-weight:400;color:#8a6d3b}.letter p{margin:4px 0}.reply{color:#3a4a5a}
     .none{color:#8a96a3}.note{color:#6b7a8a;font-size:12.5px}small{font-weight:700}
+    .jd{background:#f3f7fb;border-left:4px solid #2f74c0;border-radius:8px;padding:8px 12px;margin:8px 0}.jd small{color:#2f74c0;font-weight:700}.jd-list{margin:4px 0 0;padding-left:18px}.jd-list li{margin:4px 0}.jd-list small{color:#6b7a8a}
     @media print{body{margin:0}section{border-color:#bbb}}`;
   const body = H.join('\n');
   const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>전기 마스터 타운 · 나의 배움 기록</title><style>${css}</style></head><body>${body}</body></html>`;
@@ -12935,14 +12968,14 @@ function openEnding(){
 const CONCEPT_GEN = '사람은 자기력을 켜고 끄거나, 세기와 방향을 조절해야 할 때 전기 에너지를 들여 전자석을 쓴다.';
 function p2State(){ if (!SAVE.p2 || typeof SAVE.p2 !== 'object') SAVE.p2 = {}; return SAVE.p2; }
 /* ACTS 밖의 선택 활동은 놓인 차시로 기록한다 (a11 스마트 기기 설계실 = 3차시 AI 안전 로봇실) */
-const JUDGE_LESSON = {a11:'L3'};
+const JUDGE_LESSON = {a11:'L3', shop:'L1'};   /* 상점(자유 탐험)은 1차시 '전자석의 쓰임'과 이어진다 */
 const lessonOfAct = id => { if (JUDGE_LESSON[id]) return JUDGE_LESSON[id]; const L = zoneOfAct(id); return L ? wrapLessonOf(L.z) : null; };
 
 /* 판단 기록: 학급 서버가 있으면 시트로, 없어도 이 기기에 남긴다 (배움 기록 문서용) */
 function ladJudge(actId, nodeId, studentText, result, npcText, npc){
   const st = p2State(); st.log = Array.isArray(st.log) ? st.log : [];
   const text = ladMask(studentText).slice(0, 200);
-  st.log.push({at:Date.now(), act:actId, node:nodeId, text, result}); if (st.log.length > 60) st.log.splice(0, st.log.length - 60);
+  st.log.push({at:Date.now(), act:actId, node:nodeId, text, result, q:String(npcText || '').slice(0, 90)}); if (st.log.length > 60) st.log.splice(0, st.log.length - 60);
   persist();
   const lesson = lessonOfAct(actId);
   if (!ACC.server || !ACC.id || !lesson) return;
@@ -13073,6 +13106,38 @@ function craneBlackout(){
       });
     }, 1300);
   });
+}
+
+/* ===== 판단 기록 모아 보기 (EM 재설계 P5): 정리 회의 화면 · 배움 기록 문서 =====
+   질문마다 한 줄: 같은 질문에 여러 번 답했으면 마지막으로 인정받은 답(없으면 마지막 답) */
+const JUDGE_RES = {correct:'✔ 인정', partial:'◐ 되물음', miss:'💡 다시 생각', info:''};
+function judgeList(filter){
+  const st = p2State(), log = Array.isArray(st.log) ? st.log : [], by = new Map();
+  for (const l of log){
+    if (!l || !filter(l)) continue;
+    const key = l.act + '|' + String(l.node || '').replace(/\.[^.]+$/, '') + '|' + (l.q || '');
+    const prev = by.get(key);
+    if (!prev || l.result !== 'miss' || prev.result === 'miss') by.set(key, l);
+  }
+  return [...by.values()].sort((a, b) => a.at - b.at);
+}
+const judgeOfLesson = lesson => judgeList(l => lessonOfAct(l.act) === lesson);
+const judgeOfAct = id => judgeList(l => l.act === id);
+/* 질문 글이 없는 예전 기록은 노드ID 앞부분으로 이름을 붙인다 */
+const JUDGE_LABEL = {'a2.counterexample':'반례 사냥: 영구 자석을 쓰는 곳과 까닭', 'a2.fridge':'냉장고 문에 영구 자석을 쓰는 까닭', 'a2.judge':'판단 카드: 이 물건에 전자석이 있을까?', 'shop.perm':'목적에 맞게 고르기',
+  'a4.blackout':'크레인 정전 사건', 'a6.energySource':'충전소 전기는 어디서 오나', 'a11.props':'설계: 필요한 전자석 성질', 'a11.wrongWhy':'설계: 틀린 장면의 까닭', 'a11.sensorCheck':'설계: 센서가 틀리면',
+  'a11.design':'설계 한 문장', 'a11.ext':'설계: 확장 질문', 'a11.meta':'설계: AI일까, 규칙일까'};
+const judgeQ = l => l.q || (Object.entries(JUDGE_LABEL).find(([k]) => String(l.node || '').startsWith(k)) || [])[1] || l.node;
+const judgeLine = l => `${judgeQ(l)} → ${l.text}${JUDGE_RES[l.result] ? ` (${JUDGE_RES[l.result]})` : ''}`;
+function judgeListHTML(list){ return `<ul class="jd-list">${list.map(l => `<li><small>${esc(judgeQ(l))}</small><br>「${esc(l.text)}」 <b class="jd-${esc(l.result)}">${esc(JUDGE_RES[l.result] || '')}</b></li>`).join('')}</ul>`; }
+/* 정리 회의 화면: 이 차시에 게임에서 한 판단을 펼쳐 볼 수 있다 (AI 튜터도 같은 기록을 참고 자료로 본다) */
+function judgeWrapUI(lesson){
+  const b = $('#wuJudge'), box = $('#wuJudgeList'); if (!b || !box) return;
+  const list = judgeOfLesson(lesson);
+  b.hidden = !list.length; box.hidden = true; box.innerHTML = '';
+  if (!list.length) return;
+  b.textContent = `🧭 내 판단 ${list.length}`;
+  b.onclick = () => { box.hidden = !box.hidden; if (!box.hidden) box.innerHTML = '<p class="jd-head">게임에서 내가 한 판단이에요. 정리 회의에서 떠올려 써도 좋아요.</p>' + judgeListHTML(list); };
 }
 /* =========================================================
    👤 학생 로그인 · 학생별 기록

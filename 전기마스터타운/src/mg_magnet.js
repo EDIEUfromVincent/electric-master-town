@@ -283,6 +283,7 @@ function detS4(api){
     if (S.step !== 1) return;
     const d = deck[S.i], want = judgeKindOf(d), ok = k === want;
     document.querySelectorAll('[data-k]').forEach(b => { b.disabled = true; b.classList.toggle('good', b.dataset.k === want); });
+    if (BOUNDARY_ITEMS.includes(d)) ladJudge('a2', `a2.judge.${d.id}.${k}`, `${d.name} → ${(JUDGE_KIND.find(x => x[0] === k) || [])[2] || k}`, ok ? 'correct' : 'miss', '판단 카드: 이 물건에 전자석이 있을까?', 'sun');   /* 경계 사례 판단 기록 (EM 재설계 P5) */
     if (ok && want === 'em'){
       S.score += 1; S.step = 2; SND.ok();
       const f = $('#jFb'); f.innerHTML = `<p class="mg-q">✓ 맞아요! <b>② 이 물건이 쓰는 전자석의 성질을 모두 골라요.</b></p><div class="mg-choices">${[['onoff', '🔌', '켜고 끄기', '전기가 흐를 때만 자석'], ['power', '🔆', '세기', '자석의 세기를 바꿈'], ['pole', '🧭', '극의 방향', '극의 방향을 바꿈']].map(([p, i, t, s]) => `<button class="btn mg-ch" data-pp="${p}"><span>${i}</span><b>${t}</b><small>${s}</small></button>`).join('')}</div><div class="row" style="justify-content:center;margin-top:6px"><button class="btn primary" id="jOk" disabled>다 골랐어요 ✓</button></div>`;

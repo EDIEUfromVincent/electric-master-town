@@ -165,6 +165,7 @@ function wrapOpen(z, lesson){
   wrapStandAside(b); showHUD(false);
   $('#wrapUI').hidden = false; $('#wrapUI').style.setProperty('--zc', z.color);
   $('#wuZone').textContent = `${z.icon} ${z.no}차시 정리 회의`; $('#wuAi').hidden = true;
+  judgeWrapUI(lesson);   /* 🧭 게임 속 판단 기록 (judge.js) */
   wrapLine('', '🪑 모두 칠판 앞에 모이는 중…'); wrapInput(null);
   SFX.ping();
 }
@@ -739,6 +740,8 @@ function buildLearningDoc(){
     T.push('한 활동: ' + acts.map(a => `${actDone(a) ? '✔' : '□'} ${a.title}`).join(' / '));
     let h = `<section><h2><span class="no">${z.no}차시</span> ${esc(z.icon)} ${esc(z.name)}</h2>
       <p class="acts">${acts.map(a => `<span class="${actDone(a) ? 'ok' : ''}">${actDone(a) ? '✔' : '□'} ${esc(a.title)}</span>`).join('')}</p>`;
+    const jd = judgeOfLesson(L);   /* 🧭 게임 속 나의 판단 (반례 사냥 · 정전 사건 · 시장님 질문 · 판단 카드 · 설계실) */
+    if (jd.length){ h += `<div class="jd"><small>🧭 게임 속 나의 판단</small>${judgeListHTML(jd)}</div>`; T.push('게임 속 나의 판단:'); jd.forEach(l => T.push('  · ' + judgeLine(l))); }
     if (rec && rec.done){
       h += `<div class="one"><small>📌 오늘의 한 문장</small><p>${esc(rec.sentence || '—')}</p></div>`;
       T.push(`오늘의 한 문장: ${rec.sentence || '—'}`);
@@ -776,6 +779,7 @@ function buildLearningDoc(){
     .cps span{display:inline-block;font-size:12px;border:1px solid #d5dbe2;border-radius:999px;padding:1px 8px;margin:6px 6px 0 0}.cps .self{border-color:#25a862;color:#1d7a46}.cps .support{border-color:#e5737f;color:#b23a48}
     .letter{background:#fdf4e3;border-left:5px solid #e2a93a;border-radius:8px;padding:8px 12px;margin-top:10px}.letter i{font-weight:400;color:#8a6d3b}.letter p{margin:4px 0}.reply{color:#3a4a5a}
     .none{color:#8a96a3}.note{color:#6b7a8a;font-size:12.5px}small{font-weight:700}
+    .jd{background:#f3f7fb;border-left:4px solid #2f74c0;border-radius:8px;padding:8px 12px;margin:8px 0}.jd small{color:#2f74c0;font-weight:700}.jd-list{margin:4px 0 0;padding-left:18px}.jd-list li{margin:4px 0}.jd-list small{color:#6b7a8a}
     @media print{body{margin:0}section{border-color:#bbb}}`;
   const body = H.join('\n');
   const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>전기 마스터 타운 · 나의 배움 기록</title><style>${css}</style></head><body>${body}</body></html>`;

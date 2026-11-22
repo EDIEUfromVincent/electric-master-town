@@ -98,7 +98,8 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
       await ai.refresh();
       /* AI 튜터가 켜져 있으면 AI가, 아니면 규칙 엔진이 정리 회의를 이끈다 (이어 하기는 하던 쪽으로) */
       const useAi = body.resume && tutor.has(body.resume) ? true : body.resume && engine.store.has(String(body.resume)) ? false : tutor.ready(lessonId);
-      const r = useAi ? tutor.start(player, lessonId, body.resume) : engine.start(player, lessonId, body.resume);
+      const judged = ((ladOf(s).judge || {})[lessonId] || []).slice(-8);   /* 이 차시에서 학생이 게임 속에서 한 판단 (AI 튜터의 참고 자료) */
+      const r = useAi ? tutor.start(player, lessonId, body.resume, judged) : engine.start(player, lessonId, body.resume);
       if (r.error) { send(res, 404, { error: '정리 회의 대본이 없어요' }); return true; }
       send(res, 200, r);
       return true;
@@ -120,7 +121,7 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     }
     if (p === '/api/events') {
       const list = Array.isArray(body.events) ? body.events.slice(0, 40) : [];
-      const accepted = [];
+      const accepted = []; let judged = 0;
       for (const e of list) {
         if (!e || !ID_RE.test(String(e.eventId || ''))) continue;
         if (seenIds.has(e.eventId)) { accepted.push(e.eventId); continue; }
@@ -140,8 +141,14 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
           playerKey: player.playerKey, sessionId: player.sessionId, npc: tag === 'judgment' ? R.cleanText(e.npc, 20) : '', nodeId: NODE_RE.test(String(e.nodeId || '')) ? e.nodeId : '',
           stage: '', tag, npcText, studentText, result, hintLevel: 0, flags,
         });
+        /* 판단 기록은 학생 기록에도 차시별로 남긴다 → 정리 회의 AI 튜터가 참고 자료로 본다 (최근 12개, 위험 표시 문장은 빼고) */
+        if (tag === 'judgment' && NODE_RE.test(String(e.nodeId || '')) && !flags.includes('위험')) {
+          const J = ladOf(s).judge = ladOf(s).judge || {}, arr = J[lesson] = Array.isArray(J[lesson]) ? J[lesson] : [];
+          arr.push({ nodeId: e.nodeId, text: studentText.slice(0, 120), result, at: Date.now() }); if (arr.length > 12) arr.splice(0, arr.length - 12); judged++;
+        }
         remember(e.eventId); accepted.push(e.eventId);
       }
+      if (judged) writeStu(id, s);
       send(res, 200, { accepted });
       return true;
     }

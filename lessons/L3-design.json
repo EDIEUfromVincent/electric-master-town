@@ -1,0 +1,767 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "A11",
+  "zone": "z3",
+  "status": "draft",
+  "title": "활동 11 · 스마트 기기 설계실 정리 (초안)",
+  "unit": "6학년 과학 · 전기의 이용 + 실과 인공지능",
+  "_note": "EM 재설계 P5 초안. 서버는 status가 draft인 대본을 쓰지 않는다. 교사가 a11의 배치(정리 교실)를 정한 뒤 lessonId와 zone을 맞추고 status를 ready로 바꾼다.",
+  "standards": [
+    "[6과15-03] 전자석을 만들어 전자석의 성질을 탐색하고 전자석이 사용되는 예를 조사할 수 있다.",
+    "[6실05-05] 인공지능이 만들어지는 과정을 체험하고, 인공지능이 사회에 미치는 영향을 탐색한다."
+  ],
+  "_standardsNote": "TODO(교사 확인): 성취기준 코드·문구를 2022 개정 교육과정 고시 원문과 대조해 주세요. 지도안과 같은 문구를 썼습니다.",
+  "concepts": [
+    "AI 기기는 감지(센서) → 판단(질문 길) → 행동(전자석)으로 움직인다",
+    "센서가 모를 때('?')도 안전한 쪽으로 가게 설계한다",
+    "센서와 AI는 틀릴 수 있어 사람이 점검하고 확인해야 한다",
+    "문제에 필요한 전자석 성질(켜고 끄기·세기·극의 방향)을 골라 쓴다"
+  ],
+  "rubric": {
+    "S": "감지·판단·행동 중 일부만 말함",
+    "E": "'?' 상황의 안전한 설계나 사람이 확인해야 하는 까닭을 자기 말로 설명함",
+    "R": "만약 ~을 감지하면 전자석의 ~을 ~한다는 설계 문장과 까닭을 스스로 씀"
+  },
+  "npcs": {
+    "volt": {
+      "name": "볼트 박사",
+      "style": "존댓말(~해요)"
+    }
+  },
+  "lead": "volt",
+  "vocabulary": [
+    "센서",
+    "감지",
+    "카메라",
+    "거리",
+    "무게",
+    "질문",
+    "판단",
+    "예",
+    "아니요",
+    "전자석",
+    "세기",
+    "극",
+    "방향",
+    "켜고",
+    "끄",
+    "안전",
+    "사람",
+    "확인",
+    "점검",
+    "ai",
+    "인공지능",
+    "기기",
+    "설계"
+  ],
+  "messages": {
+    "avoidPrefix": "괜찮아요, 같이 천천히 찾아봐요.",
+    "profanity": "그 말은 우리 약속과 맞지 않아요. 바른 말로 다시 이야기해 줄래요?",
+    "profanityLimit": "규칙 위반이 세 번이라 정리 회의를 잠시 멈출게요. 선생님께 도움을 요청해요.",
+    "pii": "개인정보는 적지 않기로 약속했지요? 그 부분은 빼고 다시 말해 줄래요?",
+    "danger": "그 이야기를 들으니 걱정돼요. 지금 바로 선생님이나 보호자께 꼭 말씀드려요.",
+    "mild": "친구를 배려하는 말로 이야기해 주면 더 좋겠어요.",
+    "empty": "한 낱말이라도 좋아요. 생각나는 대로 적어 줄래요?",
+    "offtopic": "재미있는 이야기지만, 지금은 전기 안전 이야기에 집중해 볼까요?"
+  },
+  "checkpoints": {
+    "S1": {
+      "label": "감지 → 판단 → 행동",
+      "stage": "S",
+      "praise": "내 기기가 움직이는 순서를 스스로 설명했어요.",
+      "next": "집에 있는 스마트 기기 하나를 골라 감지·판단·행동으로 나눠 볼래요?"
+    },
+    "E1": {
+      "label": "'?'일 때 안전한 설계",
+      "stage": "E",
+      "praise": "센서가 모를 때도 안전한 쪽으로 가게 질문을 고른 까닭을 말했어요.",
+      "next": "내 설계에서 센서 값이 '?'이면 어디로 가는지 다시 따라가 볼래요?"
+    },
+    "E2": {
+      "label": "사람이 확인할 일",
+      "stage": "E",
+      "praise": "AI가 틀릴 때 사람이 할 일을 스스로 말했어요.",
+      "next": "우리 주변 AI 기기가 틀리면 누가 무엇을 확인해야 할지 생각해 볼래요?"
+    },
+    "R1": {
+      "label": "설계 한 문장",
+      "stage": "R",
+      "praise": "설계와 그 까닭을 한 문장에 스스로 정리했어요.",
+      "next": "다른 민원 카드도 같은 모양의 문장으로 설계해 볼래요?"
+    }
+  },
+  "praiseHint": "힌트를 보고도 포기하지 않고 끝까지 스스로 답을 찾아냈어요.",
+  "praiseDefault": "정리 회의에 끝까지 참여했어요. 칠판에 남긴 문장을 다시 소리 내어 읽어 봐요.",
+  "nextAll": "다른 민원 카드에도 도전해 감지·판단·행동을 다시 설계해 볼래요?",
+  "fallbackNode": "R1blank",
+  "start": "greet",
+  "nodes": {
+    "greet": {
+      "type": "say",
+      "who": "volt",
+      "stage": "",
+      "say": "스마트 기기 설계실 정리 회의에 온 걸 환영해요! 오늘 설계한 기기를 떠올리며 이야기해 봐요.",
+      "next": "S1"
+    },
+    "S1": {
+      "type": "free",
+      "who": "volt",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 0,
+      "say": "내가 설계한 기기는 어떤 순서로 움직였나요? 상황을 알아채는 것부터 전자석이 움직이는 것까지 말해 줘요.",
+      "match": {
+        "groups": {
+          "sense": [
+            "센서",
+            "감지",
+            "카메라",
+            "거리",
+            "무게",
+            "알아채",
+            "알아차"
+          ],
+          "decide": [
+            "질문",
+            "판단",
+            "예아니요",
+            "예/아니요",
+            "나누",
+            "정하"
+          ],
+          "act": [
+            "전자석",
+            "세기",
+            "극",
+            "끄",
+            "꺼",
+            "약하게",
+            "세게",
+            "반대로",
+            "행동",
+            "움직"
+          ]
+        },
+        "correct": [
+          [
+            "sense",
+            "decide",
+            "act"
+          ],
+          [
+            "sense",
+            "act"
+          ]
+        ],
+        "partial": [
+          [
+            "sense"
+          ],
+          [
+            "decide"
+          ],
+          [
+            "act"
+          ]
+        ],
+        "misconception": [
+          "알아서생각",
+          "스스로생각",
+          "마음대로"
+        ]
+      },
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1p",
+        "miss": "S1h1",
+        "avoid": "S1h1",
+        "misconception": "S1mis"
+      }
+    },
+    "S1p": {
+      "type": "free",
+      "who": "volt",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 1,
+      "say": "좋아요, 반쯤 왔어요! 센서가 알아챈 다음 무엇이 정하고, 마지막에 무엇이 움직였는지 이어서 말해 줄래요?",
+      "matchRef": "S1",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1h1",
+        "avoid": "S1h1",
+        "misconception": "S1h1"
+      }
+    },
+    "S1mis": {
+      "type": "free",
+      "who": "volt",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 1,
+      "say": "기기가 마음대로 생각하는 걸까요? 질문 길에서 예와 아니요로 나눈 장면을 떠올려 봐요.",
+      "matchRef": "S1",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1h1",
+        "avoid": "S1h1",
+        "misconception": "S1h1"
+      }
+    },
+    "S1h1": {
+      "type": "choice",
+      "who": "volt",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 2,
+      "say": "내가 만든 기기가 움직인 순서로 더 알맞은 것은 무엇일까요?",
+      "options": [
+        {
+          "text": "기기가 스스로 마음대로 생각해서 움직인다",
+          "result": "miss",
+          "next": "S1sup"
+        },
+        {
+          "text": "감지(센서) → 판단(질문 길) → 행동(전자석)",
+          "result": "correct",
+          "next": "S1ok"
+        }
+      ]
+    },
+    "S1sup": {
+      "type": "free",
+      "who": "volt",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 3,
+      "say": "센서가 알아챈 값이 질문 길을 지나 어느 통으로 갔는지 떠올리며 네 말로 다시 말해 줄래요?",
+      "matchRef": "S1",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1h1",
+        "avoid": "S1h1",
+        "misconception": "S1h1"
+      },
+      "flags": [
+        "지원필요"
+      ],
+      "stuck": {
+        "after": 2,
+        "to": "S1blank"
+      }
+    },
+    "S1blank": {
+      "type": "blank",
+      "who": "volt",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸만 채워서 함께 확인해 봐요.",
+      "template": "기기는 [①]로 상황을 알아채고, 질문 길로 판단한 뒤, [②]의 세기나 극을 바꿔 움직여요.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "센서",
+            "감지",
+            "카메라"
+          ]
+        },
+        {
+          "id": "②",
+          "accept": [
+            "전자석"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "S1ok": {
+      "type": "say",
+      "who": "volt",
+      "stage": "S",
+      "say": "맞아요! 감지하고, 판단하고, 행동하는 것. 이게 오늘 만든 AI 기기의 뼈대예요.",
+      "next": "E1"
+    },
+    "E1": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 0,
+      "say": "센서 값이 '?'인 장면이 있었죠? 그때 질문의 답은 어느 쪽으로 갔고, 그래서 질문을 어떻게 골라야 안전했나요?",
+      "match": {
+        "groups": {
+          "no": [
+            "아니요",
+            "아니오",
+            "no"
+          ],
+          "safe": [
+            "안전",
+            "약하게",
+            "멈추",
+            "멈춰",
+            "끄",
+            "꺼",
+            "세게잡",
+            "떨어지지않",
+            "다치지않"
+          ]
+        },
+        "correct": [
+          [
+            "no",
+            "safe"
+          ]
+        ],
+        "partial": [
+          [
+            "no"
+          ],
+          [
+            "safe"
+          ]
+        ],
+        "misconception": [
+          "예로",
+          "맞게나와",
+          "상관없"
+        ]
+      },
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1p",
+        "miss": "E1h1",
+        "avoid": "E1h1",
+        "misconception": "E1h1"
+      }
+    },
+    "E1p": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 1,
+      "say": "좋아요! '?'일 때 '아니요'로 간다면, '아니요' 쪽에는 어떤 행동이 있어야 안전할까요?",
+      "matchRef": "E1",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1ok",
+        "miss": "E1h1",
+        "avoid": "E1h1",
+        "misconception": "E1h1"
+      }
+    },
+    "E1h1": {
+      "type": "choice",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 2,
+      "say": "센서 값이 '?'일 때를 대비한 설계로 더 알맞은 것은 무엇일까요?",
+      "options": [
+        {
+          "text": "어차피 드문 일이니 생각하지 않는다",
+          "result": "miss",
+          "next": "E1sup"
+        },
+        {
+          "text": "'아니요' 쪽이 안전한 행동(멈추기, 약하게)으로 가게 질문을 고른다",
+          "result": "correct",
+          "next": "E1ok"
+        }
+      ]
+    },
+    "E1sup": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 3,
+      "say": "거리 센서가 먼지로 가려진 장면을 떠올려 봐요. 그때 기기가 어떻게 움직여야 할머니가 춥지 않았을까요?",
+      "matchRef": "E1",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1ok",
+        "miss": "E1h1",
+        "avoid": "E1h1",
+        "misconception": "E1h1"
+      },
+      "flags": [
+        "지원필요"
+      ],
+      "stuck": {
+        "after": 2,
+        "to": "E1blank"
+      }
+    },
+    "E1blank": {
+      "type": "blank",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸만 채워서 함께 확인해 봐요.",
+      "template": "센서 값이 '?'이면 답은 [①]로 가니까, 그쪽에 [②]한 행동을 두어야 해요.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "아니요",
+            "아니오"
+          ]
+        },
+        {
+          "id": "②",
+          "accept": [
+            "안전",
+            "약하게",
+            "멈추"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1ok",
+        "miss": "E1ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E1ok": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "정확해요! 모를 때 안전한 쪽으로 가게 만드는 것도 설계예요.",
+      "next": "E2"
+    },
+    "E2": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 0,
+      "say": "그런데 센서가 사람을 못 알아보거나 고장 나면 어떻게 될까요? 그럴 때 사람은 무엇을 해야 할지 말해 줘요.",
+      "match": {
+        "groups": {
+          "check": [
+            "확인",
+            "점검",
+            "살펴",
+            "닦",
+            "고쳐",
+            "고치",
+            "시험",
+            "다시"
+          ],
+          "human": [
+            "사람",
+            "어른",
+            "선생님",
+            "우리",
+            "직접"
+          ]
+        },
+        "correct": [
+          [
+            "check",
+            "human"
+          ],
+          [
+            "check"
+          ]
+        ],
+        "partial": [
+          [
+            "human"
+          ]
+        ],
+        "misconception": [
+          "안틀",
+          "틀리지않",
+          "믿으면",
+          "그냥믿"
+        ]
+      },
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2p",
+        "miss": "E2h1",
+        "avoid": "E2h1",
+        "misconception": "E2mis"
+      }
+    },
+    "E2p": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 1,
+      "say": "좋아요! 그 일을 누가, 언제 해야 할지도 함께 말해 줄래요?",
+      "matchRef": "E2",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2h1",
+        "avoid": "E2h1",
+        "misconception": "E2h1"
+      }
+    },
+    "E2mis": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 1,
+      "say": "오늘 시험에서 내 설계가 틀린 장면이 있었죠? AI도 틀릴 수 있다면 사람은 무엇을 해야 할까요?",
+      "matchRef": "E2",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2h1",
+        "avoid": "E2h1",
+        "misconception": "E2h1"
+      }
+    },
+    "E2h1": {
+      "type": "choice",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 2,
+      "say": "센서가 틀릴 때 사람이 할 일로 더 알맞은 것은 무엇일까요?",
+      "options": [
+        {
+          "text": "AI는 틀리지 않으니 그냥 믿는다",
+          "result": "miss",
+          "next": "E2sup"
+        },
+        {
+          "text": "센서를 점검하고, 사람이 다칠 수 있는 결정은 사람이 한 번 더 확인한다",
+          "result": "correct",
+          "next": "E2ok"
+        }
+      ]
+    },
+    "E2sup": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 3,
+      "say": "고양이를 사람으로 잘못 알아본 장면처럼, AI가 틀린 장면을 떠올리며 사람이 할 일을 네 말로 다시 말해 줄래요?",
+      "matchRef": "E2",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2h1",
+        "avoid": "E2h1",
+        "misconception": "E2h1"
+      },
+      "flags": [
+        "지원필요"
+      ],
+      "stuck": {
+        "after": 2,
+        "to": "E2blank"
+      }
+    },
+    "E2blank": {
+      "type": "blank",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸만 채워서 함께 확인해 봐요.",
+      "template": "AI 기기도 틀릴 수 있어서 [①]이 센서를 점검하고 중요한 결정을 마지막에 [②]해야 해요.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "사람",
+            "어른",
+            "우리"
+          ]
+        },
+        {
+          "id": "②",
+          "accept": [
+            "확인",
+            "점검"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E2ok": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "맞아요. 기기를 만든 사람과 쓰는 사람 모두에게 확인할 책임이 있어요.",
+      "next": "R1"
+    },
+    "R1": {
+      "type": "free",
+      "who": "volt",
+      "stage": "R",
+      "cp": "R1",
+      "hintLevel": 0,
+      "say": "이제 칠판에 남길 한 문장을 써 봐요. '만약 ___을 감지하면, 전자석의 ___을 ___ 한다. 왜냐하면 ___' 모양으로 내 설계를 정리해 줄래요?",
+      "match": {
+        "groups": {
+          "if": [
+            "만약",
+            "감지하면",
+            "이면",
+            "라면"
+          ],
+          "prop": [
+            "세기",
+            "극",
+            "켜고끄",
+            "켜고 끄",
+            "방향"
+          ],
+          "why": [
+            "왜냐하면",
+            "때문",
+            "려고",
+            "위해"
+          ]
+        },
+        "correct": [
+          [
+            "if",
+            "prop",
+            "why"
+          ]
+        ],
+        "partial": [
+          [
+            "if",
+            "prop"
+          ],
+          [
+            "if"
+          ],
+          [
+            "prop"
+          ]
+        ],
+        "misconception": []
+      },
+      "on": {
+        "correct": "Rend",
+        "partial": "R1p",
+        "miss": "R1blank",
+        "avoid": "R1blank",
+        "misconception": "R1blank"
+      },
+      "tag": "reflection"
+    },
+    "R1p": {
+      "type": "free",
+      "who": "volt",
+      "stage": "R",
+      "cp": "R1",
+      "hintLevel": 1,
+      "say": "좋은 문장이에요! 왜 그렇게 설계했는지 까닭도 붙여 줄래요?",
+      "matchRef": "R1",
+      "on": {
+        "correct": "Rend",
+        "partial": "Rend",
+        "miss": "R1blank",
+        "avoid": "R1blank",
+        "misconception": "R1blank"
+      },
+      "tag": "reflection"
+    },
+    "R1blank": {
+      "type": "blank",
+      "who": "volt",
+      "stage": "R",
+      "cp": "R1",
+      "hintLevel": 3,
+      "say": "그럼 빈칸을 채워 문장을 완성해 봐요.",
+      "template": "만약 사람이 가까이 있는 것을 감지하면, 전자석의 [①]를 약하게 한다. 왜냐하면 [②]이 춥지 않게 하려고.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "세기",
+            "힘"
+          ]
+        },
+        {
+          "id": "②",
+          "accept": [
+            "사람",
+            "할머니"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "Rend",
+        "partial": "Rend",
+        "miss": "Rend"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "Rend": {
+      "type": "end",
+      "who": "volt",
+      "stage": "R",
+      "tag": "lesson-complete",
+      "say": "멋진 설계자예요! 네 문장 '{{reflection}}'은 칠판에 남기고 선생님께도 전해 둘게요."
+    }
+  }
+}

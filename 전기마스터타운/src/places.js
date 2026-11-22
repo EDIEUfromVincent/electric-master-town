@@ -44,9 +44,9 @@ function openFrame(key){
 /* ===== 영구 자석이 맞는 자리 · 해님네 냉장고 문 ===== */
 const QUIZ_THINGS = {
   fridge:{who:'해님', q:'우리 집 냉장고 문에는 왜 전자석이 아니라 영구 자석을 쓸까?', choices:[
-    {t:'늘 붙어 있으면 되니까 켜고 끌 필요가 없고, 전기도 들지 않아서', ok:true, r:'맞아! 조절할 일이 없으면 전기를 들일 까닭이 없지. 그래서 영구 자석이 알맞아.'},
-    {t:'전자석은 철에 붙지 않아서', r:'전자석도 철에 붙어. 고철장 크레인을 떠올려 봐. 다시 골라 볼래?'},
-    {t:'영구 자석이 전자석보다 항상 더 세서', r:'세기는 전자석도 아주 세게 만들 수 있어. 핵심은 조절이 필요한가야. 다시 골라 볼래?'}],
+    {t:'늘 붙어 있으면 되니까 켜고 끌 필요가 없고, 전기도 들지 않아서', ok:true, tag:'no-control', r:'맞아! 조절할 일이 없으면 전기를 들일 까닭이 없지. 그래서 영구 자석이 알맞아.'},
+    {t:'전자석은 철에 붙지 않아서', tag:'em-nostick', r:'전자석도 철에 붙어. 고철장 크레인을 떠올려 봐. 다시 골라 볼래?'},
+    {t:'영구 자석이 전자석보다 항상 더 세서', tag:'perm-stronger', r:'세기는 전자석도 아주 세게 만들 수 있어. 핵심은 조절이 필요한가야. 다시 골라 볼래?'}],
     after:'전자석은 켜고 끄거나 세기·방향을 바꿔야 할 때 쓰고, 늘 붙어 있기만 하면 되는 곳에는 영구 자석을 써요.'},
 };
 function quizState(){ if (!SAVE.quiz || typeof SAVE.quiz !== 'object') SAVE.quiz = {}; return SAVE.quiz; }
@@ -54,7 +54,7 @@ function quizThing(o){
   const Q = QUIZ_THINGS[o.key]; if (!Q) return;
   const st = quizState(), first = !st[o.key];
   const node = {who:Q.who, text:Q.q, choices:[]};
-  node.choices = mgShuffle(Q.choices).map(c => ({label:c.t, fn:() => { if (c.ok){ st[o.key] = st[o.key] || {at:Date.now(), tries:(st._t || 0) + 1}; } else st._t = (st._t || 0) + 1; },
+  node.choices = mgShuffle(Q.choices).map(c => ({label:c.t, fn:() => { if (c.tag) ladJudge(Q.act || 'a2', `${Q.act || 'a2'}.${o.key}.${c.tag}`, c.t, c.ok ? 'correct' : 'miss', Q.q, Q.npc || 'sun'); if (c.ok){ st[o.key] = st[o.key] || {at:Date.now(), tries:(st._t || 0) + 1}; } else st._t = (st._t || 0) + 1; },
     next:c.ok ? [{who:Q.who, text:c.r}, {who:Q.who, text:Q.after}] : [{who:Q.who, text:c.r}, node]}));
   st._t = 0;
   showDialog(Q.who, [node], () => { delete st._t; persist(); if (first && st[o.key]){ award('em', 6); award('eco', 3); rpgToast('🧲 <b>영구 자석의 자리</b>를 찾았어요! 조절이 필요 없으면 영구 자석이 알맞아요.', 'item'); } updateHUD(); });
@@ -295,12 +295,12 @@ function shopClue(api){
 }
 /* 4단계 · 목적에 맞게 고르기: 영구 자석에게도 '맞는 자리'가 있다 (조절이 필요한가, 전기를 들일 만한가) */
 const PURPOSE_CARDS = [
-  {q:'냉장고에 메모를 붙여 두기', icon:'📝', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 켜고 끌 필요가 없어요. 전기도 들지 않는 영구 자석이 알맞아요.'},
+  {id:'memo', q:'냉장고에 메모를 붙여 두기', icon:'📝', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 켜고 끌 필요가 없어요. 전기도 들지 않는 영구 자석이 알맞아요.'},
   {q:'버튼을 누를 때만 딩동 울리기', icon:'🔔', a:'em', why:'누를 때만 자석이 되어야 하니까 전기가 흐를 때만 자석이 되는 전자석이 필요해요.'},
   {q:'선풍기 바람 세기를 1·2·3단으로 바꾸기', icon:'🌀', a:'em', why:'세기를 바꿔야 하니까 전자석(전동기)이 필요해요.'},
-  {q:'산에서 방향 찾기', icon:'🧭', a:'perm', why:'바늘이 늘 같은 극이면 되니까 영구 자석 나침반이 알맞아요. 전기가 없어도 돼요.'},
+  {id:'compass', q:'산에서 방향 찾기', icon:'🧭', a:'perm', why:'바늘이 늘 같은 극이면 되니까 영구 자석 나침반이 알맞아요. 전기가 없어도 돼요.'},
   {q:'고철을 들었다가 원하는 곳에 내려놓기', icon:'🏗️', a:'em', why:'내려놓으려면 자석을 꺼야 하니까 켜고 끌 수 있는 전자석이 필요해요.'},
-  {q:'필통 뚜껑이 저절로 닫혀 있게 하기', icon:'✏️', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 작은 영구 자석이면 충분해요.'},
+  {id:'pencil', q:'필통 뚜껑이 저절로 닫혀 있게 하기', icon:'✏️', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 작은 영구 자석이면 충분해요.'},
   {q:'책상 위를 밝게 비추기', icon:'💡', a:'none', why:'빛만 내면 되니까 자석이 필요 없어요. (LED 스탠드)'},
   {q:'세탁통을 왼쪽·오른쪽으로 번갈아 돌리기', icon:'🧺', a:'em', why:'극의 방향을 바꿔야 하니까 전자석(전동기)이 필요해요.'},
   {q:'물을 따뜻하게 데우기', icon:'🫖', a:'none', why:'열선이 뜨거워지면 되니까 자석이 필요 없어요. (전기 주전자)'},
@@ -318,6 +318,7 @@ function shopPurpose(api){
   const answer = a => {
     if (S.lock) return; S.lock = true;
     const c = deck[S.i], ok = a === c.a; if (ok) S.ok++;
+    if (c.id) ladJudge('shop', `shop.perm-${c.id}.${a}`, `${c.q} → ${(PURPOSE_OPTS.find(x => x[0] === a) || [])[2] || a}`, ok ? 'correct' : 'miss', '목적에 맞게 고르기: 이 일에는 무엇이 알맞을까?', 'shopkeeper');   /* 영구 자석이 맞는 자리 판단 기록 (P5) */
     (ok ? SND.ok : SND.bad).call(SND);
     document.querySelectorAll('[data-a]').forEach(b => { b.disabled = true; b.classList.toggle('good', b.dataset.a === c.a); });
     const extra = !ok && a === 'em' && c.hold ? ' 전자석도 쓸 수는 있지만, 늘 켜 두려면 전기가 계속 들어요. 조절이 필요 없으면 영구 자석이 알맞아요.' : '';

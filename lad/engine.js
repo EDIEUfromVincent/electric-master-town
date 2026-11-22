@@ -180,7 +180,7 @@ class ReflectEngine {
     }
 
     s.turns++;
-    if (s.turns > MAX_TURNS && !L.nodes[next].tag) next = L.fallbackNode || next;
+    if (s.turns > (L.maxTurns || MAX_TURNS) && !L.nodes[next].tag) next = L.fallbackNode || next;   /* 차시 대본이 한도를 정할 수 있다 (L1: 52) */
     const fin = this.advance(L, s, next, msgs, player);
     s.lastMessages = msgs;
     if (fin) return { messages: msgs, view: { type: 'end' }, done: true, locked: false, last, summary: fin };

@@ -9,14 +9,14 @@
 const CONCEPT_GEN = '사람은 자기력을 켜고 끄거나, 세기와 방향을 조절해야 할 때 전기 에너지를 들여 전자석을 쓴다.';
 function p2State(){ if (!SAVE.p2 || typeof SAVE.p2 !== 'object') SAVE.p2 = {}; return SAVE.p2; }
 /* ACTS 밖의 선택 활동은 놓인 차시로 기록한다 (a11 스마트 기기 설계실 = 3차시 AI 안전 로봇실) */
-const JUDGE_LESSON = {a11:'L3'};
+const JUDGE_LESSON = {a11:'L3', shop:'L1'};   /* 상점(자유 탐험)은 1차시 '전자석의 쓰임'과 이어진다 */
 const lessonOfAct = id => { if (JUDGE_LESSON[id]) return JUDGE_LESSON[id]; const L = zoneOfAct(id); return L ? wrapLessonOf(L.z) : null; };
 
 /* 판단 기록: 학급 서버가 있으면 시트로, 없어도 이 기기에 남긴다 (배움 기록 문서용) */
 function ladJudge(actId, nodeId, studentText, result, npcText, npc){
   const st = p2State(); st.log = Array.isArray(st.log) ? st.log : [];
   const text = ladMask(studentText).slice(0, 200);
-  st.log.push({at:Date.now(), act:actId, node:nodeId, text, result}); if (st.log.length > 60) st.log.splice(0, st.log.length - 60);
+  st.log.push({at:Date.now(), act:actId, node:nodeId, text, result, q:String(npcText || '').slice(0, 90)}); if (st.log.length > 60) st.log.splice(0, st.log.length - 60);
   persist();
   const lesson = lessonOfAct(actId);
   if (!ACC.server || !ACC.id || !lesson) return;
@@ -147,4 +147,36 @@ function craneBlackout(){
       });
     }, 1300);
   });
+}
+
+/* ===== 판단 기록 모아 보기 (EM 재설계 P5): 정리 회의 화면 · 배움 기록 문서 =====
+   질문마다 한 줄: 같은 질문에 여러 번 답했으면 마지막으로 인정받은 답(없으면 마지막 답) */
+const JUDGE_RES = {correct:'✔ 인정', partial:'◐ 되물음', miss:'💡 다시 생각', info:''};
+function judgeList(filter){
+  const st = p2State(), log = Array.isArray(st.log) ? st.log : [], by = new Map();
+  for (const l of log){
+    if (!l || !filter(l)) continue;
+    const key = l.act + '|' + String(l.node || '').replace(/\.[^.]+$/, '') + '|' + (l.q || '');
+    const prev = by.get(key);
+    if (!prev || l.result !== 'miss' || prev.result === 'miss') by.set(key, l);
+  }
+  return [...by.values()].sort((a, b) => a.at - b.at);
+}
+const judgeOfLesson = lesson => judgeList(l => lessonOfAct(l.act) === lesson);
+const judgeOfAct = id => judgeList(l => l.act === id);
+/* 질문 글이 없는 예전 기록은 노드ID 앞부분으로 이름을 붙인다 */
+const JUDGE_LABEL = {'a2.counterexample':'반례 사냥: 영구 자석을 쓰는 곳과 까닭', 'a2.fridge':'냉장고 문에 영구 자석을 쓰는 까닭', 'a2.judge':'판단 카드: 이 물건에 전자석이 있을까?', 'shop.perm':'목적에 맞게 고르기',
+  'a4.blackout':'크레인 정전 사건', 'a6.energySource':'충전소 전기는 어디서 오나', 'a11.props':'설계: 필요한 전자석 성질', 'a11.wrongWhy':'설계: 틀린 장면의 까닭', 'a11.sensorCheck':'설계: 센서가 틀리면',
+  'a11.design':'설계 한 문장', 'a11.ext':'설계: 확장 질문', 'a11.meta':'설계: AI일까, 규칙일까'};
+const judgeQ = l => l.q || (Object.entries(JUDGE_LABEL).find(([k]) => String(l.node || '').startsWith(k)) || [])[1] || l.node;
+const judgeLine = l => `${judgeQ(l)} → ${l.text}${JUDGE_RES[l.result] ? ` (${JUDGE_RES[l.result]})` : ''}`;
+function judgeListHTML(list){ return `<ul class="jd-list">${list.map(l => `<li><small>${esc(judgeQ(l))}</small><br>「${esc(l.text)}」 <b class="jd-${esc(l.result)}">${esc(JUDGE_RES[l.result] || '')}</b></li>`).join('')}</ul>`; }
+/* 정리 회의 화면: 이 차시에 게임에서 한 판단을 펼쳐 볼 수 있다 (AI 튜터도 같은 기록을 참고 자료로 본다) */
+function judgeWrapUI(lesson){
+  const b = $('#wuJudge'), box = $('#wuJudgeList'); if (!b || !box) return;
+  const list = judgeOfLesson(lesson);
+  b.hidden = !list.length; box.hidden = true; box.innerHTML = '';
+  if (!list.length) return;
+  b.textContent = `🧭 내 판단 ${list.length}`;
+  b.onclick = () => { box.hidden = !box.hidden; if (!box.hidden) box.innerHTML = '<p class="jd-head">게임에서 내가 한 판단이에요. 정리 회의에서 떠올려 써도 좋아요.</p>' + judgeListHTML(list); };
 }

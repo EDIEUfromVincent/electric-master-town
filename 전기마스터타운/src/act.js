@@ -262,8 +262,14 @@ function portfolioText(){
     }
     if (a.id === 'a5'){ const runs = (SAVE.treeRuns || []).filter(t => t.kind === 'test'); if (runs.length) lines.push(`- 새 고철 시험: ${runs.length}번 · 처음 ${Math.round(runs[0].acc * 100)}% → 가장 좋을 때 ${Math.round(Math.max(...runs.map(x => x.acc)) * 100)}%`); }
     if (a.ev && SAVE.evq && SAVE.evq.step >= 2) lines.push(`- 시장님 설득: ${SAVE.evq.miss ? `다시 말한 횟수 ${SAVE.evq.miss}번` : '한 번에 성공'}`);
+    judgeOfAct(a.id).forEach(l => lines.push(`- 내 판단: ${judgeLine(l)}`));   /* 게임 속 판단 기록 (judge.js) */
     lines.push('');
   });
+  /* 선택 활동 · 자유 탐험의 판단 */
+  for (const [id, title] of [['a11', '🛠️ 스마트 기기 설계실 (선택 활동)'], ['shop', '🧲 전자석 제품 상점 (자유 탐험)']]){
+    const jd = judgeOfAct(id); if (!jd.length) continue;
+    lines.push(`■ ${title}`); jd.forEach(l => lines.push(`- 내 판단: ${judgeLine(l)}`)); lines.push('');
+  }
   return lines.join('\n');
 }
 function portfolioHTMLDoc(){

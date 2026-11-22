@@ -393,7 +393,7 @@ function dsBuild(api){
     const c = ctx.card, test = ctx.test || dsTest(c, ctx.T), wrong = test.res.filter(r => !r.ok);
     api.bot(''); api.pop(); ctx.tok = null; ctx.sel = null; ctx.phase = 'z5';
     const steps = [];
-    if (wrong.length) steps.push(why1); steps.push(check2, sentence3, ext4);
+    if (wrong.length) steps.push(why1); steps.push(check2, sentence3, ext4, meta5);
     let si = 0; const go = () => (si < steps.length ? steps[si++](go) : finish());
     function why1(nx){
       const r = wrong[0], cause = dsCause(c, test, r);
@@ -454,6 +454,15 @@ function dsBuild(api){
       setTimeout(() => { if (!IS_TOUCH) Dd.focus(); }, 60);
     }
     function ext4(nx){ const E = DS_EXT[c.ext]; api.say('🚀 <b>확장 질문</b> · 오늘 설계한 것을 다른 기기로 넓혀 봐요.'); choose('🚀 확장 질문', E.q, mgShuffle(E.opts), 'a11.ext', nx); }
+    /* 상호작용 메타 질문 (P5): 지금까지 대화한 마을 사람들은 AI일까, 규칙일까? — 정직하게 밝힌다 */
+    function meta5(nx){
+      const tutorOn = !!(typeof LAD !== 'undefined' && LAD.st && LAD.st.ai);
+      api.say('🤖 <b>마지막 질문</b> · 볼트 박사가 묻는 AI와 상호작용 이야기예요.');
+      choose('🤖 볼트 박사의 질문', '그런데 지금까지 너랑 대화한 시장님과 마을 사람들은 AI일까, 자동이처럼 규칙으로 움직일까?', mgShuffle([
+        {t:'게임을 만든 사람이 미리 만든 규칙(대본)대로 대답했다', ok:'ok', tag:'rules', r:`맞아요! 마을 사람들은 미리 만든 규칙(대본)과 선택지 안에서만 대답해요. 오늘 만든 기기와 자동이의 질문 길도 규칙이에요.${tutorOn ? ' 단, 정리 회의 칠판에서는 선생님이 켜 둔 AI 튜터가 인물의 목소리로 함께 질문해요. 그때는 화면 위에 🤖 표시가 나오고, 선생님이 대화를 봐요.' : ' 정리 회의에서 선생님이 AI 튜터를 켜 두면, 그때만 AI가 인물의 목소리로 질문하고 화면에 🤖 표시가 나와요.'}`},
+        {t:'스스로 생각하는 AI라서 무엇이든 알아서 대답했다', ok:'no', tag:'ai', r:'그렇게 느껴질 수 있어요! 그런데 시장님은 정해진 질문과 선택지 안에서만 대답했지요? 다시 골라 볼래요?'},
+        {t:'화면 뒤에서 진짜 사람이 대답했다', ok:'no', tag:'human', r:'화면 뒤에 사람이 있는 건 아니에요. 대답이 늘 정해진 모양이었던 걸 떠올려 다시 골라 볼래요?'}]), 'a11.meta', nx);
+    }
     function finish(){
       dom('');
       const ok = test.ok, bolts = ok === 8 ? (ctx.tries <= 2 ? 3 : 2) : ok >= 6 ? (ctx.tries <= 2 ? 2 : 1) : 1;

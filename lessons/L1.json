@@ -87,6 +87,12 @@
       "praise": "생활 속 물건이 전자석의 어떤 성질을 쓰는지 스스로 이어서 설명했어요.",
       "next": "교실이나 집에서 전자석이 든 물건을 하나 더 찾아, 어떤 성질을 쓰는지 생각해 볼래요?"
     },
+    "E1b": {
+      "label": "영구 자석이 알맞은 곳",
+      "stage": "E",
+      "praise": "조절이 필요 없는 곳에는 영구 자석이 알맞다는 것을 까닭과 함께 스스로 말했어요.",
+      "next": "우리 집에서 영구 자석을 쓰는 곳을 하나 더 찾아, 왜 전자석이 필요 없는지 생각해 볼래요?"
+    },
     "E2": {
       "label": "전자석의 세기",
       "stage": "E",
@@ -112,6 +118,11 @@
     },
     "E1m": {
       "label": "만약: 세기가 같으면",
+      "stage": "E",
+      "ext": true
+    },
+    "E1bm": {
+      "label": "만약: 정전이면 냉장고 문은?",
       "stage": "E",
       "ext": true
     },
@@ -1107,14 +1118,14 @@
         "지원필요"
       ],
       "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
-      "next": "E2"
+      "next": "E1b"
     },
     "E1mok": {
       "type": "say",
       "who": "sun",
       "stage": "E",
       "say": "맞아! 세기가 바뀌어야 진동판이 떨리며 소리가 나.",
-      "next": "E2"
+      "next": "E1b"
     },
     "E2blank": {
       "type": "blank",
@@ -1323,6 +1334,280 @@
       "stage": "E",
       "say": "맞아! 극이 바뀌어도 철은 전자석에 붙어.",
       "next": "R1"
+    },
+    "E1b": {
+      "type": "free",
+      "who": "sun",
+      "stage": "E",
+      "cp": "E1b",
+      "hintLevel": 0,
+      "say": "그럼 우리 집 냉장고 문에는 왜 전자석이 아니라 영구 자석을 쓸까?",
+      "match": {
+        "groups": {
+          "noControl": [
+            "켜고끌",
+            "끌필요",
+            "늘붙",
+            "항상붙",
+            "계속붙",
+            "조절할필요",
+            "조절안",
+            "조절이필요없",
+            "바꿀필요",
+            "붙어있기만",
+            "붙어만"
+          ],
+          "noPower": [
+            "전기안",
+            "전기가안",
+            "전기없",
+            "전기를안",
+            "전기가필요없",
+            "전기필요없",
+            "정전",
+            "전기가안들",
+            "전기안들",
+            "전기를아",
+            "전기를쓰지",
+            "전기가들지"
+          ]
+        },
+        "correct": [
+          [
+            "noControl",
+            "noPower"
+          ]
+        ],
+        "partial": [
+          [
+            "noControl"
+          ],
+          [
+            "noPower"
+          ]
+        ],
+        "misconception": [
+          "철에안붙",
+          "철에안",
+          "영구자석이더세",
+          "더세서",
+          "더세니까",
+          "더세기때문"
+        ]
+      },
+      "on": {
+        "correct": "E1bok",
+        "partial": "E1bp",
+        "miss": "E1bh1",
+        "avoid": "E1bh1",
+        "misconception": "E1bmis"
+      }
+    },
+    "E1bp": {
+      "type": "free",
+      "who": "sun",
+      "stage": "E",
+      "cp": "E1b",
+      "hintLevel": 1,
+      "say": "좋은 생각이야! 냉장고 문을 붙여 두려고 전자석을 쓴다면, 무엇이 계속 필요하고 무엇은 필요 없을까?",
+      "matchRef": "E1b",
+      "on": {
+        "correct": "E1bok",
+        "partial": "E1bok",
+        "miss": "E1bh1",
+        "avoid": "E1bh1",
+        "misconception": "E1bh1"
+      }
+    },
+    "E1bmis": {
+      "type": "free",
+      "who": "sun",
+      "stage": "E",
+      "cp": "E1b",
+      "hintLevel": 1,
+      "say": "전자석도 전지를 늘리면 아주 세게 만들 수 있어. 냉장고 문은 켜고 끄거나 세기를 바꿀 일이 있을까?",
+      "matchRef": "E1b",
+      "on": {
+        "correct": "E1bok",
+        "partial": "E1bok",
+        "miss": "E1bh1",
+        "avoid": "E1bh1",
+        "misconception": "E1bh1"
+      }
+    },
+    "E1bh1": {
+      "type": "choice",
+      "who": "sun",
+      "stage": "E",
+      "cp": "E1b",
+      "hintLevel": 2,
+      "say": "두 생각 가운데 냉장고 문 자석으로 더 알맞은 까닭은 어느 쪽일까?",
+      "options": [
+        {
+          "text": "영구 자석이 전자석보다 항상 더 세서",
+          "result": "miss",
+          "next": "E1bsup"
+        },
+        {
+          "text": "켜고 끌 필요가 없고 전기도 들지 않아서",
+          "result": "correct",
+          "next": "E1bok"
+        }
+      ]
+    },
+    "E1bsup": {
+      "type": "free",
+      "who": "sun",
+      "stage": "E",
+      "cp": "E1b",
+      "hintLevel": 3,
+      "flags": [
+        "지원필요"
+      ],
+      "say": "냉장고 문은 하루 종일 붙어 있기만 하면 돼. 전자석으로 그렇게 하려면 무엇이 계속 들까? 네 말로 다시 말해 줄래?",
+      "matchRef": "E1b",
+      "on": {
+        "correct": "E1bok",
+        "partial": "E1bok",
+        "miss": "E1bh1",
+        "avoid": "E1bh1",
+        "misconception": "E1bh1"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "E1bblank"
+      }
+    },
+    "E1bblank": {
+      "type": "blank",
+      "who": "sun",
+      "stage": "E",
+      "cp": "E1b",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "냉장고 문은 켜고 끄거나 세기를 바꿀 필요가 없고 [①]도 들지 않아서 영구 자석을 써.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "전기",
+            "전기에너지",
+            "에너지"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E1bok",
+        "partial": "E1bok",
+        "miss": "E1bok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E1bok": {
+      "type": "say",
+      "who": "sun",
+      "stage": "E",
+      "say": "맞아! 조절할 일이 없으면 전기를 들일 까닭이 없지. 그래서 늘 붙어 있기만 하면 되는 곳에는 영구 자석이 알맞아.",
+      "next": "E1bmq"
+    },
+    "E1bmq": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1bm",
+      "hintLevel": 0,
+      "say": "만약 냉장고 문에 전자석을 쓴다면, 정전이 됐을 때 문은 어떻게 될까요?",
+      "match": {
+        "groups": {
+          "open": [
+            "열리",
+            "열려",
+            "떨어",
+            "안붙",
+            "붙지않",
+            "벌어",
+            "헐거",
+            "닫히지않"
+          ]
+        },
+        "correct": [
+          [
+            "open"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "그대로붙",
+          "계속붙",
+          "더세게"
+        ]
+      },
+      "on": {
+        "correct": "E1bmok",
+        "partial": "E1bmok",
+        "miss": "E1bmc",
+        "avoid": "E1bmc",
+        "misconception": "E1bmc"
+      }
+    },
+    "E1bmc": {
+      "type": "choice",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1bm",
+      "hintLevel": 2,
+      "say": "정전이 되면 전자석 냉장고 문은 어떻게 될까요?",
+      "options": [
+        {
+          "text": "그대로 꼭 붙어 있다",
+          "result": "miss",
+          "next": "E1bmr"
+        },
+        {
+          "text": "자석이 아니게 되어 문이 열릴 수 있다",
+          "result": "correct",
+          "next": "E1bmok"
+        }
+      ]
+    },
+    "E1bmr": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "만약 그대로 붙어 있다면 크레인 정전 사건에서 고철도 떨어지지 않았겠지요. 전자석은 언제 자석이 되는지 떠올려 다시 골라 볼래요?",
+      "next": "E1bmc",
+      "stuck": {
+        "after": 2,
+        "to": "E1bmx"
+      }
+    },
+    "E1bmx": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E1bm",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "E2"
+    },
+    "E1bmok": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "맞아요! 그래서 늘 붙어 있어야 하는 곳은 전기에 기대지 않는 영구 자석이 더 믿음직해요.",
+      "next": "E2"
     }
-  }
+  },
+  "maxTurns": 52
 }
