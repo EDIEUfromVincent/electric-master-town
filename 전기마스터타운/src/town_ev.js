@@ -112,6 +112,23 @@ function evAsk(text, opts){
   qq.choices = mgShuffle(opts).map(op => ({label:op.label, fn:() => { if (op.ok) SFX.ping(); else { EVQ.miss++; SFX.buzz(); } }, next:op.ok ? [{who:'시장님', text:op.reply}] : [{who:'시장님', text:op.reply}, qq]}));
   return qq;
 }
+/* 시장의 후속 질문 (EM 재설계 P3 · X2→X3): 전기는 어디서 오나? 근거가 있으면 모두 인정하고, 고른 이유 태그를 판단 기록으로 남긴다.
+   'none'만 다시 생각하게 하고, 이 질문은 설득 실패(EVQ.miss · '한 번에 설득 성공')에 넣지 않는다 */
+const EV_SOURCE_Q = {q:'그런데 충전소 전기는 어디서 오죠? 우리 마을 발전소가 석탄을 태운다면요?', opts:[
+  {t:'그래도 달릴 때 배기가스가 없어서 길가 공기는 깨끗해져요. 발전소 쪽 배출은 남지만요.', ok:'ok', tag:'local-air', r:'좋아요, 장점과 남는 문제를 함께 봤군요.'},
+  {t:'발전소를 햇빛·바람 발전으로 바꾸면 전기차가 더 깨끗해져요.', ok:'ok', tag:'renewable', r:'충전소와 함께 발전소도 바꿔 볼까요?'},
+  {t:'석탄으로 만든 전기라면 전기도 아껴 써야 해요.', ok:'ok', tag:'save', r:'전기를 아끼는 까닭과도 이어지네요!'},
+  {t:'전기는 원래 그냥 생기니까 상관없어요.', ok:'no', tag:'none', r:'전기는 발전소에서 만들어요. 무엇으로 만드는지 생각해 볼래요?'}]};
+function evSourceAsk(){
+  const Q = EV_SOURCE_Q, qq = {who:'시장님', text:Q.q, choices:[]};
+  qq.choices = mgShuffle(Q.opts).map(op => ({label:op.t, fn:() => {
+    const ok = op.ok === 'ok';
+    ok ? SFX.ping() : SFX.buzz();
+    ladJudge('a6', 'a6.energySource.' + op.tag, op.t, ok ? 'correct' : 'miss', Q.q, 'mayor');
+    if (ok){ const st = p2State(); st.evSource = op.tag; persist(); }
+  }, next:op.ok === 'ok' ? [{who:'시장님', text:op.r}] : [{who:'시장님', text:op.r}, qq]}));
+  return qq;
+}
 function evMayorTalk(){
   const q = evq();
   if (q.step === 0) return showDialog('시장님', ['어서 와요, 꼬마 전기 마스터! 마을을 위한 좋은 생각이 있다면 언제든 이야기해 줘요.', '요즘 도로에서 초록 전기차가 자주 보이던데… 운전자에게 무슨 고민이 있는 것 같더군요.']);
@@ -124,6 +141,7 @@ function evMayorTalk(){
       {label:'충전소가 생기면 전기를 공짜로 마음껏 쓸 수 있어요.', reply:'공짜라니요? 전기도 요금을 내고 아껴 써야 해요. 에너지를 아끼는 까닭을 다시 말해 볼래요?'},
       {label:'전기차는 조용하고 멋있게 생겼어요.', reply:'멋있는 건 좋지만, 그게 에너지를 아끼는 까닭은 아니에요. 다시 말해 볼래요?'},
     ]),
+    evSourceAsk(),
     evAsk('좋아요. 그런데 전기차가 우리 아이들이 배우는 전자석과 무슨 상관이죠?', [
       {ok:true, label:'바퀴를 돌리는 전동기 안에 전자석이 있어요. 전기가 흐를 때만 자석이 되고, 극의 방향을 바꿔 가며 돌고, 세기를 바꿔 빠르기를 조절해요.', reply:'켜고 끄기, 극의 방향, 세기… 전자석의 세 가지 성질이 다 들어 있군요! 아이들에게 살아 있는 공부가 되겠어요.'},
       {label:'전기차 지붕에 큰 영구 자석이 붙어 있어서 그 힘으로 굴러가요.', reply:'지붕의 자석으로 차가 움직이지는 않아요. 전기가 흐를 때만 자석이 되는 것이 무엇이었죠? 다시 생각해 볼래요?'},

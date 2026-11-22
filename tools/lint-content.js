@@ -87,6 +87,17 @@ else {
     if (o.ok === 'part' && !(o.follow && o.follow.opts && o.follow.opts.some(x => x.ok === 'ok'))) errors.push(`정전 질문 "${o.t}": 되묻기(part)에는 이어지는 질문과 정답이 있어야 해요`);
   }
 }
+/* 6-2. 시장의 후속 질문 (P3): 근거가 있는 답 2개 이상 인정, 발전소 = 전기의 출처로 다룬다 (석탄을 전기와 같은 층위의 '대안'으로 내지 않는다) */
+const EVS = objectConst('EV_SOURCE_Q');
+if (!EVS) warns.push('시장의 후속 질문(EV_SOURCE_Q)이 아직 없어요');
+else {
+  if (EVS.value.opts.filter(o => o.ok === 'ok').length < 2) errors.push('EV_SOURCE_Q: 근거가 있는 답(ok)을 2개 이상 인정해야 해요 (지시서 6장)');
+  if (!/발전소/.test(EVS.value.q) || !/어디서/.test(EVS.value.q)) errors.push("EV_SOURCE_Q: 질문은 '전기는 어디서 오나(발전소)'를 묻는 형태여야 해요");
+  for (const o of EVS.value.opts){
+    if (!o.tag || !/^[a-z-]+$/.test(o.tag)) errors.push(`EV_SOURCE_Q "${o.t}": 기록용 tag(영어 소문자)가 있어야 해요`);
+    if (!o.r) errors.push(`EV_SOURCE_Q "${o.t}": 시장의 반응(r)이 있어야 해요`);
+  }
+}
 const GEN = srcFiles.map(read).join('\n').match(/const CONCEPT_GEN = '([^']+)'/);
 if (!GEN) warns.push('개념적 일반화(CONCEPT_GEN)가 아직 없어요');
 else if (!/조절/.test(GEN[1]) || !/전기/.test(GEN[1])) errors.push("CONCEPT_GEN: '조절'과 '전기'(대가)가 들어 있어야 해요");

@@ -462,7 +462,8 @@ function gbBuildReflection_(lesson) {
   add('학습자', '학생의 선택 · 판단 · 설명',
     '성찰문장 작성 ' + m.reflections + '명(' + pct(m.reflections, m.players) + '), ' +
     '빈칸 문장으로 넘어감 ' + m.blankUsers + '명(' + pct(m.blankUsers, m.players) + '), ' +
-    '자유응답 평균 ' + m.avgLen + '자',
+    '자유응답 평균 ' + m.avgLen + '자' +
+    (m.judgeDist.length ? '. 판단 이유 분포(학생별 처음 인정받은 답, 다시 생각한 학생 수): ' + m.judgeDist.join(' / ') : ''),
     m.players && m.reflections / m.players >= GB_REFLECT.REFLECTION_RATE_STRONG &&
       m.blankUsers / m.players <= GB_REFLECT.BLANK_RATE_MAX, m.players > 0);
 
@@ -514,12 +515,13 @@ function gbReflectionMetrics_(lesson) {
   const keys = Object.keys(groups);
   const m = {
     players: keys.length, rReached: 0, reflections: 0, blankUsers: 0, completed: 0,
-    avgLen: 0, avgMinutes: null, hintDist: [0, 0, 0, 0], nodeRates: [],
+    avgLen: 0, avgMinutes: null, hintDist: [0, 0, 0, 0], nodeRates: [], judgeDist: [],
     flags: { '개인정보': 0, '욕설': 0, '이탈': 0, '위험': 0, '지원필요': 0 },
     errors: 0, agree: 0, disagree: 0, approved: 0, delivered: 0, replies: 0, teacherEdited: 0
   };
   let lenSum = 0, lenCount = 0, minuteSum = 0, minuteCount = 0;
   const nodeFirst = {};       // nodeId → { total, correct } (학생별 첫 시도만)
+  const judgeFirst = {};      // 판단 질문(a6.energySource) → 이유 태그 → 학생 수 (학생별로 처음 인정받은 답) · '다시 생각' → 한 번이라도 다시 생각한 학생 수
   let firstTime = null;
 
   keys.forEach(function (k) {
@@ -531,10 +533,19 @@ function gbReflectionMetrics_(lesson) {
     if (st.completed) m.completed++;
     m.hintDist[Math.min(3, st.maxHint)]++;
 
-    const seenNode = {};
+    const seenNode = {}, seenJudge = {};
     let tStart = null, tEnd = null;
     evs.forEach(function (ev) {
       ev.flags.forEach(function (f) { if (m.flags.hasOwnProperty(f)) m.flags[f]++; });
+      if (ev.tag === 'judgment') {   // 판단 기록 (EM 재설계): 노드ID = 활동.질문.이유태그
+        const cut = ev.nodeId.lastIndexOf('.'), q = cut > 0 ? ev.nodeId.slice(0, cut) : ev.nodeId, why = cut > 0 ? ev.nodeId.slice(cut + 1) : '-';
+        if (q) {
+          const J = judgeFirst[q] = judgeFirst[q] || {}, seen = seenJudge[q] = seenJudge[q] || {};
+          if (ev.result === 'miss') { if (!seen.miss) { seen.miss = true; J['다시 생각'] = (J['다시 생각'] || 0) + 1; } }
+          else if (!seen.ok) { seen.ok = true; J[why] = (J[why] || 0) + 1; }
+        }
+        return;
+      }
       if (ev.studentText && ev.result !== 'info') { lenSum += ev.studentText.length; lenCount++; }
       if (ev.stage && ev.studentText && !seenNode[ev.nodeId] && ev.hintLevel === 0) {
         seenNode[ev.nodeId] = true;
@@ -556,6 +567,9 @@ function gbReflectionMetrics_(lesson) {
   m.avgMinutes = minuteCount ? Math.round(minuteSum / minuteCount) : null;
   m.nodeRates = Object.keys(nodeFirst).map(function (n) {
     return n + ' ' + nodeFirst[n].correct + '/' + nodeFirst[n].total;
+  });
+  m.judgeDist = Object.keys(judgeFirst).map(function (q) {
+    return q + ' → ' + Object.keys(judgeFirst[q]).map(function (w) { return w + ' ' + judgeFirst[q][w]; }).join(' · ');
   });
 
   // 오류기록: 이 차시 첫 기록 이후 건수
