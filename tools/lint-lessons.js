@@ -58,6 +58,7 @@ function lint(file) {
       else n.blanks.forEach(b => { if (!n.template.includes('[' + b.id + ']')) errors.push(`${id}: 템플릿에 [${b.id}] 없음`); });
       BLANK_KEYS.forEach(k => { const t = n.on && n.on[k]; if (!N[t]) errors.push(`${id}: on.${k} 대상 없음`); else out.push(t); });
     }
+    if (n.stuck){ if (!N[n.stuck.to]) errors.push(`${id}: stuck.to 대상 없음`); else out.push(n.stuck.to); }
     edges[id] = out;
   }
 

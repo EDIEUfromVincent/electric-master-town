@@ -15,6 +15,8 @@
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { ReflectEngine, loadLessons } = require('./engine');
 const { SheetRelay } = require('./relay');
+const { TutorBrain } = require('./tutor');
+const { createAi } = require('./ai');
 const R = require('./rules');
 
 const flag = (v, def) => v == null || v === '' ? def : !/^(0|false|no|off)$/i.test(String(v).trim());
@@ -36,7 +38,10 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
   try { npcMail = JSON.parse(fs.readFileSync(path.join(lessonsDir, '_feedback-npc.json'), 'utf8')); } catch (e) {}
   const relay = new SheetRelay({ url: env.GAS_WEBAPP_URL, secret: env.GAS_SHARED_SECRET, dir: path.join(DATA_DIR, 'lad'), logger });
   const engine = new ReflectEngine({ lessons, emit: ev => relay.enqueue(ev) });
+  const ai = createAi({ env, relay, logger });
+  const tutor = new TutorBrain({ lessons, emit: ev => relay.enqueue(ev), ai, logger });
   relay.start();
+  ai.refresh(true).then(() => logger.log(`[lad] AI 튜터: ${({ direct: 'Gemini 바로 연결(GEMINI_API_KEY)', gas: 'GAS의 Gemini 키로 연결', none: '키 없음 → 규칙 엔진으로 진행', off: '꺼 둠(AI_TUTOR_ENABLED=false)' })[ai.status().mode]}`)).catch(() => {});
   if (relay.enabled) {
     const meta = Object.values(lessons).map(L => ({ lessonId: L.lessonId, title: L.title, standards: L.standards, concepts: L.concepts, rubric: L.rubric }));
     relay.upsertLessons(meta).then(r => logger.log(`[lad] 구글 시트 연결: 차시 설정 ${r.ok ? '동기화됨' : '실패(' + r.error + ')'}`)).catch(() => {});
@@ -70,7 +75,7 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     if (p === '/api/lad/status') {
       const L = ladOf(s);
       send(res, 200, {
-        reflect: cfg.reflect, letters: cfg.letters && relay.enabled, gas: relay.enabled, cls: s.cls || null,
+        reflect: cfg.reflect, letters: cfg.letters && relay.enabled, gas: relay.enabled, cls: s.cls || null, ai: ai.ready(),
         fixedClass: cfg.classCodes.length === 1 ? cfg.classCodes[0] : null, lessons: Object.keys(lessons),
         reflected: Object.fromEntries(Object.entries(L.reflect).map(([k, v]) => [k, { at: v.at, sentence: v.sentence }])),
       });
@@ -88,7 +93,11 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     if (p === '/api/reflect/start') {
       if (!cfg.reflect) { send(res, 409, { error: 'off' }); return true; }
       if (tooMany('rs:' + id, 20)) { send(res, 429, { error: '잠시 뒤에 다시 해요' }); return true; }
-      const r = engine.start(player, String(body.lessonId || ''), body.resume);
+      const lessonId = String(body.lessonId || '');
+      await ai.refresh();
+      /* AI 튜터가 켜져 있으면 AI가, 아니면 규칙 엔진이 정리 회의를 이끈다 (이어 하기는 하던 쪽으로) */
+      const useAi = body.resume && tutor.has(body.resume) ? true : body.resume && engine.store.has(String(body.resume)) ? false : tutor.ready(lessonId);
+      const r = useAi ? tutor.start(player, lessonId, body.resume) : engine.start(player, lessonId, body.resume);
       if (r.error) { send(res, 404, { error: '정리 회의 대본이 없어요' }); return true; }
       send(res, 200, r);
       return true;
@@ -96,7 +105,7 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     if (p === '/api/reflect/turn') {
       if (tooMany('rt:' + id, 40)) { send(res, 429, { error: '천천히 생각하고 답해요' }); return true; }
       let r;
-      try { r = engine.turn(player, body.dialogueId, body.input || {}); }
+      try { r = tutor.has(body.dialogueId) ? await tutor.turn(player, body.dialogueId, body.input || {}) : engine.turn(player, body.dialogueId, body.input || {}); }
       catch (e) { logger.error('[lad] 대화 처리 오류: ' + e.message); send(res, 500, { error: '잠시 문제가 생겼어요' }); return true; }
       if (r.error) { send(res, r.error === 'no_dialogue' ? 410 : 400, { error: r.error }); return true; }
       if (r.done && r.summary) {   /* 학생 기록에도 칠판 정리를 남긴다 (여러 기기에서 이어 보기) */
@@ -165,7 +174,7 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     return true;
   }
 
-  return { handle, relay, engine, lessons, cfg, playerKey, shutdown: () => relay.shutdown() };
+  return { handle, relay, engine, tutor, ai, lessons, cfg, playerKey, shutdown: () => relay.shutdown() };
 }
 
 module.exports = { createLad };

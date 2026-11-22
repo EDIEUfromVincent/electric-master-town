@@ -153,8 +153,7 @@ class ReflectEngine {
         return stay({ blankOk: ev.perBlank });
       }
       result = ev.result; studentText = filled; next = node.on[result];
-      s.blankText = filled;
-      if (!s.reflection) s.reflection = filled;
+      if (node.tag === 'blank'){ s.blankText = filled; if (!s.reflection) s.reflection = filled; }   /* R 빈칸만 '오늘의 한 문장'이 된다 */
     } else {
       return { error: 'not_interactive' };
     }
@@ -194,6 +193,8 @@ class ReflectEngine {
     while (guard++ < 60) {
       const n = L.nodes[id];
       if (!n) throw new Error('missing node ' + id);
+      s.visits[id] = (s.visits[id] || 0) + 1;
+      if (n.stuck && s.visits[id] > n.stuck.after){ id = n.stuck.to; continue; }   /* 같은 되묻기에서 여러 번 막히면 그 개념만 빈칸으로 확인 */
       (n.flags || []).forEach(f => s.flags.add(f));
       if (n.cp && (n.flags || []).includes('지원필요')) {
         const c = s.cps[n.cp] || (s.cps[n.cp] = { first: null, ok: false, support: false, text: '' });
@@ -208,7 +209,6 @@ class ReflectEngine {
         this.record(L, s, n, player, { studentText: '', result: 'info', flags: [], npcText: text, tag: 'lesson-complete' });
         return summary;
       }
-      s.visits[id] = (s.visits[id] || 0) + 1;
       if (s.visits[id] >= 4 && n.type === 'free' && n.on && n.on.miss !== id) { id = n.on.miss; continue; }   // 같은 질문 네 번째면 다음 단계로
       s.nodeId = id;
       return null;
@@ -218,7 +218,7 @@ class ReflectEngine {
 
   /* ----- 칠판 정리: 확인점마다 스스로/힌트로/도움 필요 · 잘한 점 · 다음에 생각할 질문 ----- */
   summary(L, s) {
-    const order = Object.keys(L.checkpoints || {});
+    const order = Object.keys(L.checkpoints || {}).filter(k => !L.checkpoints[k].ext);   /* '만약' 질문(ext)은 칠판에만 적고 정리 칩에서는 뺀다 */
     const cps = order.map(k => {
       const c = s.cps[k] || { first: null, ok: false, support: false, text: '' };
       const status = c.support || (!c.ok && c.first !== null) ? 'support' : c.first === 'correct' ? 'self' : c.ok ? 'hint' : 'skip';
@@ -282,6 +282,8 @@ function loadLessons(dir, fs, path, log) {
         profanity: '그 말은 우리 약속과 맞지 않아. 바른 말로 다시 이야기해 줄래?', profanityLimit: '규칙 위반이 세 번이라 정리 회의를 잠시 멈출게. 선생님께 도움을 요청하자.',
         pii: '개인정보는 적지 않기로 약속했지? 그 부분은 빼고 다시 말해 줄래?', danger: '그 이야기를 들으니 걱정돼. 지금 바로 선생님이나 보호자께 꼭 말씀드리자.',
       }, L.messages || {});
+      /* AI 튜터용 차시 설정 (선생님이 고치기 쉬운 글 파일): lessons/L1.tutor.txt */
+      try { L.tutorPrompt = fs.readFileSync(path.join(dir, L.lessonId + '.tutor.txt'), 'utf8').trim(); } catch (e) { L.tutorPrompt = ''; }
       out[L.lessonId] = L;
     } catch (e) { (log || console).warn(`[lad] ${f}: 대본을 읽지 못했어요 (${e.message})`); }
   }

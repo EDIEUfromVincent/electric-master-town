@@ -13,7 +13,7 @@ const fs = require('fs'), path = require('path');
 
 const DEFAULTS = {
   flushMs: 10000, maxBatch: 150, maxBuffer: 20000, timeoutMs: 30000,
-  feedbackCacheMs: 3 * 60 * 1000, backoffMs: [5000, 15000, 60000, 120000], saveMs: 1500,
+  feedbackCacheMs: 3 * 60 * 1000, backoffMs: [5000, 15000, 60000, 120000], saveMs: 1500, soonMs: 2000,
 };
 
 class SheetRelay {
@@ -82,7 +82,12 @@ class SheetRelay {
       this.log.warn(`[lad] 대기열이 가득 차 오래된 기록 ${over}건을 버렸어요 (누적 ${this.dropped}건) — 구글 시트 연결을 확인하세요`);
     }
     this.saveSoon();
-    if (this.enabled && this.buffer.length >= this.opt.maxBatch) this.flush().catch(() => {});
+    if (!this.enabled) return;
+    if (this.buffer.length >= this.opt.maxBatch) this.flush().catch(() => {});
+    else if (!this.soonT){   /* 정리 회의 답은 몇 초 안에 시트로 (여러 학생 답을 2초씩 묶어서) */
+      this.soonT = setTimeout(() => { this.soonT = null; this.flush().catch(() => {}); }, this.opt.soonMs);
+      if (this.soonT.unref) this.soonT.unref();
+    }
   }
 
   async flush() {

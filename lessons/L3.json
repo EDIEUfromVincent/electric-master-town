@@ -24,16 +24,20 @@
   },
   "npcs": {
     "guard": {
-      "name": "안전이"
+      "name": "안전이",
+      "style": "존댓말(~해요)"
     },
     "volt": {
-      "name": "볼트 박사"
+      "name": "볼트 박사",
+      "style": "존댓말(~해요)"
     },
     "moon": {
-      "name": "달님"
+      "name": "달님",
+      "style": "친구 같은 반말(~해)"
     },
     "star": {
-      "name": "별님"
+      "name": "별님",
+      "style": "친구 같은 반말(~해)"
     }
   },
   "lead": "guard",
@@ -116,6 +120,26 @@
       "stage": "R",
       "praise": "실천할 일과 그 까닭을 한 문장에 스스로 정리했어요.",
       "next": "이번 주에 정한 일을 실천했는지 스스로 점검해 볼래요?"
+    },
+    "S1m": {
+      "label": "만약: 문어발 꽂기",
+      "stage": "S",
+      "ext": true
+    },
+    "E1m": {
+      "label": "만약: 1등급과 5등급",
+      "stage": "E",
+      "ext": true
+    },
+    "E2m": {
+      "label": "만약: 예시가 없으면",
+      "stage": "E",
+      "ext": true
+    },
+    "E3m": {
+      "label": "만약: 아무도 확인 안 하면",
+      "stage": "E",
+      "ext": true
     }
   },
   "praiseHint": "힌트를 보고도 포기하지 않고 끝까지 스스로 답을 찾아냈어요.",
@@ -289,22 +313,34 @@
       ]
     },
     "S1sup": {
-      "type": "say",
+      "type": "free",
       "who": "guard",
       "stage": "S",
       "cp": "S1",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "괜찮아요, 우리 집 안전 탐정을 다시 해 보며 위험한 장면을 함께 찾아봐요.",
-      "next": "E1"
+      "say": "만약 손이 빨리 마르기만 한다면 젖은 손을 조심하라는 수칙은 없을 거예요. 물 묻은 손으로 플러그를 만지면 몸에 무엇이 흐를 수 있을까요?",
+      "matchRef": "S1h1",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1h2",
+        "avoid": "S1h2",
+        "misconception": "S1h2"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "S1blank"
+      }
     },
     "S1ok": {
       "type": "say",
       "who": "guard",
       "stage": "S",
       "say": "정확해요! 위험한 까닭을 알면 스스로 지킬 수 있어요.",
-      "next": "E1"
+      "next": "S1mq"
     },
     "E1": {
       "type": "free",
@@ -400,22 +436,34 @@
       ]
     },
     "E1sup": {
-      "type": "say",
+      "type": "free",
       "who": "star",
       "stage": "E",
       "cp": "E1",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "괜찮아, 가전제품 매장의 효율 등급 영수증을 다시 보면 아끼는 방법이 보일 거야.",
-      "next": "E2"
+      "say": "만약 텔레비전을 계속 켜 두면 아무도 안 보는 동안에도 전기를 써. 전기를 아끼려면 어떻게 하면 좋을까?",
+      "matchRef": "E1",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1ok",
+        "miss": "E1h2",
+        "avoid": "E1h2",
+        "misconception": "E1h2"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "E1blank"
+      }
     },
     "E1ok": {
       "type": "say",
       "who": "star",
       "stage": "E",
       "say": "좋은 방법이야! 오늘부터 우리 집에서도 해 볼게.",
-      "next": "E2"
+      "next": "E1mq"
     },
     "E2": {
       "type": "free",
@@ -533,22 +581,34 @@
       ]
     },
     "E2sup": {
-      "type": "say",
+      "type": "free",
       "who": "volt",
       "stage": "E",
       "cp": "E2",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "괜찮아요, 로봇은 가르친 대로 배운다는 것을 로봇 훈련소에서 다시 확인해 봐요.",
-      "next": "E3"
+      "say": "만약 로봇을 그대로 두면 다음에도 같은 장면을 또 틀릴 거예요. 로봇이 다시 배우려면 우리가 무엇을 고쳐 주어야 할까요?",
+      "matchRef": "E2",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2p",
+        "miss": "E2h2",
+        "avoid": "E2h2",
+        "misconception": "E2h2"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "E2blank"
+      }
     },
     "E2ok": {
       "type": "say",
       "who": "volt",
       "stage": "E",
       "say": "맞아요! 로봇은 우리가 준 데이터만큼 배워요.",
-      "next": "E3"
+      "next": "E2mq"
     },
     "E3": {
       "type": "free",
@@ -646,22 +706,34 @@
       ]
     },
     "E3sup": {
-      "type": "say",
+      "type": "free",
       "who": "guard",
       "stage": "E",
       "cp": "E3",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "괜찮아요, 크레인 두뇌도 로봇도 틀릴 수 있었다는 걸 다음 시간에 다시 이야기해 봐요.",
-      "next": "R1"
+      "say": "만약 로봇이 절대 틀리지 않는다면 크레인 AI도 틀리지 않았겠지요. 로봇이 위험을 놓치면 어떤 일이 생길지, 누가 확인해야 할지 다시 말해 줄래요?",
+      "matchRef": "E3",
+      "on": {
+        "correct": "E3ok",
+        "partial": "E3p",
+        "miss": "E3h1",
+        "avoid": "E3h1",
+        "misconception": "E3h1"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "E3blank"
+      }
     },
     "E3ok": {
       "type": "say",
       "who": "guard",
       "stage": "E",
       "say": "맞아요, AI는 틀릴 수 있어서 사람이 마지막에 확인해야 해요.",
-      "next": "R1"
+      "next": "E3mq"
     },
     "R1": {
       "type": "free",
@@ -804,6 +876,500 @@
       "stage": "R",
       "tag": "lesson-complete",
       "say": "고마워요! 네가 정리한 문장 '{{reflection}}'은 칠판에 남기고 선생님께도 전해 둘게요. 이제 광장의 점등식을 함께 지켜봐요!"
+    },
+    "S1blank": {
+      "type": "blank",
+      "who": "guard",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "젖은 손으로 플러그를 만지면 [①]될 수 있어서 위험해요.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "감전"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "S1mq": {
+      "type": "free",
+      "who": "guard",
+      "stage": "S",
+      "cp": "S1m",
+      "hintLevel": 0,
+      "say": "만약 멀티탭 하나에 히터와 전기밥솥과 다리미를 한꺼번에 꽂으면 어떤 일이 생길까요?",
+      "match": {
+        "groups": {
+          "fire": [
+            "불",
+            "화재",
+            "뜨거",
+            "과열",
+            "타",
+            "녹",
+            "위험",
+            "터지"
+          ]
+        },
+        "correct": [
+          [
+            "fire"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "아낄",
+          "괜찮"
+        ]
+      },
+      "on": {
+        "correct": "S1mok",
+        "partial": "S1mok",
+        "miss": "S1mc",
+        "avoid": "S1mc",
+        "misconception": "S1mc"
+      }
+    },
+    "S1mc": {
+      "type": "choice",
+      "who": "guard",
+      "stage": "S",
+      "cp": "S1m",
+      "hintLevel": 2,
+      "say": "멀티탭 하나에 여러 제품을 한꺼번에 꽂으면 어떻게 될까요?",
+      "options": [
+        {
+          "text": "전기를 아낄 수 있다",
+          "result": "miss",
+          "next": "S1mr"
+        },
+        {
+          "text": "전선이 뜨거워져 불이 날 수 있다",
+          "result": "correct",
+          "next": "S1mok"
+        }
+      ]
+    },
+    "S1mr": {
+      "type": "say",
+      "who": "guard",
+      "stage": "S",
+      "say": "만약 전기를 아낄 수 있다면 문어발 꽂기를 막을 까닭이 없겠지요. 멀티탭이 뜨거워지는 장면을 떠올려 다시 골라 볼래요?",
+      "next": "S1mc",
+      "stuck": {
+        "after": 2,
+        "to": "S1mx"
+      }
+    },
+    "S1mx": {
+      "type": "say",
+      "who": "guard",
+      "stage": "S",
+      "cp": "S1m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "E1"
+    },
+    "S1mok": {
+      "type": "say",
+      "who": "guard",
+      "stage": "S",
+      "say": "맞아요. 그래서 멀티탭은 나눠 쓰고 다 쓰면 뽑아요.",
+      "next": "E1"
+    },
+    "E1blank": {
+      "type": "blank",
+      "who": "star",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "쓰지 않는 전기 제품은 끄고 플러그를 [①] 전기를 아낄 수 있어.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "뽑",
+            "빼"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1ok",
+        "miss": "E1ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E1mq": {
+      "type": "free",
+      "who": "star",
+      "stage": "E",
+      "cp": "E1m",
+      "hintLevel": 0,
+      "say": "만약 똑같이 시원한 에어컨인데 하나는 1등급, 하나는 5등급이라면 한 달 뒤에 무엇이 달라질까?",
+      "match": {
+        "groups": {
+          "save": [
+            "요금",
+            "전기를덜",
+            "덜쓰",
+            "덜써",
+            "아끼",
+            "아낄",
+            "절약",
+            "적게",
+            "돈",
+            "아껴",
+            "아낀"
+          ]
+        },
+        "correct": [
+          [
+            "save"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "똑같",
+          "상관없"
+        ]
+      },
+      "on": {
+        "correct": "E1mok",
+        "partial": "E1mok",
+        "miss": "E1mc",
+        "avoid": "E1mc",
+        "misconception": "E1mc"
+      }
+    },
+    "E1mc": {
+      "type": "choice",
+      "who": "star",
+      "stage": "E",
+      "cp": "E1m",
+      "hintLevel": 2,
+      "say": "1등급과 5등급 에어컨을 한 달 쓰면 무엇이 달라질까?",
+      "options": [
+        {
+          "text": "아무것도 달라지지 않는다",
+          "result": "miss",
+          "next": "E1mr"
+        },
+        {
+          "text": "1등급이 전기를 덜 써서 전기 요금이 적다",
+          "result": "correct",
+          "next": "E1mok"
+        }
+      ]
+    },
+    "E1mr": {
+      "type": "say",
+      "who": "star",
+      "stage": "E",
+      "say": "만약 아무것도 달라지지 않는다면 효율 등급 스티커가 필요 없겠지? 매장에서 본 등급을 떠올려 다시 골라 볼래?",
+      "next": "E1mc",
+      "stuck": {
+        "after": 2,
+        "to": "E1mx"
+      }
+    },
+    "E1mx": {
+      "type": "say",
+      "who": "star",
+      "stage": "E",
+      "cp": "E1m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "E2"
+    },
+    "E1mok": {
+      "type": "say",
+      "who": "star",
+      "stage": "E",
+      "say": "맞아! 그래서 가전을 살 때 효율 등급을 꼭 봐야 해.",
+      "next": "E2"
+    },
+    "E2blank": {
+      "type": "blank",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "로봇이 틀리면 정답과 같은 쪽 [①]를 골라 다시 가르쳐요.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "예시",
+            "문장",
+            "데이터",
+            "예"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E2mq": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2m",
+      "hintLevel": 0,
+      "say": "만약 '위험' 예시 문장을 한 개도 가르치지 않으면 로봇은 젖은 손 장면을 어떻게 판단할까요?",
+      "match": {
+        "groups": {
+          "wrong": [
+            "틀리",
+            "모르",
+            "바른사용",
+            "낭비",
+            "잘못",
+            "못알아",
+            "못맞",
+            "구별못"
+          ]
+        },
+        "correct": [
+          [
+            "wrong"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "맞힐",
+          "맞혀",
+          "알아서"
+        ]
+      },
+      "on": {
+        "correct": "E2mok",
+        "partial": "E2mok",
+        "miss": "E2mc",
+        "avoid": "E2mc",
+        "misconception": "E2mc"
+      }
+    },
+    "E2mc": {
+      "type": "choice",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2m",
+      "hintLevel": 2,
+      "say": "위험 예시를 하나도 안 배운 로봇은 어떻게 판단할까요?",
+      "options": [
+        {
+          "text": "그래도 위험이라고 맞힌다",
+          "result": "miss",
+          "next": "E2mr"
+        },
+        {
+          "text": "배운 적이 없어서 틀리게 판단한다",
+          "result": "correct",
+          "next": "E2mok"
+        }
+      ]
+    },
+    "E2mr": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "만약 배우지 않아도 맞힌다면 우리가 로봇을 가르칠 까닭이 없겠지요. 로봇은 무엇으로 배운다고 했는지 떠올려 다시 골라 볼래요?",
+      "next": "E2mc",
+      "stuck": {
+        "after": 2,
+        "to": "E2mx"
+      }
+    },
+    "E2mx": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E2m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "E3"
+    },
+    "E2mok": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "맞아요! 로봇은 가르친 만큼만 알아요.",
+      "next": "E3"
+    },
+    "E3blank": {
+      "type": "blank",
+      "who": "guard",
+      "stage": "E",
+      "cp": "E3",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "로봇도 틀릴 수 있어서 [①]이 마지막에 확인해야 해요.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "사람",
+            "선생님",
+            "우리",
+            "어른"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E3ok",
+        "partial": "E3ok",
+        "miss": "E3ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E3mq": {
+      "type": "free",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E3m",
+      "hintLevel": 0,
+      "say": "만약 우리 마을 집 수백 채를 로봇만 살피고 아무도 확인하지 않는다면 어떤 일이 생길까요?",
+      "match": {
+        "groups": {
+          "harm": [
+            "다치",
+            "감전",
+            "불",
+            "화재",
+            "사고",
+            "위험",
+            "놓치",
+            "틀리",
+            "다쳐",
+            "다칠",
+            "다친"
+          ]
+        },
+        "correct": [
+          [
+            "harm"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "아무일도",
+          "괜찮"
+        ]
+      },
+      "on": {
+        "correct": "E3mok",
+        "partial": "E3mok",
+        "miss": "E3mc",
+        "avoid": "E3mc",
+        "misconception": "E3mc"
+      }
+    },
+    "E3mc": {
+      "type": "choice",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E3m",
+      "hintLevel": 2,
+      "say": "로봇만 살피고 아무도 확인하지 않으면 어떻게 될까요?",
+      "options": [
+        {
+          "text": "아무 일도 생기지 않는다",
+          "result": "miss",
+          "next": "E3mr"
+        },
+        {
+          "text": "로봇이 놓친 위험 때문에 사고가 날 수 있다",
+          "result": "correct",
+          "next": "E3mok"
+        }
+      ]
+    },
+    "E3mr": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "만약 아무 일도 생기지 않는다면 안전이가 마을을 살필 까닭이 없겠지요. 로봇이 틀린 장면을 떠올려 다시 골라 볼래요?",
+      "next": "E3mc",
+      "stuck": {
+        "after": 2,
+        "to": "E3mx"
+      }
+    },
+    "E3mx": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "cp": "E3m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "R1"
+    },
+    "E3mok": {
+      "type": "say",
+      "who": "volt",
+      "stage": "E",
+      "say": "맞아요. 그래서 사람이 마지막에 꼭 확인해야 해요.",
+      "next": "R1"
     }
   }
 }

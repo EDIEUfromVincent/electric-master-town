@@ -80,7 +80,7 @@ function gbMenuTestSetup() {
   });
   lines.push((secret.length >= 20 ? '✅' : '❌') + ' GAME_SHARED_SECRET ' + (secret.length >= 20 ? '설정됨' : '없음 또는 20자 미만'));
   lines.push((props.getProperty(GB.ALERT_EMAIL_PROPERTY) ? '✅' : '⬜') + ' TEACHER_ALERT_EMAIL (선택)');
-  lines.push((keys.length ? '✅' : '⬜') + ' GEMINI_API_KEYS ' + keys.length + '개 (없으면 AI 없이 규칙 분석만)');
+  lines.push((keys.length ? '✅' : '⬜') + ' GEMINI_API_KEYS ' + keys.length + '개 (정리 회의 AI 튜터 + 수업 후 분석. 없으면 규칙 엔진으로 진행)');
   if (keys.length) {
     const r = gbCallGemini_('연결 점검입니다. {"ok":true} 만 JSON으로 답하세요.', '점검', null);
     lines.push('Gemini 응답: ' + (r.ok ? '✅ 정상' : '❌ ' + r.error));

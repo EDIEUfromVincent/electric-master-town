@@ -23,16 +23,20 @@
   },
   "npcs": {
     "boss": {
-      "name": "무쇠 사장님"
+      "name": "무쇠 사장님",
+      "style": "씩씩한 반말(~지, ~다)"
     },
     "auto": {
-      "name": "자동이"
+      "name": "자동이",
+      "style": "로봇 말투, \"삐릭!\"을 섞고 예전에 틀린 일을 솔직하게 말함"
     },
     "mayor": {
-      "name": "시장님"
+      "name": "시장님",
+      "style": "존댓말(~해요)"
     },
     "evdriver": {
-      "name": "전기차 운전자"
+      "name": "전기차 운전자",
+      "style": "존댓말(~해요)"
     }
   },
   "lead": "boss",
@@ -110,6 +114,26 @@
       "stage": "R",
       "praise": "좋은 질문과 AI를 고치는 방법을 한 문장에 스스로 정리했어요.",
       "next": "AI 안전 로봇은 크레인 두뇌처럼 규칙으로 가르칠 수 있을지 생각해 올래요?"
+    },
+    "S1m": {
+      "label": "만약: 내려놓으려면",
+      "stage": "S",
+      "ext": true
+    },
+    "E1m": {
+      "label": "만약: 검은 철이면",
+      "stage": "E",
+      "ext": true
+    },
+    "E2m": {
+      "label": "만약: 시험 안 하면",
+      "stage": "E",
+      "ext": true
+    },
+    "E3m": {
+      "label": "만약: 전기가 없으면",
+      "stage": "E",
+      "ext": true
     }
   },
   "praiseHint": "힌트를 보고도 포기하지 않고 끝까지 스스로 답을 찾아냈어요.",
@@ -232,22 +256,34 @@
       ]
     },
     "S1sup": {
-      "type": "say",
+      "type": "free",
       "who": "boss",
       "stage": "S",
       "cp": "S1",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "괜찮다, 크레인 조종을 한 번 더 해 보면 금방 보일 거야. 자동이 이야기로 넘어가자.",
-      "next": "E1"
+      "say": "만약 은색인지만 본다면, 은색 알루미늄 캔도 철 고철함에 들어가겠지. 철 고철과 캔은 전자석에 가까이 댔을 때 무엇이 달랐지?",
+      "matchRef": "S1",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1h2",
+        "avoid": "S1h2",
+        "misconception": "S1h2"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "S1blank"
+      }
     },
     "S1ok": {
       "type": "say",
       "who": "boss",
       "stage": "S",
       "say": "바로 그거다! 겉모습보다 무엇으로 만들었는지, 전자석에 붙는지가 중요하지.",
-      "next": "E1"
+      "next": "S1mq"
     },
     "E1": {
       "type": "free",
@@ -415,22 +451,34 @@
       ]
     },
     "E1sup": {
-      "type": "say",
+      "type": "free",
       "who": "auto",
       "stage": "E",
       "cp": "E1",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "삐릭, 괜찮다. 질문 미끄럼틀의 💡 힌트를 다시 보면 알 수 있다.",
-      "next": "E2"
+      "say": "삐릭! 만약 크기를 먼저 물으면 크고 가벼운 종이 상자는 어느 통으로 갈까? 철만 고르려면 무엇을 먼저 물어야 할지 다시 말해 줘.",
+      "matchRef": "E1",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1p",
+        "miss": "E1h2",
+        "avoid": "E1h2",
+        "misconception": "E1h2"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "E1blank"
+      }
     },
     "E1ok": {
       "type": "say",
       "who": "auto",
       "stage": "E",
       "say": "삐릭! 그 까닭이면 내 두뇌가 다시는 캔에 속지 않겠다.",
-      "next": "E2"
+      "next": "E1mq"
     },
     "E2": {
       "type": "free",
@@ -554,22 +602,34 @@
       ]
     },
     "E2sup": {
-      "type": "say",
+      "type": "free",
       "who": "boss",
       "stage": "E",
       "cp": "E2",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "괜찮아, 다음 시간에 질문 길을 한 번 더 굴려 보며 확인해 보자.",
-      "next": "E3"
+      "say": "만약 AI를 그대로 믿었는데 처음 보는 고철을 또 틀리면 공장은 어떻게 될까? 그럴 때 사람은 무엇을 해야 할지 다시 말해 줘.",
+      "matchRef": "E2",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2p",
+        "miss": "E2h2",
+        "avoid": "E2h2",
+        "misconception": "E2h2"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "E2blank"
+      }
     },
     "E2ok": {
       "type": "say",
       "who": "boss",
       "stage": "E",
       "say": "그렇지! AI도 틀릴 수 있으니 사람이 시험하고 고쳐야 해.",
-      "next": "E3"
+      "next": "E2mq"
     },
     "E3": {
       "type": "free",
@@ -652,22 +712,34 @@
       ]
     },
     "E3sup": {
-      "type": "say",
+      "type": "free",
       "who": "mayor",
       "stage": "E",
       "cp": "E3",
+      "hintLevel": 3,
       "flags": [
         "지원필요"
       ],
-      "say": "괜찮아요, 과학 박물관 테슬라 방의 전동기 액자를 보면 더 알 수 있어요.",
-      "next": "R1"
+      "say": "만약 전기 자동차가 휘발유 엔진으로 달린다면 충전소가 필요 없을 거예요. 전기 자동차는 무엇으로 바퀴를 돌리길래 충전소가 필요할까요?",
+      "matchRef": "E3",
+      "on": {
+        "correct": "E3ok",
+        "partial": "E3p",
+        "miss": "E3h1",
+        "avoid": "E3h1",
+        "misconception": "E3h1"
+      },
+      "stuck": {
+        "after": 2,
+        "to": "E3blank"
+      }
     },
     "E3ok": {
       "type": "say",
       "who": "mayor",
       "stage": "E",
       "say": "맞아요! 전기 자동차도 전동기 속 전자석의 힘으로 달리지요.",
-      "next": "R1"
+      "next": "E3mq"
     },
     "R1": {
       "type": "free",
@@ -795,6 +867,507 @@
       "stage": "R",
       "tag": "lesson-complete",
       "say": "고맙다! 네가 정리한 문장 '{{reflection}}'은 칠판에 남기고 선생님께도 전해 둘게. 3차시에는 전기를 아끼고 안전하게 쓰는 법을 로봇에게 가르쳐 보자!"
+    },
+    "S1blank": {
+      "type": "blank",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "철만 고르려면 색이 아니라 [①]가 무엇인지(전자석에 붙는지) 봐야 해.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "재료",
+            "철"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "S1ok",
+        "partial": "S1ok",
+        "miss": "S1ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "S1mq": {
+      "type": "free",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1m",
+      "hintLevel": 0,
+      "say": "그럼 무거운 철 고철을 들어 올렸다가 원하는 곳에 내려놓으려면 크레인 전자석을 어떻게 해야 할까?",
+      "match": {
+        "groups": {
+          "release": [
+            "끄",
+            "꺼",
+            "끊",
+            "끈",
+            "전기를멈",
+            "흐르지않",
+            "안흐르",
+            "끌",
+            "끕"
+          ]
+        },
+        "correct": [
+          [
+            "release"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "계속흘",
+          "계속켜"
+        ]
+      },
+      "on": {
+        "correct": "S1mok",
+        "partial": "S1mok",
+        "miss": "S1mc",
+        "avoid": "S1mc",
+        "misconception": "S1mc"
+      }
+    },
+    "S1mc": {
+      "type": "choice",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1m",
+      "hintLevel": 2,
+      "say": "고철을 원하는 곳에 내려놓으려면 크레인은 어떻게 해야 할까?",
+      "options": [
+        {
+          "text": "전기를 계속 흘린다",
+          "result": "miss",
+          "next": "S1mr"
+        },
+        {
+          "text": "전기를 끊는다",
+          "result": "correct",
+          "next": "S1mok"
+        }
+      ]
+    },
+    "S1mr": {
+      "type": "say",
+      "who": "boss",
+      "stage": "S",
+      "say": "만약 전기를 계속 흘리면 고철이 계속 붙어 있겠지. 전자석이 언제 자석이 되는지 떠올려 다시 골라 볼래?",
+      "next": "S1mc",
+      "stuck": {
+        "after": 2,
+        "to": "S1mx"
+      }
+    },
+    "S1mx": {
+      "type": "say",
+      "who": "boss",
+      "stage": "S",
+      "cp": "S1m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "E1"
+    },
+    "S1mok": {
+      "type": "say",
+      "who": "boss",
+      "stage": "S",
+      "say": "그렇지! 전기가 흐를 때만 자석이 되니까 끊으면 고철을 놓아.",
+      "next": "E1"
+    },
+    "E1blank": {
+      "type": "blank",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "질문 길의 첫 질문은 '[①]로 만들었나요?'가 좋아. 은색이어도 철이 아닌 고철이 있으니까.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "철"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E1ok",
+        "partial": "E1ok",
+        "miss": "E1ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E1mq": {
+      "type": "free",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1m",
+      "hintLevel": 0,
+      "say": "만약 처음 보는 철 프라이팬이 검은색이라면, 색을 묻는 질문 길에서는 어떻게 될까?",
+      "match": {
+        "groups": {
+          "wrong": [
+            "틀리",
+            "잘못",
+            "못골라",
+            "안골라",
+            "놓쳐",
+            "다른통",
+            "엉뚱",
+            "철이아닌통",
+            "못넣"
+          ]
+        },
+        "correct": [
+          [
+            "wrong"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "잘골라",
+          "바르게"
+        ]
+      },
+      "on": {
+        "correct": "E1mok",
+        "partial": "E1mok",
+        "miss": "E1mc",
+        "avoid": "E1mc",
+        "misconception": "E1mc"
+      }
+    },
+    "E1mc": {
+      "type": "choice",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1m",
+      "hintLevel": 2,
+      "say": "색을 묻는 질문 길이라면 검은 철 프라이팬은 어떻게 될까?",
+      "options": [
+        {
+          "text": "색으로도 바르게 고른다",
+          "result": "miss",
+          "next": "E1mr"
+        },
+        {
+          "text": "철인데 은색이 아니라서 틀린 통으로 간다",
+          "result": "correct",
+          "next": "E1mok"
+        }
+      ]
+    },
+    "E1mr": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "say": "만약 색으로도 바르게 고른다면 내 두뇌가 캔에서 틀리지 않았을 거다. 철인데 은색이 아닌 고철을 떠올려 다시 골라 줘.",
+      "next": "E1mc",
+      "stuck": {
+        "after": 2,
+        "to": "E1mx"
+      }
+    },
+    "E1mx": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E1m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "E2"
+    },
+    "E1mok": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "say": "삐릭! 그래서 겉모습이 아니라 재료를 물어야 한다.",
+      "next": "E2"
+    },
+    "E2blank": {
+      "type": "blank",
+      "who": "boss",
+      "stage": "E",
+      "cp": "E2",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "AI가 틀리면 틀린 고철을 살펴보고 질문을 [①] 다시 [②]해야 해.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "고쳐",
+            "고치",
+            "바꿔",
+            "바꾸",
+            "수정"
+          ]
+        },
+        {
+          "id": "②",
+          "accept": [
+            "시험",
+            "굴려",
+            "확인",
+            "테스트"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E2ok",
+        "partial": "E2ok",
+        "miss": "E2ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E2mq": {
+      "type": "free",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E2m",
+      "hintLevel": 0,
+      "say": "만약 아무도 크레인 AI를 시험하지 않고 그대로 쓴다면 고철장에서 어떤 일이 생길까?",
+      "match": {
+        "groups": {
+          "harm": [
+            "틀리",
+            "섞",
+            "고장",
+            "멈추",
+            "멈춰",
+            "다치",
+            "잘못",
+            "엉뚱",
+            "망가",
+            "사고",
+            "다쳐",
+            "다칠",
+            "다친"
+          ]
+        },
+        "correct": [
+          [
+            "harm"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "아무일도",
+          "괜찮"
+        ]
+      },
+      "on": {
+        "correct": "E2mok",
+        "partial": "E2mok",
+        "miss": "E2mc",
+        "avoid": "E2mc",
+        "misconception": "E2mc"
+      }
+    },
+    "E2mc": {
+      "type": "choice",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E2m",
+      "hintLevel": 2,
+      "say": "시험하지 않은 AI를 그대로 쓰면 어떻게 될까?",
+      "options": [
+        {
+          "text": "아무 일도 없다",
+          "result": "miss",
+          "next": "E2mr"
+        },
+        {
+          "text": "틀린 고철이 섞여 공장이 멈출 수 있다",
+          "result": "correct",
+          "next": "E2mok"
+        }
+      ]
+    },
+    "E2mr": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "say": "삐릭, 만약 아무 일도 없다면 내가 캔에서 틀린 일도 없었을 거다. 다시 골라 줘.",
+      "next": "E2mc",
+      "stuck": {
+        "after": 2,
+        "to": "E2mx"
+      }
+    },
+    "E2mx": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "cp": "E2m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "E3"
+    },
+    "E2mok": {
+      "type": "say",
+      "who": "auto",
+      "stage": "E",
+      "say": "삐릭! 그래서 사람이 꼭 시험해 봐야 한다.",
+      "next": "E3"
+    },
+    "E3blank": {
+      "type": "blank",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3",
+      "hintLevel": 3,
+      "say": "그럼 이 빈칸 하나만 채워서 함께 확인해 볼까요?",
+      "template": "전기 자동차의 바퀴는 [①] 속 전자석의 힘으로 돌아가요.",
+      "blanks": [
+        {
+          "id": "①",
+          "accept": [
+            "전동기",
+            "모터"
+          ]
+        }
+      ],
+      "maxRetries": 1,
+      "retrySay": "맞은 빈칸은 그대로 두고, 나머지 빈칸을 한 번 더 생각해 볼래요?",
+      "on": {
+        "correct": "E3ok",
+        "partial": "E3ok",
+        "miss": "E3ok"
+      },
+      "flagsOn": {
+        "miss": [
+          "지원필요"
+        ],
+        "partial": [
+          "지원필요"
+        ]
+      }
+    },
+    "E3mq": {
+      "type": "free",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3m",
+      "hintLevel": 0,
+      "say": "만약 전동기 속 전자석에 전기가 흐르지 않으면 바퀴는 어떻게 될까요?",
+      "match": {
+        "groups": {
+          "stop": [
+            "멈",
+            "안돌",
+            "돌지않",
+            "못가",
+            "안움직",
+            "못움직",
+            "서버"
+          ]
+        },
+        "correct": [
+          [
+            "stop"
+          ]
+        ],
+        "partial": [],
+        "misconception": [
+          "계속돌",
+          "그대로돌"
+        ]
+      },
+      "on": {
+        "correct": "E3mok",
+        "partial": "E3mok",
+        "miss": "E3mc",
+        "avoid": "E3mc",
+        "misconception": "E3mc"
+      }
+    },
+    "E3mc": {
+      "type": "choice",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3m",
+      "hintLevel": 2,
+      "say": "전동기에 전기가 흐르지 않으면 바퀴는 어떻게 될까요?",
+      "options": [
+        {
+          "text": "그래도 계속 돈다",
+          "result": "miss",
+          "next": "E3mr"
+        },
+        {
+          "text": "전자석이 자석이 아니게 되어 바퀴가 멈춘다",
+          "result": "correct",
+          "next": "E3mok"
+        }
+      ]
+    },
+    "E3mr": {
+      "type": "say",
+      "who": "mayor",
+      "stage": "E",
+      "say": "만약 그래도 계속 돈다면 충전할 필요가 없겠지요. 전자석이 언제 자석이 되는지 떠올려 다시 골라 볼래요?",
+      "next": "E3mc",
+      "stuck": {
+        "after": 2,
+        "to": "E3mx"
+      }
+    },
+    "E3mx": {
+      "type": "say",
+      "who": "mayor",
+      "stage": "E",
+      "cp": "E3m",
+      "flags": [
+        "지원필요"
+      ],
+      "say": "괜찮아요, 이 질문은 선생님과 함께 다시 생각해 봐요.",
+      "next": "R1"
+    },
+    "E3mok": {
+      "type": "say",
+      "who": "mayor",
+      "stage": "E",
+      "say": "맞아요! 그래서 전기 자동차에는 충전소가 꼭 필요해요.",
+      "next": "R1"
     }
   }
 }

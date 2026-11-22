@@ -91,7 +91,7 @@ for (const [L, node, text, want] of cases) {
 }
 test('빈칸 판정', () => {
   const b = L1.nodes.R1blank.blanks;
-  assert.equal(R.evaluateBlanks({ '①': '자석', '②': '세기', '③': '극' }, b).result, 'correct');
+  assert.equal(R.evaluateBlanks({ '①': '자석', '②': '세기', '③': '꺼' }, b).result, 'correct');
   assert.equal(R.evaluateBlanks({ '①': '자석', '②': '몰라', '③': '' }, b).result, 'partial');
   assert.equal(R.evaluateBlanks({}, b).result, 'miss');
 });
@@ -111,32 +111,45 @@ function talk(e, p, lessonId, answers) {
   }
   return r;
 }
-test('1차시 정답 직행 → 칠판 정리 · 잘한 점 · 한 문장', () => {
-  const { e, events } = mk();
-  const r = talk(e, player(1), 'L1', [
-    { text: '켜면 클립이 붙고 끄면 떨어져요' }, { text: '스피커는 전자석 세기를 바꿔서 소리를 내요' }, { text: '전지를 더 많이 연결해요' },
-    { text: '바늘이 반대로 돌아갔어요' }, { text: '전자석은 전기가 흐를 때만 자석이 되고 전지를 더 연결하면 세기가 세져요' },
-  ]);
+const L1_GOOD = { S1: '켜면 클립이 붙고 끄면 떨어져요', S1m: '전지를 빼면 클립이 떨어져요', E1: '스피커는 전자석 세기를 바꿔서 소리를 내요', E1m: '세기가 같으면 진동하지 않아서 소리가 안 나요',
+  E2: '전지를 더 많이 연결해요', E2m: '전선이 뜨거워져요', E3: '바늘이 반대로 돌아갔어요', R1: '전자석은 전기가 흐를 때만 자석이 되고 전지를 더 연결하면 세기가 세져요' };
+function drive(e, p, id, r, ans, opts = {}) {
+  let guard = 0;
+  while (!r.done && !r.locked && guard++ < (opts.max || 80)) {
+    const v = r.view;
+    if (v.type === 'free') r = e.turn(p, id, { text: ans[v.cp] || opts.free || '몰라' });
+    else if (v.type === 'choice') r = e.turn(p, id, { optionIndex: opts.choice == null ? 1 : opts.choice });
+    else r = e.turn(p, id, { blanks: opts.blank ? opts.blank(v) : {} });
+    NO_KEYS(r);
+  }
+  return r;
+}
+test('1차시 정답 직행 → 만약 질문까지 → 칠판 정리 · 잘한 점 · 한 문장', () => {
+  const { e, events } = mk(), p = player(1);
+  const r0 = e.start(p, 'L1'); NO_KEYS(r0);
+  const seen = [];
+  const orig = e.turn.bind(e); e.turn = (pp, id, inp) => { const v = e.store.get(id) && L1.nodes[e.store.get(id).nodeId]; if (v) seen.push(v.cp); return orig(pp, id, inp); };
+  const r = drive(e, p, r0.dialogueId, r0, L1_GOOD);
   assert.ok(r.done); assert.equal(r.summary.stage, 'R');
+  assert.deepEqual([...new Set(seen)], ['S1', 'S1m', 'E1', 'E1m', 'E2', 'E2m', 'E3', 'E3m', 'R1'], '맞게 답해도 만약 질문을 거친다');
   assert.ok(r.summary.checkpoints.every(c => c.status === 'self'));
+  assert.ok(!r.summary.checkpoints.some(c => c.key.endsWith('m')), '만약 질문은 정리 칩에서 빠진다');
   assert.ok(r.summary.sentence.includes('흐를 때만'));
   assert.equal(r.summary.praise, L1.checkpoints.R1.praise);
-  assert.equal(r.summary.question, L1.nextAll);
   assert.ok(events.some(ev => ev.tag === 'lesson-complete'));
   assert.ok(events.some(ev => ev.tag === 'reflection'));
   assert.ok(events.every(ev => ev.classCode === 'TEST' && ev.playerKey && !JSON.stringify(ev).includes('n:test')), '이벤트에 계정 이름이 들어가면 안 됨');
 });
-test('1차시 전부 모름 → 힌트 사다리 → 지원필요 → 빈칸 문장', () => {
+test('1차시 전부 모름 → 그냥 넘어가지 않고 되묻기 → 세 번 막히면 그 개념만 빈칸 → 지원필요', () => {
   const { e, events } = mk(), p = player(2);
-  let r = e.start(p, 'L1'); const id = r.dialogueId; let guard = 0;
-  while (!r.done && guard++ < 40) {
-    const v = r.view;
-    if (v.type === 'free') r = e.turn(p, id, { text: '몰라' });
-    else if (v.type === 'choice') r = e.turn(p, id, { optionIndex: 0 });   // 첫 선택지는 늘 틀린 쪽
-    else if (v.type === 'blank') r = e.turn(p, id, { blanks: { '①': '자석', '②': '세기', '③': '극' } });
-    NO_KEYS(r);
-  }
+  const r0 = e.start(p, 'L1');
+  const nodes = [];
+  const orig = e.turn.bind(e); e.turn = (pp, id, inp) => { nodes.push(e.store.get(id).nodeId); return orig(pp, id, inp); };
+  const r = drive(e, p, r0.dialogueId, r0, {}, { choice: 0, max: 300, blank: v => v.template === L1.nodes.R1blank.template ? { '①': '자석', '②': '세기', '③': '꺼' } : { '①': '몰라' } });
   assert.ok(r.done);
+  assert.ok(nodes.filter(n => n === 'S1sup').length >= 2, '틀린 쪽을 고르면 만약 질문으로 되묻는다');
+  assert.ok(nodes.indexOf('S1blank') > nodes.indexOf('S1sup'), '여러 번 막히면 그 개념 빈칸으로 확인한다');
+  assert.ok(nodes.indexOf('E1') > nodes.indexOf('S1blank'), '빈칸 확인 뒤에야 다음 개념으로 간다');
   assert.ok(r.summary.flags.includes('지원필요'));
   assert.ok(r.summary.checkpoints.filter(c => c.key !== 'R1').every(c => c.status === 'support'));
   assert.ok(r.summary.sentence.includes('자석'));
@@ -195,7 +208,7 @@ test('이어 하기: 같은 대화를 다시 열면 지금 질문이 나온다',
   const r0 = e.start(p, 'L1');
   e.turn(p, r0.dialogueId, { text: '켜면 붙고 끄면 떨어져' });
   const r = e.start(p, 'L1', r0.dialogueId);
-  assert.ok(r.resumed); assert.equal(r.view.cp, 'E1');
+  assert.ok(r.resumed); assert.equal(r.view.cp, 'S1m');
 });
 test('세 차시 모든 경로가 끝까지 간다 (정답 · 부분 · 선택지 정답)', () => {
   for (const L of [L1, L2, L3]) {
@@ -216,11 +229,10 @@ test('두 번에 나눠 바르게 말하면 "힌트 보고"로 정리된다', ()
   const r0 = e.start(p, 'L1'), id = r0.dialogueId;
   e.turn(p, id, { text: '켜니까 붙었어요' });          // 부분 → S1p
   const r = e.turn(p, id, { text: '끄면 떨어져요' });   // 부분이지만 정답 쪽으로 받아 줌
-  assert.equal(r.view.cp, 'E1');
-  let s = r; const ans = ['스피커는 세기를 바꿔서 소리를 내요', '전지를 더 연결해요', '바늘이 반대로 돌아갔어요', '전자석은 전기가 흐를 때만 자석이 되고 전지를 더 연결하면 세기가 세져요'];
-  for (const a of ans) s = e.turn(p, id, { text: a });
-  assert.ok(s.done);
-  assert.equal(s.summary.checkpoints.find(c => c.key === 'S1').status, 'hint');
+  assert.equal(r.view.cp, 'S1m');
+  const s2 = drive(e, p, id, r, L1_GOOD);
+  assert.ok(s2.done);
+  assert.equal(s2.summary.checkpoints.find(c => c.key === 'S1').status, 'hint');
 });
 
 /* ---------- 4. 시트 중계 (SheetRelay) ---------- */
@@ -249,4 +261,70 @@ test('연결 뒤: 모아 둔 기록을 묶어 보내고, 실패하면 남겨 두
   fail = false; r.nextAllowedAt = 0; await r.flush();
   assert.equal(r.buffer.length, 0); assert.deepEqual(got.sort(), [ev(1), ev(2), ev(3)].map(e => e.eventId));
   await r.shutdown();
+});
+
+/* ---------- 5. AI 튜터 (TutorBrain) — 가짜 AI로 ---------- */
+const { TutorBrain, COMMON } = require('../lad/tutor');
+function fakeAi(replies) {
+  const calls = [];
+  return { calls, ready: () => true, ask: async (system, contents, schema) => { calls.push({ system, contents, schema }); const r = replies.shift(); return r === undefined ? { ok: false, error: 'none' } : typeof r === 'string' ? { ok: true, text: r } : { ok: true, text: JSON.stringify(r) }; } };
+}
+const J = (o) => Object.assign({ speaker: 'volt', reply: '좋아요!', judge: { result: 'correct' }, cp: 'S1', concept: '', boardNote: '', stage: 'S', hintLevel: 0, choices: [], blankTemplate: '', flag: '없음', done: false, praise: '', nextQuestion: '' }, o);
+test('AI 튜터: 대본에 AI 설정 글이 있고, 첫 인사·첫 질문은 AI 없이 고정', () => {
+  for (const L of [L1, L2, L3]) assert.ok(L.tutorPrompt.includes('[확인점]') && L.tutorPrompt.includes('만약'), L.lessonId + ' tutor.txt');
+  const ai = fakeAi([]), events = [];
+  const t = new TutorBrain({ lessons: LESSONS, ai, emit: ev => events.push(ev) });
+  const r = t.start(player(40), 'L1');
+  assert.equal(ai.calls.length, 0);
+  assert.ok(r.ai && r.messages.length >= 2 && r.view.prompt.includes('스위치'));
+  assert.ok(COMMON.includes('만약') && COMMON.includes('그냥 넘어가지 않는다'));
+});
+test('AI 튜터: 맞으면 칠판에 학생 말이 적히고, 시트 기록에 질문·답·판정이 남는다', async () => {
+  const ai = fakeAi([J({ speaker: 'sun', reply: '잘 말했어! 만약 전지를 빼면 클립은 어떻게 될까?', boardNote: '켜면 붙고 끄면 떨어짐', concept: '전기가 흐를 때만 자석' })]), events = [];
+  const t = new TutorBrain({ lessons: LESSONS, ai, emit: ev => events.push(ev) }), p = player(41);
+  const r0 = t.start(p, 'L1');
+  const r = await t.turn(p, r0.dialogueId, { text: '켜면 붙고 끄면 떨어져요' });
+  assert.equal(r.view.who, '해님'); assert.ok(r.view.prompt.includes('만약'));
+  assert.equal(r.board[0].text, '켜면 붙고 끄면 떨어짐');
+  const ev = events[0];
+  assert.equal(ev.studentText, '켜면 붙고 끄면 떨어져요'); assert.equal(ev.result, 'correct'); assert.ok(ev.npcText.includes('스위치')); assert.equal(ev.stage, 'S');
+  assert.ok(ai.calls[0].system.includes('[확인점]') && ai.calls[0].contents.slice(-1)[0].parts[0].text.includes('<student_message>'));
+});
+test('AI 튜터: 위험 신호·욕설·개인정보는 AI에 보내지 않는다', async () => {
+  const ai = fakeAi([J({}), J({})]), events = [];
+  const t = new TutorBrain({ lessons: LESSONS, ai, emit: ev => events.push(ev) }), p = player(42);
+  const r0 = t.start(p, 'L3');
+  let r = await t.turn(p, r0.dialogueId, { text: '내 번호는 010-1234-5678' }); assert.equal(ai.calls.length, 0); assert.equal(r.view.cp, 'S1');
+  r = await t.turn(p, r0.dialogueId, { text: '시발' }); assert.equal(ai.calls.length, 0);
+  r = await t.turn(p, r0.dialogueId, { text: '죽고 싶어' }); assert.equal(r.locked, 'danger'); assert.equal(ai.calls.length, 0);
+  assert.ok(events.some(e => e.flags.includes('위험')) && events.some(e => e.flags.includes('개인정보')));
+});
+test('AI 튜터: 학생 문장 없이는 끝내지 않고, 오늘의 한 문장은 학생 글 그대로', async () => {
+  const ai = fakeAi([
+    J({ done: true, reply: '끝!', praise: '잘했어요' }),                                                  // R 문장 없이 끝내려 함 → 받지 않음
+    J({ stage: 'R', cp: 'R1', reply: '이제 한 문장으로 말해 줄래요?' }),
+    J({ cp: 'R1', stage: 'R', done: true, reply: '멋져요! 칠판에 남길게요.', praise: '성질 두 가지를 담았어요.', nextQuestion: '크레인은 어떤 성질을 쓸까요?', boardNote: '흐를 때만 자석, 전지 더하면 셈' }),
+  ]);
+  const t = new TutorBrain({ lessons: LESSONS, ai, emit: () => {} }), p = player(43);
+  const r0 = t.start(p, 'L1');
+  let r = await t.turn(p, r0.dialogueId, { text: '켜면 붙어요' }); assert.equal(r.done, false);
+  r = await t.turn(p, r0.dialogueId, { text: '그다음은요' }); assert.equal(r.view.stage, 'R');
+  r = await t.turn(p, r0.dialogueId, { text: '전자석은 전기가 흐를 때만 자석이 되고 전지를 더하면 세져요' });
+  assert.ok(r.done);
+  assert.equal(r.summary.sentence, '전자석은 전기가 흐를 때만 자석이 되고 전지를 더하면 세져요');
+  assert.equal(r.summary.praise, '성질 두 가지를 담았어요.'); assert.ok(r.summary.ai);
+});
+test('AI 튜터: AI 답이 깨지면 기록하지 않고 다시 말해 달라고 한다, 두 생각 비교와 빈칸도 전달', async () => {
+  const ai = fakeAi(['이건 JSON이 아님', '{"reply":', J({ judge: { result: 'avoid' }, reply: '두 생각 가운데 골라 볼래요?', hintLevel: 3, choices: ['늘 붙어 있다', '흐를 때만 붙는다'] }),
+    J({ judge: { result: 'miss' }, reply: '빈칸을 채워 볼래요?', blankTemplate: '전자석은 전기가 [①] 때만 자석이 돼요.' })]), events = [];
+  const t = new TutorBrain({ lessons: LESSONS, ai, emit: ev => events.push(ev) }), p = player(44);
+  const r0 = t.start(p, 'L1');
+  let r = await t.turn(p, r0.dialogueId, { text: '몰라' });
+  assert.ok(r.retry); assert.equal(events.length, 0);
+  r = await t.turn(p, r0.dialogueId, { text: '몰라' });
+  assert.deepEqual(r.view.choices, ['늘 붙어 있다', '흐를 때만 붙는다']); assert.equal(events[0].result, 'avoid');
+  r = await t.turn(p, r0.dialogueId, { text: '늘 붙어 있다', choice: 0 });
+  assert.equal(r.view.type, 'blank'); assert.deepEqual(r.view.blanks, [{ id: '①' }]);
+  r = await t.turn(p, r0.dialogueId, { blanks: { '①': '흐를' } });
+  assert.ok(ai.calls.slice(-1)[0].contents.slice(-1)[0].parts[0].text.includes('전자석은 전기가 흐를 때만'));
 });

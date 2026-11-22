@@ -12,7 +12,7 @@
 - **AI 두 가지**: 질문 길(의사결정트리)로 만드는 AI 크레인 두뇌, 예시 문장으로 가르치는 AI 안전 로봇(분류)
 - **길 건너기 안전(❤️)** 과 **전기차 충전소 프로젝트**(시장님 설득 퀘스트)
 - **맵 만들기**와 맵 코드 공유
-- **차시 정리 회의**: 차시 구역 끝의 「정리 교실」에서 그 차시 인물들이 큰 칠판 앞에 모여 S-E-R 대화로 배운 것을 정리한다. 판정은 학급 서버의 규칙 엔진(`lad/`, 대본 `lessons/L*.json`)이 하고 LLM은 부르지 않는다. 칠판에 오늘의 한 문장 · 잘한 점 · 다음 질문이 자동으로 정리된다
+- **차시 정리 회의 (AI 튜터)**: 차시 구역 끝의 「정리 교실」에서 그 차시 인물들이 큰 칠판 앞에 모여 S-E-R 소크라테스 대화로 배운 것을 정리한다. Gemini가 선생님 튜터 프롬프트(`lad/tutor.js` 공통 규칙 + `lessons/L*.tutor.txt` 차시 설정)로 대화를 이끌고(힌트 사다리 · '만약' 질문 · 정답 보호 · R 한 문장), 칠판에 학생 말이 정리된다. 키가 없으면 같은 흐름의 규칙 대본(`lessons/L*.json`)으로 진행한다
 - **구글 시트 기록(LAD)과 선생님 편지**: 정리 회의 답이 반 코드 · 번호로(이름 없이) 구글 시트에 쌓이고, 선생님이 승인한 편지를 다음 차시에 우체부가 전한다. 연결 방법은 [gas/SETUP.md](gas/SETUP.md)
 - **시청 기록실 엔딩**: 점등식 뒤 시장님과 볼트 박사가 세 차시 문장과 편지를 모아 배움 기록 문서(HTML · 한글/워드용 · 인쇄/PDF)로 만들어 주고 게임이 끝난다
 
@@ -33,6 +33,7 @@ npm start
 | `GAS_WEBAPP_URL` · `GAS_SHARED_SECRET` | 구글 시트(LAD) 연결. 없으면 기록을 `DATA_DIR/lad/queue.json`에 모아 두었다가 연결하면 보낸다 ([gas/SETUP.md](gas/SETUP.md)) |
 | `CLASS_CODES` | 받을 반 코드(쉼표). 하나면 학생 화면에 미리 채움 |
 | `NPC_REFLECTION_ENABLED` · `FEEDBACK_LETTER_ENABLED` · `SHOW_AI_LABEL` | `false`로 정리 회의 · 편지 · 'AI 도움' 표시를 끈다 |
+| `GEMINI_API_KEY` · `GEMINI_MODEL` · `AI_TUTOR_ENABLED` | 정리 회의 AI 튜터. 키가 없으면 GAS 스크립트 속성 `GEMINI_API_KEYS`로 GAS가 대신 부르고, 그것도 없으면 규칙 대본 |
 | `PLAYER_KEY_SALT` | 시트용 플레이어키를 만드는 값 (없으면 `SECRET`에서 만든다) |
 
 테스트: `npm test` (규칙 엔진 · 대본 경로 · 시트 중계), 대본 검사: `npm run lint:lessons`, 가짜 GAS로 시험: `npm run dev:mock`

@@ -7,7 +7,9 @@
 //      (기존 소크라테스 튜터 프로젝트에 넣지 마세요. 기존 LAD를 건드리지 않기 위함)
 //  ■ 같은 프로젝트에 Analysis.gs 도 함께 넣습니다.
 //  ■ 이 웹앱은 '게임 서버(Railway)'만 호출합니다. 학생 브라우저는 이 주소를 모릅니다.
-//  ■ 이 파일은 Gemini를 호출하지 않습니다. (학생이 게임하는 순간에는 AI 호출 없음)
+//  ■ 정리 회의 AI 튜터: 게임 서버가 보낸 대화(tutor_turn)를 스크립트 속성 GEMINI_API_KEYS의 키로 Gemini에 물어 돌려줍니다.
+//    (Railway에 GEMINI_API_KEY를 넣으면 게임 서버가 직접 부르므로 이 길은 쓰지 않습니다)
+//    학생 이름·반·번호는 오지 않습니다. 게임 서버가 개인정보를 가린 대화만 보냅니다.
 //
 //  [스크립트 속성]  프로젝트 설정(⚙️) → 스크립트 속성
 //    GAME_SHARED_SECRET   : 게임 서버와 똑같이 맞춘 긴 무작위 문자열 (40자 이상 권장)
@@ -74,7 +76,9 @@ function doPost(e) {
   try {
     switch (body.action) {
       case 'ping':
-        return gbJson_({ ok: true, time: new Date().toISOString() });
+        return gbJson_({ ok: true, time: new Date().toISOString(), ai: gbTutorKeys_().length > 0 });
+      case 'tutor_turn':
+        return gbJson_(gbHandleTutorTurn_(body));
       case 'log_events':
         return gbJson_(gbHandleLogEvents_(body.events));
       case 'get_feedback':
@@ -317,6 +321,69 @@ function gbHandleUpsertLessons_(lessons) {
   } finally {
     lock.releaseLock();
   }
+}
+
+
+// ============================================================
+//  ③-3 정리 회의 AI 튜터 — 게임 서버가 만든 지시문·대화를 Gemini에 묻고 글만 돌려준다
+// ============================================================
+const GB_TUTOR = {
+  KEY_PROPERTY: 'GEMINI_API_KEYS',
+  MODEL: 'gemini-3.5-flash-lite',      // 기존 소크라테스 튜터와 같은 모델
+  MAX_OUTPUT_TOKENS: 900,
+  PER_MINUTE: 150                       // 앱 전체 분당 상한 (한 반이 동시에 써도 넉넉하게)
+};
+function gbTutorKeys_() {
+  const raw = PropertiesService.getScriptProperties().getProperty(GB_TUTOR.KEY_PROPERTY) || '';
+  return raw.split(',').map(function (k) { return k.trim().replace(/['"]/g, ''); }).filter(String);
+}
+function gbHandleTutorTurn_(b) {
+  const keys = gbTutorKeys_();
+  if (!keys.length) return { ok: false, error: 'no_key' };
+  const system = gbStr_(b.system, 24000);
+  const contents = Array.isArray(b.contents) ? b.contents.slice(-60) : [];
+  if (!system || !contents.length) return { ok: false, error: 'bad_request' };
+  const clean = [];
+  for (let i = 0; i < contents.length; i++) {
+    const c = contents[i] || {};
+    const role = c.role === 'model' ? 'model' : 'user';
+    const text = gbStr_(c.parts && c.parts[0] && c.parts[0].text, 4000);
+    if (text) clean.push({ role: role, parts: [{ text: text }] });
+  }
+  // 분당 상한 (선생님 할당량 보호)
+  const cache = CacheService.getScriptCache();
+  const k = 'tutor:' + Math.floor(Date.now() / 60000);
+  const n = Number(cache.get(k) || 0) + 1;
+  cache.put(k, String(n), 120);
+  if (n > GB_TUTOR.PER_MINUTE) return { ok: false, error: 'busy' };
+
+  const generationConfig = { temperature: Math.max(0, Math.min(1, Number(b.temperature) || 0.6)), maxOutputTokens: GB_TUTOR.MAX_OUTPUT_TOKENS, responseMimeType: 'application/json' };
+  if (b.schema && typeof b.schema === 'object') generationConfig.responseSchema = b.schema;
+  const payload = {
+    systemInstruction: { parts: [{ text: system }] }, contents: clean, generationConfig: generationConfig,
+    safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT']
+      .map(function (c) { return { category: c, threshold: 'BLOCK_MEDIUM_AND_ABOVE' }; })
+  };
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(GB_TUTOR.MODEL) + ':generateContent';
+  const order = keys.slice().sort(function () { return Math.random() - 0.5; });
+  let last = 'busy';
+  for (let i = 0; i < order.length; i++) {
+    let res;
+    try {
+      res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', headers: { 'x-goog-api-key': order[i] }, payload: JSON.stringify(payload), muteHttpExceptions: true });
+    } catch (e) { last = 'fetch_failed'; continue; }
+    const code = res.getResponseCode();
+    if (code === 429 || code >= 500) { last = 'HTTP ' + code; continue; }
+    let json = {};
+    try { json = JSON.parse(res.getContentText()); } catch (e) { json = {}; }
+    if (code !== 200 || json.error) { gbLogError_('tutor_turn', 'HTTP ' + code + ' ' + ((json.error && json.error.status) || '')); return { ok: false, error: 'HTTP ' + code }; }
+    const cand = json.candidates && json.candidates[0];
+    const text = cand && cand.content && cand.content.parts
+      ? cand.content.parts.filter(function (p) { return p.text && !p.thought; }).map(function (p) { return p.text; }).join('') : '';
+    if (!text) return { ok: false, error: 'empty_' + ((cand && cand.finishReason) || 'blocked') };
+    return { ok: true, text: text };
+  }
+  return { ok: false, error: last };
 }
 
 
