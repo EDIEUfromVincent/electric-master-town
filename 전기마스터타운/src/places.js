@@ -61,12 +61,20 @@ function quizThing(o){
 }
 function placeInteract(o){
   if (o.kind === 'quiz') return quizThing(o);
+  if (o.kind === 'design') return designThing();
   if (o.kind === 'wrapBoard') return wrapBoardTalk(o);
   if (o.kind === 'shopDesk') return mgOpenGame('shop');
   if (o.kind === 'screen' || o.kind === 'seat') return watchVideo(o);
   if (o.kind === 'mri') return mriThing();
   if (o.kind === 'frame') return openFrame(o.key);
   if (o.kind === 'bust'){ const B = BUSTS[o.who]; return showDialog(B.name, B.lines); }
+}
+/* 🛠️ 스마트 기기 설계실 (a11 · 선택): 볼트 박사가 안내하고 미니 게임 화면을 연다 */
+function designThing(){
+  const first = !mgCleared('design', 0);
+  showDialog('볼트 박사', [first ? '여기는 스마트 기기 설계실이야! 마을 사람들의 민원 카드를 하나 골라, 그 문제를 푸는 똑똑한 기기를 설계해 보자.' : '또 설계하러 왔구나! 다른 민원 카드에도 도전해 보렴.',
+    '기기는 감지(센서)로 상황을 알아채고, 판단(질문 길)으로 무엇을 할지 정하고, 행동(전자석의 켜고 끄기 · 세기 · 극의 방향)으로 움직여. 처음 보는 장면으로 시험한 뒤 틀린 까닭도 생각해 보자.',
+    '이건 선택 활동이야. 끝까지 해내면 ‘AI 발명가’ 배지를 줄게!'], () => mgOpenGame('design'));
 }
 /* 장소 사람들 (상점 주인 · 의사 선생님): 처리했으면 true */
 function placeNpcTalk(o){
@@ -87,6 +95,7 @@ function placeNpcTalk(o){
 }
 function placeThingDone(o){
   if (o.kind === 'quiz') return !!quizState()[o.key];
+  if (o.kind === 'design') return mgCleared('design', 0);
   if (o.kind === 'wrapBoard') return wrapBoardDone(o);
   if (o.kind === 'frame') return !!placeState().museum[o.key];
   if (o.kind === 'seat') return true;   /* ! 표시는 화면에만 */
@@ -152,6 +161,13 @@ function mkThing(kind, arg){
   return b.mesh();
 }
 function placeDraw3D(o, t, gy){
+  if (o.kind === 'design'){   /* 스마트 기기 설계실 컴퓨터: 책상 + 모니터 + 감지 카드 */
+    drawM(model('thing:design', () => { const b = new VB(), B = (x0, y0, z0, x1, y1, z1, c, e) => vbBox(b, x0, y0, z0, x1, y1, z1, c, e == null ? -1 : e);
+      B(-.46, .68, -.32, .46, .74, .3, '#c89b5e'); for (const [x, z] of [[-.4, -.26], [.4, -.26], [-.4, .24], [.4, .24]]) B(x - .03, 0, z - .03, x + .03, .68, z + .03, '#5b6573');
+      B(-.3, .74, -.2, .3, 1.16, -.16, '#1d2228'); B(-.27, .77, -.16, .27, 1.13, -.15, '#2f74c0', 2); B(-.04, .74, -.16, .04, .8, -.06, '#1d2228');
+      B(.14, .74, .06, .32, .75, .2, '#ffd23f'); B(-.32, .74, .04, -.12, .75, .2, '#8ff0b9'); return b.mesh(); }), M4.trs(o.x + .5, gy, o.y + .5));
+    sprAdd(o.x + .5, gy + 1.55 + Math.sin(t * 2.2) * .05, o.y + .5, iconBadge('mis', '🛠️'), .34); SHADOWS.push([o.x + .5, gy, o.y + .5, .5]); return true;
+  }
   if (o.kind === 'quiz'){ drawM(model('prop:fridge', () => mkProp('fridge')), M4.trs(o.x + .5, gy, o.y + .5)); sprAdd(o.x + .5, gy + 1.45, o.y + .9, iconBadge('pick', '🧲'), .26); SHADOWS.push([o.x + .5, gy, o.y + .5, .45]); return true; }
   if (o.kind === 'wrapBoard') return wrapBoardDraw3D(o, t, gy);
   const cx = o.x + .5, cz = o.y + .5;

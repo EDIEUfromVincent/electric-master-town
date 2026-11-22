@@ -388,11 +388,12 @@ function cpCopy(txt){
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
 }
 function openCampaignGallery(){
-  const W = cpWorks(), notes = SAVE.notes || {}, comics = W.filter(w => w.kind === 'comic').slice(-4), rules = W.filter(w => w.kind === 'rules').slice(-3).flatMap(r => r.items || []);
+  const W = cpWorks(), notes = SAVE.notes || {}, comics = W.filter(w => w.kind === 'comic').slice(-4), rules = W.filter(w => w.kind === 'rules').slice(-3).flatMap(r => r.items || []), designs = W.filter(w => w.kind === 'design').slice(-4);
   const imgs = comics.map(w => { const P = CP_PLAYS.find(p => p.id === w.play); if (!P) return ''; const c = mkCanvas(960, 540); cpComic(c.getContext('2d'), P, w.lines || []); return `<img class="cp-img" src="${c.toDataURL()}" alt="${esc(P.title)} 3컷 만화">`; }).filter(Boolean);
   const p = openPanel(`<h2>📣 캠페인 갤러리</h2><p class="sub">내가 만든 안전 수칙 카드와 3컷 만화예요. 모둠 친구와 나누고, 학급 게시판(패들렛 등)에 붙여 넣어 공유해요.</p>
     <h3>안전 수칙 카드</h3>${rules.length ? `<div class="cp-made">${rules.map(cpCard).join('')}</div>` : '<p class="sub">아직 없어요. 전기 안전 캠페인 1단계에서 만들어요.</p>'}
     <h3>3컷 만화</h3>${imgs.length ? `<div class="cp-gal">${imgs.join('')}</div>` : '<p class="sub">아직 없어요. 전기 안전 캠페인 2단계에서 만들어요.</p>'}
+    ${designs.length ? `<h3>🛠️ 스마트 기기 설계</h3><ul class="ds-fb">${designs.map(w => { const c = (typeof DESIGN_CARDS !== 'undefined' && DESIGN_CARDS.find(x => x.id === w.card)) || {}; return `<li>${c.icon || '🛠️'} <b>${esc(c.title || '')}</b> · ${esc(w.sentence)} <small>(처음 보는 장면 ${w.acc}/8)</small></li>`; }).join('')}</ul>` : ''}
     <h3>새롭게 알게 된 점</h3>
     <div class="fieldset"><label for="cgNote">전기를 안전하게 쓰고 아끼는 방법에 대해 새롭게 알게 된 점을 한두 줄로 써요</label><textarea id="cgNote" rows="2" maxlength="160">${esc(notes.campaign || '')}</textarea></div>
     ${notes.detect ? `<p class="sub">🔍 전자석 탐정에서 쓴 글: ${esc(notes.detect)}</p>` : ''}
@@ -402,6 +403,7 @@ function openCampaignGallery(){
     const n = SAVE.notes || {};
     cpCopy(['[우리 모둠 전기 안전 캠페인]', ...rules.map(x => `· 만약 ${x.sit}, ${x.act}. 왜냐하면 ${x.why}.`),
       ...comics.map(w => { const P = CP_PLAYS.find(q => q.id === w.play); return P ? `· 3컷 대본 「${P.title}」 ${(w.lines || []).join(' / ')}` : ''; }),
+      ...designs.map(w => `· 스마트 기기 설계: ${w.sentence}`),
       n.campaign ? `· 새롭게 알게 된 점: ${n.campaign}` : '', n.detect ? `· 전자석으로 만들고 싶은 것: ${n.detect}` : ''].filter(Boolean).join('\n'));
   };
 }

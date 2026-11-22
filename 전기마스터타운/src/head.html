@@ -388,6 +388,33 @@ kbd{font-family:var(--font-display);background:var(--ink);border:2px solid var(-
 .quizp .qp-o{text-align:left;white-space:normal;line-height:1.4}
 .quizp .qp-o.good{border-color:var(--ok);background:#123423}
 .quizp .qp-fb{margin-top:10px}
+/* 🛠️ 스마트 기기 설계실 (design.js) */
+.ds p{line-height:1.6}
+.ds-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.ds-card{display:grid;gap:4px;text-align:left;background:#132231;border:2px solid #34506a;border-radius:12px;padding:10px 12px;color:#fff;cursor:pointer;font:inherit}
+.ds-card:hover,.ds-card:focus-visible{border-color:#ffd23f}
+.ds-card .ds-ci{font-size:30px}
+.ds-card small{color:var(--text-dim)}
+.ds-card p{margin:2px 0 0;font-size:13px;color:#cfe0f0}
+.ds-prob{margin:6px 0;padding:8px 12px;border-left:4px solid #ffd23f;background:#132231;border-radius:8px;line-height:1.6}
+.ds-ex{margin:4px 0 8px;padding-left:20px;font-size:14px;color:#cfe0f0}
+.ds-props,.ds-sens{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.ds-prop{display:grid;gap:2px;text-align:left;white-space:normal}
+.ds-prop small{font-weight:400;color:var(--text-dim)}
+.ds-prop.on{border-color:#ffd23f;background:#3a3214}
+.ds-sen{display:grid;gap:3px;text-align:left;background:#132231;border:2px solid #34506a;border-left:8px solid var(--c);border-radius:12px;padding:10px;color:#fff;cursor:pointer;font:inherit}
+.ds-sen span{font-size:26px}
+.ds-sen small{color:var(--text-dim)}
+.ds-sen.on{border-color:#ffd23f;background:#2b2a14}
+.ds-fb{margin:6px 0 0;padding-left:18px}
+.ds-fb li{margin:4px 0}
+.ds-opts{display:grid;gap:8px}
+.ds-opts .btn{text-align:left;white-space:normal;line-height:1.4}
+.ds-q,.ds-sc{font-size:16px;font-weight:700}
+.ds-sent{line-height:2.4;font-size:16px}
+.ds-sent select{font-size:15px;padding:4px 6px;border-radius:8px;max-width:100%}
+.ds-sent label{display:block;margin-top:4px}
+.ds-prev{background:#132231;border-radius:8px;padding:8px 12px;font-weight:700}
 #mgCount{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:120px;color:var(--volt);text-shadow:0 6px 0 rgba(0,0,0,.4);background:rgba(10,16,24,.35);pointer-events:none}
 .mg-say{width:min(1180px,100%);background:#fffdf4;color:var(--text-dark);border:3px solid #1c2733;border-radius:12px;padding:8px 12px;font-size:15px;line-height:1.45;font-weight:700}
 .mg-say[hidden]{display:none}

@@ -8,7 +8,9 @@
    ========================================================= */
 const CONCEPT_GEN = '사람은 자기력을 켜고 끄거나, 세기와 방향을 조절해야 할 때 전기 에너지를 들여 전자석을 쓴다.';
 function p2State(){ if (!SAVE.p2 || typeof SAVE.p2 !== 'object') SAVE.p2 = {}; return SAVE.p2; }
-const lessonOfAct = id => { const L = zoneOfAct(id); return L ? wrapLessonOf(L.z) : null; };
+/* ACTS 밖의 선택 활동은 놓인 차시로 기록한다 (a11 스마트 기기 설계실 = 3차시 AI 안전 로봇실) */
+const JUDGE_LESSON = {a11:'L3'};
+const lessonOfAct = id => { if (JUDGE_LESSON[id]) return JUDGE_LESSON[id]; const L = zoneOfAct(id); return L ? wrapLessonOf(L.z) : null; };
 
 /* 판단 기록: 학급 서버가 있으면 시트로, 없어도 이 기기에 남긴다 (배움 기록 문서용) */
 function ladJudge(actId, nodeId, studentText, result, npcText, npc){

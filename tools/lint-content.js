@@ -98,6 +98,35 @@ else {
     if (!o.r) errors.push(`EV_SOURCE_Q "${o.t}": 시장의 반응(r)이 있어야 해요`);
   }
 }
+/* 7. a11 스마트 기기 설계실 (P4): 카드마다 장면 8개, 기대 행동은 고를 수 있는 행동, 모범 설계가 8개 모두 맞힘,
+      센서 값 '?' 장면이 하나 이상(안전한 쪽 설계), 감지 카드마다 질문이 있음, 용어는 '빠르기'·'방향' ('속도'는 교사 확인 전까지 쓰지 않음) */
+const DC = arrayConst('DESIGN_CARDS'), DSX = objectConst('DS_EXT');
+if (!DC) warns.push('DESIGN_CARDS가 아직 없어요');
+else {
+  const PK = ['onoff', 'power', 'pole'], ACTS_OK = ['off', 'weak', 'strong', 'flip'];
+  const trace = (card, n, read) => { while (n && n.t === 'q'){ const q = card.questions.find(x => x.id === n.q); if (!q) return null; n = q.f(read) ? n.yes : n.no; } return n ? n.a : null; };
+  for (const c of DC.value){
+    const at = `DESIGN_CARDS.${c.id}`;
+    if (!Array.isArray(c.scenarios) || c.scenarios.length !== 8) errors.push(`${at}: 처음 보는 장면은 8개여야 해요`);
+    if (!(c.needProps || []).length || c.needProps.some(k => !PK.includes(k))) errors.push(`${at}: needProps는 onoff·power·pole 중에서 하나 이상`);
+    if ((c.actions || []).some(a => !ACTS_OK.includes(a))) errors.push(`${at}: 행동은 off·weak·strong·flip 중에서`);
+    for (const k of PK) if (!c.propWhy || !c.propWhy[k]) errors.push(`${at}: propWhy.${k}(성질마다 피드백)가 있어야 해요`);
+    for (const q of c.questions) if (!c.sensors.includes(q.s)) errors.push(`${at}: 질문 ${q.id}의 감지 카드 ${q.s}가 sensors에 없어요`);
+    for (const s of c.sensors) if (!c.questions.some(q => q.s === s)) errors.push(`${at}: 감지 카드 ${s}로 물을 질문이 없어요`);
+    for (const sc of c.scenarios || []) if (!c.actions.includes(sc.expect)) errors.push(`${at} "${sc.desc}": 기대 행동 ${sc.expect}을 고를 수 없어요`);
+    if (!(c.scenarios || []).some(sc => Object.values(sc.read).includes('?'))) warns.push(`${at}: 센서 값이 '?'인 장면이 없어요 (모를 때 안전한 쪽 설계)`);
+    const ok = (c.scenarios || []).filter(sc => trace(c, c.best, sc.read) === sc.expect).length;
+    if (ok !== 8) errors.push(`${at}: 모범 설계(best)가 ${ok}/8만 맞혀요 — 장면이나 질문을 고쳐요`);
+    const bestSensors = new Set(); (function walk(n){ if (n && n.t === 'q'){ bestSensors.add(c.questions.find(q => q.id === n.q).s); walk(n.yes); walk(n.no); } })(c.best);
+    if (bestSensors.size > c.maxSensors) errors.push(`${at}: 모범 설계에 감지 카드가 ${bestSensors.size}장 필요해서 maxSensors(${c.maxSensors})를 넘어요`);
+    if (/속도/.test(JSON.stringify(c))) warns.push(`${at}: '속도'라는 말이 있어요 ('빠르기'·'방향'을 쓰기로 함)`);
+  }
+}
+if (DSX){
+  for (const [k, E] of Object.entries(DSX.value)) if (E.opts.filter(o => o.ok === 'ok').length < 1) errors.push(`DS_EXT.${k}: 정답이 있어야 해요`);
+  if (/속도/.test(JSON.stringify(DSX.value))) warns.push("DS_EXT: '속도'라는 말이 있어요");
+}
+
 const GEN = srcFiles.map(read).join('\n').match(/const CONCEPT_GEN = '([^']+)'/);
 if (!GEN) warns.push('개념적 일반화(CONCEPT_GEN)가 아직 없어요');
 else if (!/조절/.test(GEN[1]) || !/전기/.test(GEN[1])) errors.push("CONCEPT_GEN: '조절'과 '전기'(대가)가 들어 있어야 해요");

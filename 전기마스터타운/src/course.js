@@ -136,10 +136,11 @@ const COURSE = {
           '#................#',
           '<....N...........>',
           '#...........S....#',
-          '#..t......b......#',
+          '#..t......b...D..#',
           '#.v...........v..#',
           '##################'],
-        props:{v:['server'], m:['screen', 1], t:['desk'], b:['robotDock']}},
+        props:{v:['server'], m:['screen', 1], t:['desk'], b:['robotDock']},
+        things:{D:{kind:'design', name:'🛠️ 스마트 기기 설계실 (선택)'}}},   /* a11 · EM 재설계 P4 (design.js) — 활동 목록(ACTS)에는 넣지 않는다 */
        {id:'stage', name:'역할놀이 무대', act:'a9', station:{id:'m_stage', act:'p_stage', emoji:'📣', name:'역할놀이 무대'},
         map:[
           '##################',
