@@ -44,14 +44,15 @@ const COURSE = {
        {id:'living', name:'해님네 거실', act:'a2', station:{id:'m_tv', act:'p_tv', emoji:'📺', name:'텔레비전'},
         map:[
           '##################',
-          '#.p...t..S...w.h.#',
+          '#.p...t..S.F.w.h.#',
           '#................#',
           '<.....ooo........>',
           '#....N...........#',
           '#.........r....v.#',
           '#..p.........l...#',
           '##################'],
-        props:{p:['plant'], t:['tv', 1], w:['washer'], h:['shelf'], o:['sofa', 0, 2], r:['rug', 0, 0, true], v:['robovac'], l:['lamp']}},
+        props:{p:['plant'], t:['tv', 1], w:['washer'], h:['shelf'], o:['sofa', 0, 2], r:['rug', 0, 0, true], v:['robovac'], l:['lamp']},
+        things:{F:{kind:'quiz', key:'fridge', name:'🧲 냉장고 문 자석 살펴보기'}}},
        {id:'lab', name:'전자석 실험실', act:'a3', station:{id:'m_exp', act:'exp', emoji:'🧪', name:'전자석 실험대'},
         map:[
           '##################',

@@ -55,6 +55,16 @@ for (const [label, arr] of [['CLASS_SPOTS (2D)', CS], ['CLASS3 (3D)', C3]]){
   else arr.value.forEach(x => { if (!x.kind || !x.why) errors.push(`${label} ${x.name}: kind와 why가 모두 있어야 해요`); });
 }
 
+/* 4-2. 판단 카드 경계 사례: kind·why가 있고, DEVICES와 id가 겹치지 않는다 (겹치면 a2 완료 판정이 흔들린다) */
+const BI = arrayConst('BOUNDARY_ITEMS');
+if (!BI) warns.push('BOUNDARY_ITEMS가 아직 없어요');
+else for (const b of BI.value){
+  if (!b.kind || !b.why) errors.push(`BOUNDARY_ITEMS.${b.id}: kind와 why가 모두 있어야 해요`);
+  if (b.kind === 'em' && !(b.props || []).length) errors.push(`BOUNDARY_ITEMS.${b.id}: 전자석이 있으면 props가 있어야 해요`);
+  if (b.kind !== 'em' && (b.props || []).length) errors.push(`BOUNDARY_ITEMS.${b.id}: 전자석이 없으면 props는 비워요`);
+  if (DEV && DEV.value.some(d => d.id === b.id)) errors.push(`BOUNDARY_ITEMS.${b.id}: DEVICES와 id가 겹쳐요`);
+}
+
 /* 5. 배기가스: 전기차는 '달릴 때' 배기가스가 없다 */
 for (const f of srcFiles) read(f).split('\n').forEach((line, n) => { if (/배기가스(도|가)? 나오지 않/.test(line) && !/달릴 때/.test(line)) errors.push(`${path.relative(ROOT, f)}:${n + 1} 배기가스 문장에 '달릴 때'가 빠졌어요`); });
 

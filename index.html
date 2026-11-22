@@ -419,6 +419,8 @@ button.mg-st:hover{border-color:var(--volt)}
 .mg-ch{display:grid;justify-items:center;gap:2px;padding:10px 6px}
 .mg-ch span{font-size:28px}
 .mg-ch small{font-size:12px;color:var(--text-dim)}
+.btn.mg-ch.on{background:#3a8ee6;border-color:#a8dcff;color:#fff}
+.mg-judge .mg-q{margin:8px 0 4px}
 .btn.mg-ch.good{background:var(--ok);border-color:#8ff0b9}
 #dFb{width:100%;text-align:left}
 /* 마트 · 영수증 */
@@ -988,6 +990,24 @@ const DEVICES = [
    desc:'안에 있는 전동기 전자석의 세기를 바꿔 약한 바람과 센 바람을 만들어요.'},
   {id:'speaker', name:'스피커',          icon:'🔊',       x:49, y:39, props:['power','pole'],
    desc:'스피커 안에는 영구 자석과 코일(전자석)이 함께 있어요. 코일에 흐르는 전기의 세기와 방향이 아주 빠르게 바뀌면서 진동판이 앞뒤로 떨려 소리가 나요. 세기가 크면 소리가 커져요.'},
+];
+
+/* ===== a2 '판단 카드' 전용 경계 사례 =====
+   DEVICES와 섞지 않는다: actDone이 DEVICES.every(… SAVE.dex …)로 a2 완료를 판정해서, 섞으면 기존 학생의 완료가 깨진다.
+   kind: em(전자석 있음) · perm(영구 자석) · heat(전기를 쓰지만 열만 냄) · light(전기를 쓰지만 빛만 냄) */
+const BOUNDARY_ITEMS = [
+  {id:'b_fridge',  name:'냉장고 문 자석', icon:'🧲', kind:'perm', props:[], hint:'냉장고 문을 꼭 닫아 두는 자석이에요',
+   why:'문을 늘 붙여 두기만 하면 돼요. 켜고 끌 필요도, 세기를 바꿀 필요도 없고 전기도 들지 않아서 영구 자석이 알맞아요.'},
+  {id:'b_compass', name:'나침반',        icon:'🧭', kind:'perm', props:[], hint:'바늘이 남쪽과 북쪽을 가리켜요',
+   why:'늘 같은 극을 가진 영구 자석 바늘이 남북을 가리켜요. 전기가 필요 없어요.'},
+  {id:'b_heater',  name:'열선 전기난로',  icon:'🔥', kind:'heat', props:[], hint:'빨갛게 달아오르며 따뜻해져요',
+   why:'전기를 쓰지만 열선이 뜨거워지는 원리예요. 움직이거나 소리를 내는 부분이 없어서 전자석이 없어요. (바람을 내는 온풍기에는 팬 전동기가 있어요)'},
+  {id:'b_lamp',    name:'LED 스탠드',     icon:'💡', kind:'light', props:[], hint:'책상 위를 밝게 비춰요',
+   why:'전기로 빛만 내요. 움직이는 부분이 없어서 전자석을 쓰지 않아요.'},
+  {id:'b_bell',    name:'전기 초인종',    icon:'🔔', kind:'em', props:['onoff'], hint:'버튼을 누르면 딩동 소리가 나요',
+   why:'버튼을 누를 때만 전자석이 쇠막대를 끌어당겨 딩동 소리를 내요.'},
+  {id:'b_aircon',  name:'에어컨',        icon:'❄️', kind:'em', props:['power','pole'], hint:'시원한 바람이 나와요',
+   why:'찬 공기를 만드는 압축기와 바람을 보내는 팬을 전동기가 돌려요. 전동기 세기로 바람과 냉방 세기를 조절하고, 전동기 안에서는 극이 계속 바뀌며 돌아요. (찬 공기를 만드는 냉매 자체는 전자석이 아니에요)'},
 ];
 
 /* ===== 판단 무리 ===== */
@@ -3956,6 +3976,9 @@ function openGuide(){
     <p class="note">도구를 찾을 때만 확률(운)이 들어가요. 미션 성공 기준·정답·평가에는 운이나 레벨이 끼어들지 않아요. 크레인 두뇌는 학생 화면에 '질문 길(스무고개)'로 나오고, 질문은 재료·무게·크기·색 네 가지 특징만 고를 수 있으며 한 길에서 같은 특징을 두 번 묻지 못해요.</p>
     <h3>저장</h3>
     <p>기록은 로그인한 학생별로 자동 저장돼요. 공용 기기에서는 수업이 끝날 때 처음 화면의 [학생 바꾸기]를 눌러 다음 학생이 로그인하게 해요.</p>
+    <h3>전자석 판단 기준과 단순화</h3>
+    <p>교실 찾기와 판단 카드의 기준은 "전기로 <b>움직이거나 소리를 내는</b> 부분이 있으면 전자석이 있을 가능성이 크고, 빛이나 열만 내는 물건에는 없을 수 있다"예요. 열선 난로·전기 주전자(열), LED 스탠드(빛), 칠판 자석·나침반(영구 자석)을 경계 사례로 넣었고, 경계 사례를 처음 잘못 고르면 ❤️ 대신 생각 카드로 까닭을 보여 줘요. 탐정 게임 4단계 '판단 카드'와 상점 4단계 '목적에 맞게 고르기', 해님네 거실의 냉장고 문 질문은 선택 활동이라 활동 완료·배지·인증서 조건에 들어가지 않아요.</p>
+    <p class="note">단순화의 한계: 전원 장치(어댑터) 안에도 코일이 있을 수 있지만 초등 수준에서는 위 기준으로 다뤄요. 스피커·선풍기는 교과서 자료처럼 '세기와 극'을 함께 쓰는 기기로 다뤄요. MRI는 "전기를 아주 많이 흘려 엄청나게 센 자석"까지만 다뤄요(실제로는 초전도 자석을 늘 켜 두고, 일부는 영구 자석을 써요).</p>
     <h3>개인정보와 안전</h3>
     <p>학습 문장·상황 카드·모둠 이름에 실명, 학교, 연락처를 쓰지 않도록 지도해 주세요. 숫자가 길게 이어지거나 '학교'가 들어간 문장은 프로그램이 경고해요. 위험 장면은 게임 속에서만 다루고 실제 콘센트로 따라 하지 않도록 지도해요.</p>
     <h3>AI 모델에 대해</h3>
@@ -7336,22 +7359,48 @@ mgReg({id:'mag', order:1, icon:'🧲', title:'전자석 실험 게임', stat:'em
   extra:[{label:'예전 실험실 화면 (예상 → 실험 카드)', fn:() => openExperiment()}]});
 
 /* ===== 전자석 탐정 ===== */
+/* kind: em(전자석 있음) · heat(전기를 쓰지만 열만 냄) · light(전기를 쓰지만 빛만 냄) · perm(영구 자석) · none(전기 없음)
+   전기를 쓴다고 모두 전자석이 있는 건 아니다 → 열·빛만 내는 물건과 영구 자석을 경계 사례로 넣었다 (3D 교실은 mg3_magnet.js의 CLASS3) */
+const CLASS_KIND_RULE = '전기로 <b>움직이거나 소리를 내는</b> 부분이 있으면 전자석이 있을 가능성이 커요. 빛이나 열만 내는 물건에는 없을 수 있어요.';
 const CLASS_SPOTS = [
-  {x:118, y:118, s:'🔊', name:'스피커', ok:true, why:'스피커 안에는 영구 자석과 코일(전자석)이 있어요. 코일에 흐르는 전기의 세기와 방향이 빠르게 바뀌면서 진동판이 떨려 소리가 나요.'},
-  {x:858, y:318, s:'fan', name:'선풍기', ok:true, why:'선풍기 속 전동기에 전자석이 있어요. 세기를 바꿔 바람 세기를 조절해요.'},
-  {x:486, y:262, s:'🖥️', name:'컴퓨터', ok:true, why:'컴퓨터의 스피커와 열을 식히는 팬(전동기)에 전자석이 들어 있어요.'},
-  {x:262, y:398, s:'📱', name:'스마트 기기', ok:true, why:'스마트폰·태블릿의 스피커와 진동 장치에 전자석이 들어 있어요.'},
-  {x:676, y:404, s:'📚', name:'책'}, {x:350, y:420, s:'✏️', name:'연필'}, {x:56, y:436, s:'🪴', name:'화분'}, {x:598, y:262, s:'🌍', name:'지구본'},
-  {x:906, y:486, s:'⚽', name:'공'}, {x:440, y:470, s:'✂️', name:'가위'}, {x:770, y:430, s:'📏', name:'자'}, {x:842, y:110, s:'🗓️', name:'달력'},
+  {x:118, y:118, s:'🔊', name:'스피커', ok:true, kind:'em', why:'스피커 안에는 영구 자석과 코일(전자석)이 있어요. 코일에 흐르는 전기의 세기와 방향이 빠르게 바뀌면서 진동판이 떨려 소리가 나요.'},
+  {x:858, y:318, s:'fan', name:'선풍기', ok:true, kind:'em', why:'선풍기 속 전동기에 전자석이 있어요. 세기를 바꿔 바람 세기를 조절해요.'},
+  {x:486, y:262, s:'🖥️', name:'컴퓨터', ok:true, kind:'em', why:'컴퓨터의 스피커와 열을 식히는 팬(전동기)에 전자석이 들어 있어요.'},
+  {x:262, y:398, s:'📱', name:'스마트 기기', ok:true, kind:'em', why:'스마트폰·태블릿의 스피커와 진동 장치에 전자석이 들어 있어요.'},
+  {x:170, y:480, s:'heater', name:'열선 전기난로', kind:'heat', why:'전기는 쓰지만 열선이 뜨거워지는 원리예요. 움직이거나 소리를 내는 부분이 없어서 전자석이 없어요. (바람을 내는 온풍기에는 팬 전동기가 있어요)'},
+  {x:540, y:255, s:'🫖', name:'전기 주전자', kind:'heat', why:'전기는 쓰지만 바닥의 열선이 물을 데우는 원리예요. 움직이는 부분이 없어서 전자석이 없어요.'},
+  {x:240, y:300, s:'💡', name:'LED 스탠드', kind:'light', why:'전기로 빛만 내요. 움직이거나 소리를 내는 부분이 없어서 전자석을 쓰지 않아요.'},
+  {x:628, y:66, s:'🧲', name:'칠판 자석', kind:'perm', why:'자석은 맞지만 늘 자석인 영구 자석이에요. 켜고 끌 수 없고 전기도 쓰지 않아요. 종이를 늘 붙여 두기만 하면 되니까 영구 자석이 알맞아요.'},
+  {x:420, y:258, s:'🧭', name:'나침반', kind:'perm', why:'바늘이 늘 같은 극을 가진 영구 자석이에요. 전기가 필요 없어요.'},
+  {x:676, y:404, s:'📚', name:'책', kind:'none', why:'종이로 만든 책이에요. 전기를 쓰지 않으니 전자석이 없어요.'},
+  {x:350, y:420, s:'✏️', name:'연필', kind:'none', why:'나무와 흑연으로 만든 필기도구예요. 전기를 쓰지 않아요.'},
+  {x:56, y:436, s:'🪴', name:'화분', kind:'none', why:'흙과 식물이 담긴 화분이에요. 전기를 쓰지 않아요.'},
+  {x:598, y:262, s:'🌍', name:'지구본', kind:'none', why:'손으로 돌려 보는 지구 모형이에요. 전기도 자석도 쓰지 않아요.'},
+  {x:906, y:486, s:'⚽', name:'공', kind:'none', why:'고무로 만든 공이에요. 전기를 쓰지 않아요.'},
+  {x:440, y:470, s:'✂️', name:'가위', kind:'none', why:'쇠로 만들어 자석에 붙을 수는 있지만, 전기가 흐르지 않아 스스로 자석이 되지는 않아요.'},
+  {x:770, y:430, s:'📏', name:'자', kind:'none', why:'플라스틱 자예요. 전기를 쓰지 않아요.'},
+  {x:842, y:110, s:'🗓️', name:'달력', kind:'none', why:'종이 달력이에요. 전기를 쓰지 않아요.'},
 ];
+/* 경계 사례(열·빛·영구 자석)는 처음 잘못 고르면 ❤️를 깎지 않고 '생각 카드'로 까닭을 보여 준다. 같은 종류를 또 잘못 고르면 ❤️가 줄어든다 */
+const CLASS_THINK = {heat:'🔥 열만 내는 물건', light:'💡 빛만 내는 물건', perm:'🧲 영구 자석'};
+function classJudge(S, hit){
+  if (hit.ok) return 'ok';
+  if (CLASS_THINK[hit.kind] && !S.thought[hit.kind]){ S.thought[hit.kind] = 1; return 'think'; }
+  return 'bad';
+}
+const classThinkText = h => `💭 <b>생각 카드 · ${CLASS_THINK[h.kind]}</b> — <b>${esc(h.name)}</b>: ${esc(h.why)}<br><small>${CLASS_KIND_RULE} (이번엔 ❤️를 깎지 않아요. 같은 종류를 또 고르면 ❤️가 줄어요)</small>`;
+function drawHeater2(g, x, y){ mgBox(g, x - 30, y - 26, 60, 52, '#c9ced6', '#7b8590', 8, 3); for (let k = 0; k < 3; k++){ g.fillStyle = `rgba(255,${110 + k * 20},40,${.75 + Math.sin(TIME * 4 + k) * .2})`; g.fillRect(x - 22, y - 16 + k * 13, 44, 6); } g.fillStyle = '#7b8590'; g.fillRect(x - 24, y + 26, 8, 8); g.fillRect(x + 16, y + 26, 8, 8); }
 function detS1(api){
-  const S = {found:{}, hearts:3, t:45, pops:[], wrong:{}}, need = CLASS_SPOTS.filter(s => s.ok).length;
-  api.canvas(true); api.say('교실 그림에서 <b>전자석이 들어 있는 물건</b>을 모두 찾아 눌러요. 전기가 흐르지 않는 물건을 누르면 ❤️가 줄어요.');
+  const S = {found:{}, hearts:3, t:50, pops:[], wrong:{}, think:{}, thought:{}}, need = CLASS_SPOTS.filter(s => s.ok).length;
+  MG.dbg = S;
+  api.canvas(true); api.say('교실 그림에서 <b>전자석이 들어 있는 물건</b>을 모두 찾아 눌러요. <b>전기를 쓴다고 모두 전자석이 있는 건 아니에요!</b> 전자석이 없는 물건을 누르면 ❤️가 줄어요.');
   api.pointer({down:(x, y) => {
     let hit = null, bd = 44; for (const s of CLASS_SPOTS){ const d = Math.hypot(s.x - x, s.y - y); if (d < bd){ bd = d; hit = s; } }
-    if (!hit || S.found[hit.name] || S.wrong[hit.name]) return;
-    if (hit.ok){ S.found[hit.name] = 1; SND.ok(); api.say(`✓ <b>${hit.name}</b>: ${hit.why}`, 'ok'); }
-    else { S.wrong[hit.name] = 1; S.hearts--; SND.bad(); api.say(`✗ ${josa(hit.name, '에는', '에는')} 전기가 흐르지 않아서 전자석이 없어요.`, 'bad'); }
+    if (!hit || S.found[hit.name] || S.wrong[hit.name] || S.think[hit.name]) return;
+    const r = classJudge(S, hit);
+    if (r === 'ok'){ S.found[hit.name] = 1; SND.ok(); api.say(`✓ <b>${hit.name}</b>: ${hit.why}`, 'ok'); }
+    else if (r === 'think'){ S.think[hit.name] = 1; SND.tick(); api.say(classThinkText(hit)); }
+    else { S.wrong[hit.name] = 1; S.hearts--; SND.bad(); api.say(`✗ <b>${hit.name}</b>: ${hit.why}`, 'bad'); }
   }});
   api.loop(dt => {
     S.t -= dt; const g = api.g, n = Object.keys(S.found).length;
@@ -7362,13 +7411,15 @@ function detS1(api){
     for (const x of [200, 600]) { mgBox(g, x, 420, 190, 22, '#c89b5e', '#8f6a3a', 4, 2); g.fillStyle = '#8f6a3a'; g.fillRect(x + 12, 442, 10, 50); g.fillRect(x + 168, 442, 10, 50); }
     g.fillStyle = '#5b6573'; g.fillRect(852, 340, 10, 120); g.fillRect(826, 456, 62, 10);
     for (const s of CLASS_SPOTS){
-      if (s.s === 'fan') drawDevIcon(g, 'fan', s.x, s.y - 6, 64, TIME); else mgEmoji(g, s.s, s.x, s.y, 44);
-      if (S.found[s.name]){ g.strokeStyle = '#25a862'; g.lineWidth = 5; g.beginPath(); g.arc(s.x, s.y, 34, 0, 7); g.stroke(); mgBox(g, s.x - 44, s.y + 30, 88, 24, '#123d27', null, 8); mgText(g, s.name, s.x, s.y + 42, 13, '#8ff0b9'); }
+      if (s.s === 'fan') drawDevIcon(g, 'fan', s.x, s.y - 6, 64, TIME); else if (s.s === 'heater') drawHeater2(g, s.x, s.y); else mgEmoji(g, s.s, s.x, s.y, s.kind === 'perm' && s.y < 100 ? 34 : 44);
+      const lab = col => { mgBox(g, s.x - 50, s.y + 30, 100, 24, col, null, 8); mgText(g, s.name, s.x, s.y + 42, 12, '#ffffff'); };
+      if (S.found[s.name]){ g.strokeStyle = '#25a862'; g.lineWidth = 5; g.beginPath(); g.arc(s.x, s.y, 34, 0, 7); g.stroke(); lab('#123d27'); }
+      if (S.think[s.name]){ g.strokeStyle = '#ee9a1c'; g.lineWidth = 4; g.setLineDash([6, 5]); g.beginPath(); g.arc(s.x, s.y, 34, 0, 7); g.stroke(); g.setLineDash([]); mgText(g, '?', s.x + 26, s.y - 26, 22, '#ee9a1c'); lab('#7a4a0c'); }
       if (S.wrong[s.name]){ g.strokeStyle = '#e5483a'; g.lineWidth = 5; g.beginPath(); g.moveTo(s.x - 22, s.y - 22); g.lineTo(s.x + 22, s.y + 22); g.moveTo(s.x + 22, s.y - 22); g.lineTo(s.x - 22, s.y + 22); g.stroke(); }
     }
     api.stat(`🔍 찾은 전자석 ${n}/${need} · ${heartsTxt(S.hearts, 3)} · ⏱ ${Math.max(0, Math.ceil(S.t))}초`);
-    if (n >= need){ const used = 45 - S.t; return api.end(S.hearts === 3 && used <= 30 ? 3 : S.hearts >= 2 ? 2 : 1, `교실에서 전자석 ${need}개를 모두 찾았어요! (${Math.round(used)}초)`); }
-    if (S.hearts <= 0) return api.end(0, '❤️를 모두 잃었어요. 전기가 흐르는 물건을 찾아봐요.');
+    if (n >= need){ const used = 50 - S.t; return api.end(S.hearts === 3 && used <= 35 ? 3 : S.hearts >= 2 ? 2 : 1, `교실에서 전자석 ${need}개를 모두 찾았어요! (${Math.round(used)}초) 전기를 써도 열이나 빛만 내는 물건, 늘 자석인 영구 자석에는 전자석이 없었어요.`); }
+    if (S.hearts <= 0) return api.end(0, '❤️를 모두 잃었어요. 전기로 움직이거나 소리를 내는 물건을 찾아봐요.');
     if (S.t <= 0) return api.end(n >= 3 ? 1 : 0, `시간이 끝났어요. ${n}개를 찾았어요.`);
   });
 }
@@ -7400,6 +7451,57 @@ function detS2(api){
     else { S.t -= dt; const tm = $('#dTm'); if (tm) tm.style.width = `${Math.max(0, S.t / 9 * 100)}%`; if (S.t <= 0) answer('none'); }
     api.stat(`🗂️ ${Math.min(S.i + 1, deck.length)}/${deck.length} · 연속 ${S.combo} · 실수 ${S.miss}`);
   });
+}
+/* 4단계(선택) · 판단 카드: ① 전자석이 있나? ② 있다면 쓰는 성질을 '모두' 고르기 — 기기 10개 + 경계 사례 6개 */
+const JUDGE_KIND = [['em', '⚡', '전자석이 있어요', '전기로 움직이거나 소리를 내요'], ['perm', '🧲', '없어요 · 영구 자석', '늘 자석이에요'], ['other', '🔌', '없어요 · 다른 원리', '전기는 쓰지만 열이나 빛만 내요']];
+const judgeKindOf = d => d.kind === 'heat' || d.kind === 'light' ? 'other' : (d.kind || 'em');
+function detS4(api){
+  const deck = mgShuffle(DEVICES.map(d => Object.assign({kind:'em', hint:DEV_HINT[d.id] || '', why:d.desc}, d)).concat(BOUNDARY_ITEMS));
+  const S = {i:0, score:0, max:deck.length * 2, step:1, pick:{}, wait:0, log:[]};
+  api.canvas(false);
+  const card = (body) => api.dom(`<div class="mg-flash mg-judge"><div class="mg-dev">${devIconHTML(deck[S.i].icon, 'big')}</div><h3>${esc(deck[S.i].name)}</h3><p>${esc(deck[S.i].hint || '')}</p>${body}<div id="jFb"></div></div>`);
+  const show = () => {
+    S.step = 1; S.pick = {};
+    card(`<p class="mg-q"><b>① 이 물건에 전자석이 있을까요?</b></p><div class="mg-choices">${JUDGE_KIND.map(([k, i, t, s]) => `<button class="btn mg-ch" data-k="${k}"><span>${i}</span><b>${t}</b><small>${s}</small></button>`).join('')}</div>`)
+      .querySelectorAll('[data-k]').forEach(b => b.onclick = () => kind(b.dataset.k));
+  };
+  const fb = (cls, html) => { const f = $('#jFb'); if (f) f.innerHTML = `<div class="${cls}">${html}</div><div class="row" style="justify-content:center;margin-top:8px"><button class="btn primary" id="jNext">다음 카드 ▶</button></div>`; const n = $('#jNext'); if (n) n.onclick = next; };
+  const kind = k => {
+    if (S.step !== 1) return;
+    const d = deck[S.i], want = judgeKindOf(d), ok = k === want;
+    document.querySelectorAll('[data-k]').forEach(b => { b.disabled = true; b.classList.toggle('good', b.dataset.k === want); });
+    if (ok && want === 'em'){
+      S.score += 1; S.step = 2; SND.ok();
+      const f = $('#jFb'); f.innerHTML = `<p class="mg-q">✓ 맞아요! <b>② 이 물건이 쓰는 전자석의 성질을 모두 골라요.</b></p><div class="mg-choices">${[['onoff', '🔌', '켜고 끄기', '전기가 흐를 때만 자석'], ['power', '🔆', '세기', '자석의 세기를 바꿈'], ['pole', '🧭', '극의 방향', '극의 방향을 바꿈']].map(([p, i, t, s]) => `<button class="btn mg-ch" data-pp="${p}"><span>${i}</span><b>${t}</b><small>${s}</small></button>`).join('')}</div><div class="row" style="justify-content:center;margin-top:6px"><button class="btn primary" id="jOk" disabled>다 골랐어요 ✓</button></div>`;
+      f.querySelectorAll('[data-pp]').forEach(b => b.onclick = () => { S.pick[b.dataset.pp] = !S.pick[b.dataset.pp]; b.classList.toggle('on', S.pick[b.dataset.pp]); $('#jOk').disabled = !Object.values(S.pick).some(Boolean); });
+      $('#jOk').onclick = props;
+      return;
+    }
+    if (ok){ S.score += 2; SND.ok(); S.log.push({id:d.id, ok:'full'}); fb('okbox', `✓ 맞아요! <b>${esc(d.name)}</b>: ${esc(d.why)}`); return; }
+    SND.bad(); S.log.push({id:d.id, ok:'miss'});
+    const right = JUDGE_KIND.find(x => x[0] === want);
+    fb('warnbox', `✗ 다시 생각해 봐요. 정답은 <b>${right[1]} ${right[2]}</b>. <b>${esc(d.name)}</b>: ${esc(d.why)}${want === 'em' ? `<br><small>쓰는 성질: ${d.props.map(p => PROPS[p].short).join(' · ')}</small>` : ''}`);
+  };
+  const props = () => {
+    if (S.step !== 2) return;
+    S.step = 3;
+    const d = deck[S.i], picked = Object.keys(S.pick).filter(k => S.pick[k]);
+    const right = picked.filter(p => d.props.includes(p)).length, wrong = picked.length - right, exact = right === d.props.length && !wrong;
+    const pts = exact ? 1 : right ? .5 : 0; S.score += pts; S.log.push({id:d.id, ok:exact ? 'full' : pts ? 'part' : 'kind-only'});
+    document.querySelectorAll('[data-pp]').forEach(b => { b.disabled = true; b.classList.toggle('good', d.props.includes(b.dataset.pp)); });
+    const sw = picked.includes('onoff') && !d.props.includes('onoff') ? '<br><small>💡 기기를 켜고 끄는 <b>스위치</b>는 어느 전기 제품에나 있어요. 여기서 \'켜고 끄기\'는 기중기처럼 전자석이 물체를 붙였다가 놓는 데 쓰는 성질이에요.</small>' : '';
+    (exact ? SND.ok : SND.bad).call(SND);
+    fb(exact ? 'okbox' : 'warnbox', `${exact ? '✓ 성질까지 모두 맞았어요!' : right ? '◐ 일부 맞았어요.' : '✗ 성질을 다시 생각해 봐요.'} <b>${esc(d.name)}</b>: ${d.props.map(p => `<b>${PROPS[p].short}</b>`).join(' · ')} — ${esc(d.why)}${sw}`);
+  };
+  const next = () => {
+    S.i++;
+    if (S.i >= deck.length){ const r = S.score / S.max; return api.end(r >= .9 ? 3 : r >= .7 ? 2 : r >= .5 ? 1 : 0, `판단 카드 ${deck.length}장 · ${Math.round(S.score * 10) / 10}/${S.max}점. 전기를 쓴다고 모두 전자석이 있는 건 아니고, 늘 붙어 있기만 하면 되는 곳에는 영구 자석이 알맞아요.`); }
+    show();
+  };
+  api.keys(e => { if (S.step === 1){ const k = {Digit1:'em', Digit2:'perm', Digit3:'other'}[e.code]; if (k) kind(k); } });
+  api.say('🃏 <b>판단 카드</b> — ① 전자석이 있는지 먼저 판단하고, ② 있다면 쓰는 성질을 <b>모두</b> 골라요. 전자석이 없는 물건과 영구 자석도 섞여 있어요!');
+  show();
+  api.loop(() => api.stat(`🃏 ${Math.min(S.i + 1, deck.length)}/${deck.length} · 점수 ${Math.round(S.score * 10) / 10}/${S.max}`));
 }
 function detS3(api){
   /* 세기 조절 다이얼: ▲ ▼를 누르는 동안 전자석의 세기가 바뀌고, 손을 떼면 그 세기를 유지한다 */
@@ -7446,14 +7548,15 @@ function mgNoteBox(key){
 }
 mgReg({id:'detect', order:2, icon:'🔍', title:'전자석 탐정', stat:'em', book:'전자석을 사용하는 예 조사하기 (교실 · 생활 속 기기 · 공중 부양 제품)',
   stages:[
-    {name:'교실에서 찾기', goal:'교실 곳곳에 숨은, 전자석이 들어 있는 물건(기기 모형 포함)을 모두 찾아요. 전기가 흐르지 않는 물건을 누르면 ❤️가 줄어요.', how:'화면에서 물건을 눌러 고르기'},
+    {name:'교실에서 찾기', goal:'교실 곳곳에 숨은, 전자석이 들어 있는 물건(기기 모형 포함)을 모두 찾아요. 전기를 쓴다고 모두 전자석이 있는 건 아니에요! 전자석이 없는 물건을 누르면 ❤️가 줄어요. (열이나 빛만 내는 물건, 영구 자석은 처음 한 번은 생각 카드로 알려 줘요)', how:'화면에서 물건을 눌러 고르기'},
     {name:'생활 속 기기와 성질', goal:'생활 속 기기 10개가 전자석의 어떤 성질을 이용하는지 골라요.', how:'버튼 또는 1·2·3 키'},
-    {name:'공중 부양 제품 만들기', goal:'전자석의 세기를 조절해 책을 목표 높이에 띄워요. 책이 늘어나면 세기를 올려요. 끝나면 새롭게 알게 된 점을 써요.', how:'▲ 세게 · ▼ 약하게 (화살표 ↑ ↓)'}],
+    {name:'공중 부양 제품 만들기', goal:'전자석의 세기를 조절해 책을 목표 높이에 띄워요. 책이 늘어나면 세기를 올려요. 끝나면 새롭게 알게 된 점을 써요.', how:'▲ 세게 · ▼ 약하게 (화살표 ↑ ↓)'},
+    {name:'판단 카드 (도전)', goal:'물건 카드 16장을 보고 ① 전자석이 있는지 판단하고, ② 있다면 쓰는 성질을 모두 골라요. 영구 자석, 열이나 빛만 내는 물건도 섞여 있어요. (선택 단계 · 활동 완료에는 들어가지 않아요)', how:'버튼 고르기 · 1·2·3 키'}],
   learn:[
-    '스피커, 선풍기, 컴퓨터, 스마트 기기, 로봇 청소기, 드론, 세탁기, 머리 말리개, 전기 자동차, 기중기, 자기 부상 열차, 자기 공명 영상 장치처럼 <b>전기로 움직이거나 소리를 내는 물건</b>에는 전자석이 들어 있어요.',
+    '스피커, 선풍기, 컴퓨터, 스마트 기기, 로봇 청소기, 드론, 세탁기, 머리 말리개, 전기 자동차, 기중기, 자기 부상 열차, 자기 공명 영상 장치처럼 <b>전기로 움직이거나 소리를 내는 물건</b>에는 전자석이 들어 있어요. 하지만 열선 난로·전기 주전자처럼 열만 내거나 LED 스탠드처럼 빛만 내는 물건, 늘 자석인 영구 자석(나침반·칠판 자석)에는 전자석이 없어요.',
     '기기마다 쓰는 성질이 달라요. 기중기는 <b>켜고 끄기</b>, 선풍기는 <b>세기</b>(전동기 안에서는 극도 계속 바뀌며 돌아요), 스피커는 <b>세기와 극의 방향</b>, 세탁기는 <b>극의 방향</b>을 바꿔요.',
     '같은 극끼리 밀어내는 힘을 <b>세기로 조절</b>하면 물체를 띄울 수 있어요. 높이를 재고 → 세기를 고치고 → 다시 재기를 되풀이하는 것이 컴퓨터 프로그램의 반복과 같아요.'],
-  start(st, api){ [detS1, detS2, detS3][st](api); }});
+  start(st, api){ [detS1, detS2, detS3, detS4][st](api); }});
 /* =========================================================
    6-2. 전기 안전 단원 게임
    · 우리 집 안전 탐정 — 교재 '전기를 안전하게 사용하고 절약하는 방법' (집 안 점검 · 효율 등급 · 까닭 3가지)
@@ -8955,24 +9058,34 @@ function mkDryer3(b){ BX(b, -.22, .14, -.07, .14, .3, .07, '#e05a8a'); BX(b, .14
 function mkEraser3(b){ BX(b, -.12, 0, -.07, .12, .08, .07, '#ffffff'); BX(b, -.12, 0, -.07, -.02, .08, .07, '#3a8ee6'); }
 function mkCup3(b){ BX(b, -.1, 0, -.1, .1, .24, .1, '#e5483a'); BX(b, .1, .07, -.02, .15, .18, .02, '#e5483a'); }
 const CLASS3 = [
-  {id:'spk', name:'스피커', ok:true, x:-4.2, y:3.0, z:-5.75, r:.45, why:'스피커 안에는 영구 자석과 코일(전자석)이 있어요. 코일에 흐르는 전기의 세기와 방향이 빠르게 바뀌면서 진동판이 떨려 소리가 나요.'},
-  {id:'fan', name:'선풍기', ok:true, x:6.4, y:1.6, z:-3.1, r:.55, why:'선풍기 속 전동기에 전자석이 있어요. 세기를 바꿔 바람 세기를 조절해요.'},
-  {id:'pc', name:'컴퓨터', ok:true, x:0, y:1.2, z:-4.35, r:.48, why:'컴퓨터의 스피커와 열을 식히는 팬(전동기)에 전자석이 들어 있어요.'},
-  {id:'tab', name:'스마트 기기', ok:true, x:-3.6, y:.8, z:-1.55, r:.36, why:'스마트폰·태블릿의 스피커와 진동 장치에 전자석이 들어 있어요.'},
-  {id:'robovac', name:'로봇 청소기', ok:true, x:-1.4, y:.12, z:.3, r:.4, why:'로봇 청소기의 바퀴와 흡입 장치를 돌리는 전동기에 전자석이 있어요. 극의 방향을 바꿔 뒤로도 가요.'},
-  {id:'drone', name:'드론', ok:true, x:4.1, y:1.15, z:1.2, r:.42, why:'드론 날개를 돌리는 전동기 4개 속 전자석의 세기를 조절해서 떠오르고 방향을 바꿔요.'},
-  {id:'crane', name:'전자석 기중기 모형', ok:true, x:-6.9, y:1.45, z:-5.55, r:.45, why:'전기를 켜면 자석이 되어 철을 붙이고, 끄면 내려놓아요. 켜고 끄기 성질이에요.'},
-  {id:'maglev', name:'자기 부상 열차 모형', ok:true, x:7.0, y:1.2, z:-5.55, r:.55, why:'전자석의 극을 차례로 바꿔 가며 선로 위에 떠서 달려요.'},
-  {id:'ev', name:'전기 자동차 장난감', ok:true, x:2.3, y:.25, z:-.2, r:.4, why:'바퀴를 돌리는 전동기에 전자석이 들어 있어요. 세기로 빠르기를, 극의 방향으로 앞뒤를 바꿔요.'},
-  {id:'mri', name:'자기 공명 영상 장치 모형', ok:true, x:-1.8, y:1.05, z:-4.35, r:.38, why:'아주 센 전자석으로 몸속을 사진처럼 찍는 병원 기계예요.'},
-  {id:'washer', name:'세탁기 장난감', ok:true, x:-4.3, y:.95, z:1.1, r:.34, why:'전동기 전자석의 극의 방향을 바꿔 세탁통을 왼쪽·오른쪽으로 돌려요.'},
-  {id:'dryer', name:'머리 말리개', ok:true, x:3.5, y:.92, z:-1.5, r:.34, why:'머리 말리개 속 전동기 전자석의 세기를 바꿔 약한 바람·센 바람을 만들어요.'},
-  {id:'book', name:'책', x:4.4, y:.88, z:-1.55, r:.34}, {id:'pencil', name:'연필', x:-4.55, y:.78, z:-1.15, r:.3},
-  {id:'plant', name:'화분', x:-7.8, y:.55, z:-1.4, r:.45}, {id:'globe', name:'지구본', x:1.75, y:1.3, z:-4.3, r:.36},
-  {id:'ball', name:'공', x:5.4, y:.2, z:.9, r:.32}, {id:'sci', name:'가위', x:4.7, y:.86, z:1.0, r:.28},
-  {id:'ruler', name:'자', x:-3.4, y:.76, z:1.35, r:.34}, {id:'cal', name:'달력', x:4.4, y:2.6, z:-5.85, r:.42},
-  {id:'eraser', name:'지우개', x:-4.6, y:.78, z:-1.7, r:.26}, {id:'cup', name:'컵', x:-.9, y:.95, z:-4.05, r:.26},
+  {id:'spk', name:'스피커', ok:true, kind:'em', x:-4.2, y:3.0, z:-5.75, r:.45, why:'스피커 안에는 영구 자석과 코일(전자석)이 있어요. 코일에 흐르는 전기의 세기와 방향이 빠르게 바뀌면서 진동판이 떨려 소리가 나요.'},
+  {id:'fan', name:'선풍기', ok:true, kind:'em', x:6.4, y:1.6, z:-3.1, r:.55, why:'선풍기 속 전동기에 전자석이 있어요. 세기를 바꿔 바람 세기를 조절해요.'},
+  {id:'pc', name:'컴퓨터', ok:true, kind:'em', x:0, y:1.2, z:-4.35, r:.48, why:'컴퓨터의 스피커와 열을 식히는 팬(전동기)에 전자석이 들어 있어요.'},
+  {id:'tab', name:'스마트 기기', ok:true, kind:'em', x:-3.6, y:.8, z:-1.55, r:.36, why:'스마트폰·태블릿의 스피커와 진동 장치에 전자석이 들어 있어요.'},
+  {id:'robovac', name:'로봇 청소기', ok:true, kind:'em', x:-1.4, y:.12, z:.3, r:.4, why:'로봇 청소기의 바퀴와 흡입 장치를 돌리는 전동기에 전자석이 있어요. 극의 방향을 바꿔 뒤로도 가요.'},
+  {id:'drone', name:'드론', ok:true, kind:'em', x:4.1, y:1.15, z:1.2, r:.42, why:'드론 날개를 돌리는 전동기 4개 속 전자석의 세기를 조절해서 떠오르고 방향을 바꿔요.'},
+  {id:'crane', name:'전자석 기중기 모형', ok:true, kind:'em', x:-6.9, y:1.45, z:-5.55, r:.45, why:'전기를 켜면 자석이 되어 철을 붙이고, 끄면 내려놓아요. 켜고 끄기 성질이에요.'},
+  {id:'maglev', name:'자기 부상 열차 모형', ok:true, kind:'em', x:7.0, y:1.2, z:-5.55, r:.55, why:'전자석의 극을 차례로 바꿔 가며 선로 위에 떠서 달려요.'},
+  {id:'ev', name:'전기 자동차 장난감', ok:true, kind:'em', x:2.3, y:.25, z:-.2, r:.4, why:'바퀴를 돌리는 전동기에 전자석이 들어 있어요. 세기로 빠르기를, 극의 방향으로 앞뒤를 바꿔요.'},
+  {id:'mri', name:'자기 공명 영상 장치 모형', ok:true, kind:'em', x:-1.8, y:1.05, z:-4.35, r:.38, why:'아주 센 전자석으로 몸속을 사진처럼 찍는 병원 기계예요.'},
+  {id:'washer', name:'세탁기 장난감', ok:true, kind:'em', x:-4.3, y:.95, z:1.1, r:.34, why:'전동기 전자석의 극의 방향을 바꿔 세탁통을 왼쪽·오른쪽으로 돌려요.'},
+  {id:'dryer', name:'머리 말리개', ok:true, kind:'em', x:3.5, y:.92, z:-1.5, r:.34, why:'머리 말리개 속 전동기 전자석의 세기를 바꿔 약한 바람·센 바람을 만들어요.'},
+  {id:'book', name:'책', x:4.4, y:.88, z:-1.55, r:.34, kind:'none', why:'종이로 만든 책이에요. 전기를 쓰지 않으니 전자석이 없어요.'}, {id:'pencil', name:'연필', x:-4.55, y:.78, z:-1.15, r:.3, kind:'none', why:'나무와 흑연으로 만든 필기도구예요. 전기를 쓰지 않아요.'},
+  {id:'plant', name:'화분', x:-7.8, y:.55, z:-1.4, r:.45, kind:'none', why:'흙과 식물이 담긴 화분이에요. 전기를 쓰지 않아요.'}, {id:'globe', name:'지구본', x:1.75, y:1.3, z:-4.3, r:.36, kind:'none', why:'손으로 돌려 보는 지구 모형이에요. 전기도 자석도 쓰지 않아요.'},
+  {id:'ball', name:'공', x:5.4, y:.2, z:.9, r:.32, kind:'none', why:'고무로 만든 공이에요. 전기를 쓰지 않아요.'}, {id:'sci', name:'가위', x:4.7, y:.86, z:1.0, r:.28, kind:'none', why:'쇠로 만들어 자석에 붙을 수는 있지만, 전기가 흐르지 않아 스스로 자석이 되지는 않아요.'},
+  {id:'ruler', name:'자', x:-3.4, y:.76, z:1.35, r:.34, kind:'none', why:'플라스틱 자예요. 전기를 쓰지 않아요.'}, {id:'cal', name:'달력', x:4.4, y:2.6, z:-5.85, r:.42, kind:'none', why:'종이 달력이에요. 전기를 쓰지 않아요.'},
+  {id:'eraser', name:'지우개', x:-4.6, y:.78, z:-1.7, r:.26, kind:'none', why:'고무 지우개예요. 전기를 쓰지 않아요.'}, {id:'cup', name:'컵', x:-.9, y:.95, z:-4.05, r:.26, kind:'none', why:'물을 담는 컵이에요. 전기를 쓰지 않아요.'},
+  {id:'heater', name:'열선 전기난로', kind:'heat', x:-6.8, y:.38, z:1.4, r:.45, why:'전기는 쓰지만 열선이 뜨거워지는 원리예요. 움직이거나 소리를 내는 부분이 없어서 전자석이 없어요. (바람을 내는 온풍기에는 팬 전동기가 있어요)'},
+  {id:'kettle', name:'전기 주전자', kind:'heat', x:.9, y:1.0, z:-4.2, r:.28, why:'전기는 쓰지만 바닥의 열선이 물을 데우는 원리예요. 움직이는 부분이 없어서 전자석이 없어요.'},
+  {id:'lamp', name:'LED 스탠드', kind:'light', x:3.35, y:1.05, z:1.35, r:.32, why:'전기로 빛만 내요. 움직이거나 소리를 내는 부분이 없어서 전자석을 쓰지 않아요.'},
+  {id:'bmag', name:'칠판 자석', kind:'perm', x:2.3, y:1.95, z:-5.88, r:.28, why:'자석은 맞지만 늘 자석인 영구 자석이에요. 켜고 끌 수 없고 전기도 쓰지 않아요. 종이를 늘 붙여 두기만 하면 되니까 영구 자석이 알맞아요.'},
+  {id:'compass', name:'나침반', kind:'perm', x:4.95, y:.78, z:-1.15, r:.26, why:'바늘이 늘 같은 극을 가진 영구 자석이에요. 전기가 필요 없어요.'},
 ];
+function mkHeater3(b){ BX(b, -.36, 0, -.14, .36, .7, .14, '#c9ced6'); for (let k = 0; k < 3; k++) BX(b, -.28, .18 + k * .16, .14, .28, .24 + k * .16, .16, '#ff6b2a', 3); BX(b, -.4, 0, -.2, .4, .05, .2, '#7b8590'); }
+function mkKettle3(b){ BX(b, -.14, 0, -.14, .14, .05, .14, '#2f343b'); BX(b, -.12, .05, -.12, .12, .3, .12, '#eef3f8'); BX(b, .12, .14, -.03, .2, .22, .03, '#eef3f8'); BX(b, -.18, .1, -.03, -.12, .28, .03, '#2f343b'); BX(b, -.06, .3, -.06, .06, .34, .06, '#2f343b'); }
+function mkLamp3(b){ BX(b, -.14, 0, -.12, .14, .04, .12, '#2f343b'); BX(b, -.02, .04, -.02, .02, .5, .02, '#5b6573'); BX(b, -.02, .46, -.02, .2, .5, .02, '#5b6573'); BX(b, .1, .38, -.08, .28, .46, .08, '#3a3f47'); BX(b, .12, .36, -.06, .26, .38, .06, '#fff3b8', 3); }
+function mkBoardMag3(b){ BX(b, -.1, -.08, 0, .1, .08, .06, '#e5483a'); BX(b, -.18, -.24, -.01, .18, .02, .005, '#ffffff'); }
+function mkCompass3(b){ BX(b, -.16, 0, -.16, .16, .05, .16, '#b07a45'); BX(b, -.13, .05, -.13, .13, .06, .13, '#f4f6f8'); BX(b, -.015, .06, -.11, .015, .075, 0, '#e5483a'); BX(b, -.015, .06, 0, .015, .075, .11, '#3a8ee6'); }
 function classDraw3(t){
   D3('class', mkClass3);
   D3('tdesk', b => mkDesk3(b, 2.6, .95, .82), 0, 0, -4.3); D3('pc3', mkPC3, 0, .82, -4.45);
@@ -8990,33 +9103,37 @@ function classDraw3(t){
   drawM(model('car:#2fb36b:ev', () => mkCar('#2fb36b', true)), S3(2.3, 0, -.2, Math.PI / 2 + .4, .4)); SH3(2.3, -.2, .32);
   const dy = .9 + Math.sin(t * 3) * .08; D3('droneT', mkDroneToy3, 4.1, .72 + dy * .5, 1.2);
   for (const [x, z] of [[-.4, 0], [.4, 0], [0, -.4], [0, .4]]) drawM(M3('rotor3', mkRotor3), S3(4.1 + x, .72 + dy * .5 + .07, 1.2 + z, t * 30)); SH3(4.1, 1.2, .3, .72);
+  D3('heater3', mkHeater3, -6.8, 0, 1.4); SH3(-6.8, 1.4, .4); D3('kettle3', mkKettle3, .9, .82, -4.2); D3('lamp3', mkLamp3, 3.35, .72, 1.35);
+  D3('bmag3', mkBoardMag3, 2.3, 1.95, -5.94); D3('compass3', mkCompass3, 4.95, .72, -1.15);
   D3('fanBody', mkFanBody3, 6.4, 0, -3.2); drawM(M3('fanBlades', mkFanBlades3), mMul(S3(6.4, 1.7, -3.06), mRZ(t * 9))); SH3(6.4, -3.2, .4);
 }
 /* 1단계 · 교실에서 찾기: 빨리 이어서 찾으면 콤보와 시간 보너스 */
 function det3S1(api){
-  const S = {found:{}, wrong:{}, hearts:3, t:80, last:-9, combo:0, el:0};
+  const S = {found:{}, wrong:{}, think:{}, thought:{}, hearts:3, t:85, last:-9, combo:0, el:0};
   const need = CLASS3.filter(s => s.ok).length; MG.dbg = S;
   api.scene({cam:{x:0, y:1.6, z:-2.6, w:17.4, h:4.6, pitch:.36}, draw:classDraw3,
     overlay(){
       tag3(0, 2.45, -5.85, '전자석을 찾아라!', {bg:'rgba(0,0,0,0)', col:'#eef7ee', size:20});
-      for (const s of CLASS3){ const o = s.id === 'robovac' ? {x:-1.4 + Math.sin(TIME * .6) * .6, z:.3 + Math.cos(TIME * .6) * .25} : s; if (S.found[s.id]){ mark3(o.x, s.y + s.r + .2, o.z, true); tag3(o.x, s.y - s.r - .05, o.z, s.name, {col:'#8ff0b9', size:12}); } else if (S.wrong[s.id]) mark3(o.x, s.y + s.r + .2, o.z, false); }
+      for (const s of CLASS3){ const o = s.id === 'robovac' ? {x:-1.4 + Math.sin(TIME * .6) * .6, z:.3 + Math.cos(TIME * .6) * .25} : s; if (S.found[s.id]){ mark3(o.x, s.y + s.r + .2, o.z, true); tag3(o.x, s.y - s.r - .05, o.z, s.name, {col:'#8ff0b9', size:12}); } else if (S.think[s.id]) tag3(o.x, s.y + s.r + .15, o.z, '❓ ' + s.name, {col:'#ffd27a', size:12}); else if (S.wrong[s.id]) mark3(o.x, s.y + s.r + .2, o.z, false); }
     }});
-  api.say('교실 곳곳에 <b>전자석이 들어 있는 물건 12개</b>가 숨어 있어요(모형 포함)! 모두 찾아 눌러요. 빨리 이어서 찾으면 <b>콤보</b>와 시간 보너스! 틀리면 ❤️가 줄어요.');
+  api.say('교실 곳곳에 <b>전자석이 들어 있는 물건 12개</b>가 숨어 있어요(모형 포함)! <b>전기를 쓴다고 모두 전자석이 있는 건 아니에요.</b> 빨리 이어서 찾으면 <b>콤보</b>와 시간 보너스! 전자석이 없는 물건을 누르면 ❤️가 줄어요.');
   api.pointer({down:(sx, sy) => {
-    const live = CLASS3.filter(s => !S.found[s.id] && !S.wrong[s.id]).map(s => s.id === 'robovac' ? Object.assign({}, s, {x:-1.4 + Math.sin(TIME * .6) * .6, z:.3 + Math.cos(TIME * .6) * .25}) : s);
+    const live = CLASS3.filter(s => !S.found[s.id] && !S.wrong[s.id] && !S.think[s.id]).map(s => s.id === 'robovac' ? Object.assign({}, s, {x:-1.4 + Math.sin(TIME * .6) * .6, z:.3 + Math.cos(TIME * .6) * .25}) : s);
     const hit = api.pick(live, sx, sy); if (!hit || MG.ended) return;
-    if (hit.ok){
+    const r = classJudge(S, hit);
+    if (r === 'think'){ S.think[hit.id] = 1; S.combo = 0; SND.tick(); fxPop(hit.x, hit.y + .5, hit.z, '❓ 생각해 봐요', '#ffd27a', 20); api.say(classThinkText(hit)); return; }
+    if (r === 'ok'){
       S.found[hit.id] = 1; S.combo = S.el - S.last <= 5 ? S.combo + 1 : 1; S.last = S.el;
       fxBurst(hit.x, hit.y, hit.z, 26); fxPop(hit.x, hit.y + .6, hit.z, `${hit.name}!`, '#8ff0b9', 24);
       if (S.combo >= 2){ S.t += 3; fxBanner(`콤보 x${S.combo}! +3초`, '#ffd23f', 1); SFX.combo(S.combo); } else SFX.ping();
       SND.ok(); api.say(`✓ <b>${hit.name}</b>: ${hit.why}`, 'ok');
-    } else { S.wrong[hit.id] = 1; S.hearts--; S.combo = 0; SFX.buzz(); fxShake(.14); fxFlash('#ff5040', .16); api.say(`✗ ${hit.name}에는 전기가 흐르지 않아서 전자석이 없어요.`, 'bad'); }
+    } else { S.wrong[hit.id] = 1; S.hearts--; S.combo = 0; SFX.buzz(); fxShake(.14); fxFlash('#ff5040', .16); api.say(`✗ <b>${esc(hit.name)}</b>: ${esc(hit.why)}`, 'bad'); }
   }});
   api.loop(dt => {
     S.t -= dt; S.el += dt; const n = Object.keys(S.found).length;
     api.stat(`🔍 찾은 전자석 ${n}/${need} · ${heartsTxt(S.hearts, 3)}${S.combo >= 2 ? ` · 🔥 x${S.combo}` : ''} · ${mgClock(S.t)}`);
     if (n >= need){ SFX.win(); const used = S.el; return api.end(S.hearts === 3 && used <= 55 ? 3 : S.hearts >= 2 ? 2 : 1, `교실에 숨은 전자석 ${need}개를 모두 찾았어요! (${Math.round(used)}초)`); }
-    if (S.hearts <= 0) return api.end(0, '❤️를 모두 잃었어요. 전기가 흐르는 물건을 찾아봐요.');
+    if (S.hearts <= 0) return api.end(0, '❤️를 모두 잃었어요. 전기로 움직이거나 소리를 내는 물건을 찾아봐요.');
     if (S.t <= 0) return api.end(n >= 8 ? 1 : 0, `시간이 끝났어요. ${need}개 중 ${n}개를 찾았어요.`);
   });
 }
@@ -9862,7 +9979,7 @@ const ACTS = [
   {id:'a1', icon:'🔍', title:'교실에서 전자석 찾기', place:'m_detect', placeName:'광장의 🔍 전자석 탐정 게임기', giver:'volt', games:[['detect', 0]],
    book:'전자석을 사용하는 예 조사하기 — 모둠별로 교실에서 전자석을 사용하는 예를 찾아봅시다.',
    intro:['혹시 전자석으로 책을 공중에 띄우는 제품 뉴스 봤어요? 자석인데 떴다가 내려왔다가 한대요!', '전자석은 생각보다 가까이에 숨어 있어요. 먼저 교실에서 전자석을 사용하는 물건을 찾아봐요. 스피커, 선풍기, 컴퓨터…!'],
-   done:['교실 곳곳에 전자석이 숨어 있었죠? 소리를 내는 스피커, 바람을 만드는 선풍기 속에도요.'],
+   done:['교실 곳곳에 전자석이 숨어 있었죠? 소리를 내는 스피커, 바람을 만드는 선풍기 속에도요.', '그런데 전기를 쓴다고 다 전자석이 있는 건 아니었어요. 열이나 빛만 내는 물건, 늘 자석인 영구 자석에는 전자석이 없어요. 전기로 움직이거나 소리를 내는지 살펴보면 돼요.'],
    check:{q:'스피커와 선풍기에 공통으로 들어 있는 것은?', o:['전자석', '건전지', '나침반'], a:0, why:'스피커는 전자석으로 판을 떨게 해 소리를 내고, 선풍기는 전동기 속 전자석으로 날개를 돌려요.'}},
   {id:'a2', icon:'📺', title:'생활 속 전자석과 성질', place:'m_tv', placeName:'해님네 집 📺 텔레비전', giver:'sun', games:[['detect', 1], ['detect', 2]],
    book:'영상에서 전자석을 사용하는 예를 알아보고 전자석의 어떤 성질을 이용하는지 살펴봅시다. · 새롭게 알게 된 점 공유하기',
@@ -10192,14 +10309,15 @@ const COURSE = {
        {id:'living', name:'해님네 거실', act:'a2', station:{id:'m_tv', act:'p_tv', emoji:'📺', name:'텔레비전'},
         map:[
           '##################',
-          '#.p...t..S...w.h.#',
+          '#.p...t..S.F.w.h.#',
           '#................#',
           '<.....ooo........>',
           '#....N...........#',
           '#.........r....v.#',
           '#..p.........l...#',
           '##################'],
-        props:{p:['plant'], t:['tv', 1], w:['washer'], h:['shelf'], o:['sofa', 0, 2], r:['rug', 0, 0, true], v:['robovac'], l:['lamp']}},
+        props:{p:['plant'], t:['tv', 1], w:['washer'], h:['shelf'], o:['sofa', 0, 2], r:['rug', 0, 0, true], v:['robovac'], l:['lamp']},
+        things:{F:{kind:'quiz', key:'fridge', name:'🧲 냉장고 문 자석 살펴보기'}}},
        {id:'lab', name:'전자석 실험실', act:'a3', station:{id:'m_exp', act:'exp', emoji:'🧪', name:'전자석 실험대'},
         map:[
           '##################',
@@ -11087,7 +11205,26 @@ function openFrame(key){
 }
 
 /* ===== 다가가 E ===== */
+/* ===== 영구 자석이 맞는 자리 · 해님네 냉장고 문 ===== */
+const QUIZ_THINGS = {
+  fridge:{who:'해님', q:'우리 집 냉장고 문에는 왜 전자석이 아니라 영구 자석을 쓸까?', choices:[
+    {t:'늘 붙어 있으면 되니까 켜고 끌 필요가 없고, 전기도 들지 않아서', ok:true, r:'맞아! 조절할 일이 없으면 전기를 들일 까닭이 없지. 그래서 영구 자석이 알맞아.'},
+    {t:'전자석은 철에 붙지 않아서', r:'전자석도 철에 붙어. 고철장 크레인을 떠올려 봐. 다시 골라 볼래?'},
+    {t:'영구 자석이 전자석보다 항상 더 세서', r:'세기는 전자석도 아주 세게 만들 수 있어. 핵심은 조절이 필요한가야. 다시 골라 볼래?'}],
+    after:'전자석은 켜고 끄거나 세기·방향을 바꿔야 할 때 쓰고, 늘 붙어 있기만 하면 되는 곳에는 영구 자석을 써요.'},
+};
+function quizState(){ if (!SAVE.quiz || typeof SAVE.quiz !== 'object') SAVE.quiz = {}; return SAVE.quiz; }
+function quizThing(o){
+  const Q = QUIZ_THINGS[o.key]; if (!Q) return;
+  const st = quizState(), first = !st[o.key];
+  const node = {who:Q.who, text:Q.q, choices:[]};
+  node.choices = mgShuffle(Q.choices).map(c => ({label:c.t, fn:() => { if (c.ok){ st[o.key] = st[o.key] || {at:Date.now(), tries:(st._t || 0) + 1}; } else st._t = (st._t || 0) + 1; },
+    next:c.ok ? [{who:Q.who, text:c.r}, {who:Q.who, text:Q.after}] : [{who:Q.who, text:c.r}, node]}));
+  st._t = 0;
+  showDialog(Q.who, [node], () => { delete st._t; persist(); if (first && st[o.key]){ award('em', 6); award('eco', 3); rpgToast('🧲 <b>영구 자석의 자리</b>를 찾았어요! 조절이 필요 없으면 영구 자석이 알맞아요.', 'item'); } updateHUD(); });
+}
 function placeInteract(o){
+  if (o.kind === 'quiz') return quizThing(o);
   if (o.kind === 'wrapBoard') return wrapBoardTalk(o);
   if (o.kind === 'shopDesk') return mgOpenGame('shop');
   if (o.kind === 'screen' || o.kind === 'seat') return watchVideo(o);
@@ -11113,6 +11250,7 @@ function placeNpcTalk(o){
   return false;
 }
 function placeThingDone(o){
+  if (o.kind === 'quiz') return !!quizState()[o.key];
   if (o.kind === 'wrapBoard') return wrapBoardDone(o);
   if (o.kind === 'frame') return !!placeState().museum[o.key];
   if (o.kind === 'seat') return true;   /* ! 표시는 화면에만 */
@@ -11178,6 +11316,7 @@ function mkThing(kind, arg){
   return b.mesh();
 }
 function placeDraw3D(o, t, gy){
+  if (o.kind === 'quiz'){ drawM(model('prop:fridge', () => mkProp('fridge')), M4.trs(o.x + .5, gy, o.y + .5)); sprAdd(o.x + .5, gy + 1.45, o.y + .9, iconBadge('pick', '🧲'), .26); SHADOWS.push([o.x + .5, gy, o.y + .5, .45]); return true; }
   if (o.kind === 'wrapBoard') return wrapBoardDraw3D(o, t, gy);
   const cx = o.x + .5, cz = o.y + .5;
   if (o.kind === 'screen') drawM(model('thing:screen' + (PLACE.playing ? 1 : 0), () => mkThing('screen', PLACE.playing)), M4.trs(cx, gy, cz));
@@ -11302,15 +11441,52 @@ function shopClue(api){
   api.loop(dt => { if (S.lock || MG.ended) return; S.ct += dt; if (S.ct > 4 && S.shown < 3){ S.shown++; S.ct = 0; SFX.tick(); draw(); } api.stat(`🔎 ${S.r + 1}/${R} · ⭐ ${S.pts} · ${'❤️'.repeat(S.hearts)}${'🤍'.repeat(3 - S.hearts)}`); });
   round();
 }
+/* 4단계 · 목적에 맞게 고르기: 영구 자석에게도 '맞는 자리'가 있다 (조절이 필요한가, 전기를 들일 만한가) */
+const PURPOSE_CARDS = [
+  {q:'냉장고에 메모를 붙여 두기', icon:'📝', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 켜고 끌 필요가 없어요. 전기도 들지 않는 영구 자석이 알맞아요.'},
+  {q:'버튼을 누를 때만 딩동 울리기', icon:'🔔', a:'em', why:'누를 때만 자석이 되어야 하니까 전기가 흐를 때만 자석이 되는 전자석이 필요해요.'},
+  {q:'선풍기 바람 세기를 1·2·3단으로 바꾸기', icon:'🌀', a:'em', why:'세기를 바꿔야 하니까 전자석(전동기)이 필요해요.'},
+  {q:'산에서 방향 찾기', icon:'🧭', a:'perm', why:'바늘이 늘 같은 극이면 되니까 영구 자석 나침반이 알맞아요. 전기가 없어도 돼요.'},
+  {q:'고철을 들었다가 원하는 곳에 내려놓기', icon:'🏗️', a:'em', why:'내려놓으려면 자석을 꺼야 하니까 켜고 끌 수 있는 전자석이 필요해요.'},
+  {q:'필통 뚜껑이 저절로 닫혀 있게 하기', icon:'✏️', a:'perm', hold:true, why:'늘 붙어 있기만 하면 되니까 작은 영구 자석이면 충분해요.'},
+  {q:'책상 위를 밝게 비추기', icon:'💡', a:'none', why:'빛만 내면 되니까 자석이 필요 없어요. (LED 스탠드)'},
+  {q:'세탁통을 왼쪽·오른쪽으로 번갈아 돌리기', icon:'🧺', a:'em', why:'극의 방향을 바꿔야 하니까 전자석(전동기)이 필요해요.'},
+  {q:'물을 따뜻하게 데우기', icon:'🫖', a:'none', why:'열선이 뜨거워지면 되니까 자석이 필요 없어요. (전기 주전자)'},
+];
+const PURPOSE_OPTS = [['em', '⚡', '전자석', '켜고 끄기·세기·방향 조절이 필요해요'], ['perm', '🧲', '영구 자석', '늘 붙어 있기만 하면 돼요'], ['none', '🚫', '자석 필요 없음', '빛이나 열만 내면 돼요']];
+function shopPurpose(api){
+  const deck = mgShuffle(PURPOSE_CARDS), S = {i:0, ok:0, lock:false};
+  api.canvas(false);
+  const show = () => {
+    const c = deck[S.i]; S.lock = false;
+    api.dom(`<div class="mg-flash"><div class="mg-dev" style="font-size:64px">${c.icon}</div><h3>${esc(c.q)}</h3><p>이 일에는 무엇이 알맞을까요?</p>
+      <div class="mg-choices">${PURPOSE_OPTS.map(([k, i, t, s]) => `<button class="btn mg-ch" data-a="${k}"><span>${i}</span><b>${t}</b><small>${s}</small></button>`).join('')}</div><div id="pFb"></div></div>`)
+      .querySelectorAll('[data-a]').forEach(b => b.onclick = () => answer(b.dataset.a));
+  };
+  const answer = a => {
+    if (S.lock) return; S.lock = true;
+    const c = deck[S.i], ok = a === c.a; if (ok) S.ok++;
+    (ok ? SND.ok : SND.bad).call(SND);
+    document.querySelectorAll('[data-a]').forEach(b => { b.disabled = true; b.classList.toggle('good', b.dataset.a === c.a); });
+    const extra = !ok && a === 'em' && c.hold ? ' 전자석도 쓸 수는 있지만, 늘 켜 두려면 전기가 계속 들어요. 조절이 필요 없으면 영구 자석이 알맞아요.' : '';
+    $('#pFb').innerHTML = `<div class="${ok ? 'okbox' : 'warnbox'}">${ok ? '⭕ 맞아요!' : '❌ 다시 생각해 봐요.'} ${esc(c.why)}${extra}</div>`;
+    api.after(ok ? 1800 : 3200, () => { S.i++; if (S.i >= deck.length) return api.end(S.ok >= deck.length - 1 ? 3 : S.ok >= deck.length - 3 ? 2 : S.ok >= 4 ? 1 : 0, `${deck.length}개 중 ${S.ok}개를 맞혔어요. 사람은 켜고 끄거나 세기·방향을 조절해야 할 때 전기를 들여 전자석을 써요.`); show(); });
+  };
+  api.keys(e => { const k = {Digit1:'em', Digit2:'perm', Digit3:'none'}[e.code]; if (k) answer(k); });
+  api.say('🎯 <b>목적에 맞게 고르기</b> — 이 일에는 전자석, 영구 자석, 자석 필요 없음 가운데 무엇이 알맞을까요? (1·2·3 키)');
+  show();
+  api.loop(() => api.stat(`🎯 ${Math.min(S.i + 1, deck.length)}/${deck.length} · 맞힘 ${S.ok}`));
+}
 mgReg({id:'shop', order:9, icon:'🧲', title:'전자석 제품 상점', stat:'em', free:true, book:'생활 속 전자석을 사용하는 예 (자유 탐험 · 상점 주인과 게임)',
   stages:[
     {name:'전자석 제품 많이 사기', goal:`예산 ${won(SHOP_BUDGET)}원으로 전자석이 들어간 제품을 가장 많이 사요. 영구 자석과 전자석이 없는 물건은 피해요.`, how:'물건을 눌러 담기 · 계산하기 (75초)'},
     {name:'값 어림하기', goal:'전자석 제품 세 개를 모두 사면 대략 얼마인지 어림해서 맞혀요. 5번!', how:'보기 중 고르기 (한 번에 15초)'},
-    {name:'특징 보고 제품 맞히기', goal:'전자석을 어떻게 쓰는지 단서를 보고 어떤 제품인지 맞혀요. 단서가 적을 때 맞히면 점수가 커요.', how:'제품 카드 고르기 · 하트 3개'}],
+    {name:'특징 보고 제품 맞히기', goal:'전자석을 어떻게 쓰는지 단서를 보고 어떤 제품인지 맞혀요. 단서가 적을 때 맞히면 점수가 커요.', how:'제품 카드 고르기 · 하트 3개'},
+    {name:'목적에 맞게 고르기', goal:'할 일 카드를 보고 전자석, 영구 자석, 자석 필요 없음 가운데 알맞은 것을 골라요. 영구 자석이 더 알맞은 곳도 있어요!', how:'버튼 고르기 · 1·2·3 키'}],
   learn:['전자석이 든 제품은 전기를 켜고 끄거나, 세기와 극의 방향을 바꿀 수 있어요. 나침반·냉장고 자석 같은 영구 자석은 늘 자석이에요.',
     '값을 만 원 단위로 반올림해 더하면 대략의 합계를 빨리 알 수 있어요. 장 볼 때 예산을 넘지 않게 어림하는 데 써요.',
     '선풍기·헤어드라이어·드론은 전동기의 세기를, 세탁기·로봇 청소기는 극의 방향을, 초인종·기중기는 켜고 끄기를 주로 이용해요.'],
-  start(st, api){ [shopBuy, shopGuess, shopClue][st](api); }});
+  start(st, api){ [shopBuy, shopGuess, shopClue, shopPurpose][st](api); }});
 /* 액자 이름표: 다가가면 'E · 🖼️ 제목'이 뜨게 */
 (function placeNames(){ for (const z of COURSE.places || []) for (const r of z.rooms) for (const t of Object.values(r.things || {})) if (t.kind === 'frame' && MUSEUM[t.key]) t.name = '🖼️ ' + MUSEUM[t.key].title.replace(/[“”]/g, ''); })();
 /* =========================================================
