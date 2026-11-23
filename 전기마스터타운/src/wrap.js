@@ -155,7 +155,7 @@ async function wrapStart(z, redo){
   } catch (e){
     wrapClose();
     if (e.status === 401){ ACC.token = null; return toast('다시 로그인해 주세요.', 'bad'); }
-    showDialog('정리 회의', [e.status === 429 ? '너무 빨리 여러 번 눌렀어요. 잠시 뒤에 다시 해요.' : '학급 서버와 연결이 잠시 끊겼어요. 조금 뒤에 칠판 앞에서 다시 E를 눌러요.']);
+    showDialog('정리 회의', [e.status === 429 ? (e.code === 'daily' ? e.message : '너무 빨리 여러 번 눌렀어요. 잠시 뒤에 다시 해요.') : '학급 서버와 연결이 잠시 끊겼어요. 조금 뒤에 칠판 앞에서 다시 E를 눌러요.']);
   }
 }
 function wrapOpen(z, lesson){
@@ -235,7 +235,7 @@ async function wrapSubmit(input, shown){
       setTimeout(() => { wrapClose(); wrapStart(z, true); }, 1500);
       return;
     }
-    toast(e.status === 429 ? '천천히 생각하고 답해요.' : /busy/.test(e.message) ? '아직 생각하는 중이에요. 잠깐만 기다려 줘요.' : '연결이 잠시 끊겼어요. 한 번 더 눌러 볼래요?', 'bad');
+    toast(e.status === 429 ? (e.code === 'daily' ? e.message : '천천히 생각하고 답해요.') : /busy/.test(e.message) ? '아직 생각하는 중이에요. 잠깐만 기다려 줘요.' : '연결이 잠시 끊겼어요. 한 번 더 눌러 볼래요?', 'bad');
     wrapInput(v);
   }
 }

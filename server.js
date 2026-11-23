@@ -96,6 +96,7 @@ async function handleApi(req, res, p){
   if (p === '/api/save'){
     const id = idFromToken(body.token); if (!id) return send(res, 401, {error:'다시 로그인해요'});
     const s = readStu(id); if (!s) return send(res, 401, {error:'다시 로그인해요'});
+    if (limited(req, 'save:' + id, 40)) return send(res, 429, {error:'잠시 뒤에 다시 저장해요'});   /* 한 학생이 1분에 40번 넘게 저장하지 않게 (게임은 2.5초에 한 번 모아서 저장) */
     if (!body.save || typeof body.save !== 'object') return send(res, 400, {error:'기록이 없어요'});
     s.save = body.save; s.sum = body.sum && typeof body.sum === 'object' ? body.sum : s.sum; s.updated = Date.now();
     writeStu(id, s);

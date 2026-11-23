@@ -381,3 +381,29 @@ test('1차시 대본: 냉장고 문 경계 판단(E1b)이 E1 다음에 있고, �
   assert.equal(L.nodes.E1bmok.next, 'E2'); assert.equal(L.nodes.E1mok.next, 'E1b');
   assert.ok(L.tutorPrompt.includes('E1b (sun) 영구 자석이 알맞은 곳'), 'AI 튜터 차시 설정에도 같은 확인점');
 });
+
+/* ---------- 7. 하루 사용 한도 ---------- */
+test('하루 한도: 정리 회의 시작 · 답 · 이벤트를 학생마다 묶고, AI 한도를 넘으면 규칙 대본으로 이어 간다', async () => {
+  const DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'lad-lim-'));
+  const stu = { cls: { code: 'TEST', no: 3 } }, sent = [];
+  const fake = { ready: () => true };
+  const lad = createLad({ ROOT: path.join(__dirname, '..'), DATA_DIR, SECRET: 'x'.repeat(40),
+    env: { AI_TUTOR_ENABLED: 'false', DAILY_REFLECT_STARTS: '2', DAILY_REFLECT_TURNS: '3', DAILY_EVENTS: '2', DAILY_AI_TURNS: '0' },
+    readStu: () => stu, writeStu: () => {}, idFromToken: t => t === 'tok' ? 'n:lim' : null, send: (res, code, body) => sent.push({ code, body }), logger: quiet });
+  assert.deepEqual([lad.LIMIT.starts, lad.LIMIT.turns, lad.LIMIT.ai, lad.LIMIT.aiTotal], [2, 3, 0, 3000]);
+  lad.tutor.ready = () => true;   /* AI가 켜져 있어도 학생 AI 한도(0)를 넘었으니 규칙 엔진으로 */
+  await lad.handle({}, {}, '/api/reflect/start', { token: 'tok', lessonId: 'L1' });
+  const r1 = sent.pop(); assert.equal(r1.code, 200); assert.ok(!r1.body.ai, 'AI 한도를 넘으면 규칙 대본');
+  await lad.handle({}, {}, '/api/reflect/start', { token: 'tok', lessonId: 'L1' }); assert.equal(sent.pop().code, 200);
+  await lad.handle({}, {}, '/api/reflect/start', { token: 'tok', lessonId: 'L1' });
+  const r3 = sent.pop(); assert.equal(r3.code, 429); assert.equal(r3.body.code, 'daily');
+  const did = r1.body.dialogueId;
+  for (let i = 0; i < 3; i++){ await lad.handle({}, {}, '/api/reflect/turn', { token: 'tok', dialogueId: did, input: { text: '몰라' } }); }
+  await lad.handle({}, {}, '/api/reflect/turn', { token: 'tok', dialogueId: did, input: { text: '몰라' } });
+  const t4 = sent.pop(); assert.equal(t4.code, 429); assert.equal(t4.body.code, 'daily');
+  const evs = [1, 2, 3].map(i => ({ eventId: 'lim-0000-000' + i, tag: 'quest-complete', lesson: 'L1', nodeId: 'a' + i }));
+  await lad.handle({}, {}, '/api/events', { token: 'tok', events: evs });
+  assert.deepEqual(sent.pop().body.accepted, ['lim-0000-0001', 'lim-0000-0002'], '하루 이벤트 한도를 넘은 것은 받지 않는다 (게임이 다음 날 다시 보냄)');
+  assert.equal(stu.lad.usage.starts, 2); assert.equal(stu.lad.usage.turns, 3);
+  await lad.shutdown();
+});

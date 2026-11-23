@@ -34,6 +34,7 @@ npm start
 | `CLASS_CODES` | 받을 반 코드(쉼표). 하나면 학생 화면에 미리 채움 |
 | `NPC_REFLECTION_ENABLED` · `FEEDBACK_LETTER_ENABLED` · `SHOW_AI_LABEL` | `false`로 정리 회의 · 편지 · 'AI 도움' 표시를 끈다 |
 | `GEMINI_API_KEY` · `GEMINI_MODEL` · `AI_TUTOR_ENABLED` | 정리 회의 AI 튜터. 키가 없으면 GAS 스크립트 속성 `GEMINI_API_KEYS`로 GAS가 대신 부르고, 그것도 없으면 규칙 대본 |
+| `DAILY_REFLECT_STARTS` · `DAILY_REFLECT_TURNS` · `DAILY_AI_TURNS` · `DAILY_AI_TOTAL` · `DAILY_EVENTS` | 하루 사용 한도 (한국 시간 자정에 새로). 기본: 학생마다 정리 회의 시작 12번 · 답 300번 · AI 튜터 답 80번 · 이벤트 600개, 학급 서버 전체 AI 튜터 답 3000번. AI 한도를 넘으면 규칙 대본으로 이어 간다. 그 밖에 1분 한도(정리 회의 시작 20 · 답 40 · 이벤트 60 · 저장 40 · 로그인 30)가 있다 |
 | `PLAYER_KEY_SALT` | 시트용 플레이어키를 만드는 값 (없으면 `SECRET`에서 만든다) |
 
 테스트: `npm test` (규칙 엔진 · 대본 경로 · 시트 중계), 대본 검사: `npm run lint:lessons`, 가짜 GAS로 시험: `npm run dev:mock`

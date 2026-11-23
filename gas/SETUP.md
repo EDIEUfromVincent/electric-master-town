@@ -128,6 +128,7 @@
 | 정리 회의를 잠시 끄고 싶음 | Railway 변수 `NPC_REFLECTION_ENABLED` = `false` (정리 교실은 남지만 회의 없이 차시가 완료됨) |
 | AI 튜터만 끄고 규칙 대본으로 하고 싶음 | `AI_TUTOR_ENABLED` = `false` |
 | AI 튜터가 "잠깐, 생각을 정리하고 있어요"만 반복 | `오류기록` 탭과 Railway 로그의 `AI 튜터 응답 실패` 확인 → 키가 결제 계정 프로젝트 것인지, 분당 한도(429)를 넘지 않았는지 |
+| 한 학생이 너무 많이 쓰지 않게 한도를 바꾸고 싶음 | Railway 변수: `DAILY_AI_TURNS`(학생마다 하루 AI 튜터 답, 기본 80 · 넘으면 규칙 대본으로 이어 감) · `DAILY_AI_TOTAL`(학급 전체 하루 AI 튜터 답, 기본 3000) · `DAILY_REFLECT_STARTS`(학생마다 하루 정리 회의 시작, 기본 12) · `DAILY_REFLECT_TURNS`(학생마다 하루 정리 회의 답, 기본 300). 한국 시간 자정에 다시 셉니다 |
 | 편지만 끄고 싶음 | `FEEDBACK_LETTER_ENABLED` = `false` |
 | 편지의 'AI 도움 + 선생님 확인' 표시를 끄고 싶음 | `SHOW_AI_LABEL` = `false` |
 
