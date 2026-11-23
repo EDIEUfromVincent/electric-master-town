@@ -42,7 +42,8 @@ function onOpen() {
     .addItem('② 차시 분석 실행 (AI 요약·피드백 초안)', 'gbMenuRunAnalysis')
     .addItem('③ 승인 체크박스 정리', 'gbMenuPrepareSummary')
     .addSeparator()
-    .addItem('④ 차시 성찰표 만들기 (여섯 관점)', 'gbMenuBuildReflection')
+    .addItem('④ 차시 성찰표 만들기 (여섯 관점 · 반별 가능)', 'gbMenuBuildReflection')
+    .addItem('⑤ 반별 탭 만들기 · 다시 만들기', 'gbMenuClassTabs')
     .addToUi();
 }
 
@@ -118,8 +119,34 @@ function gbMenuBuildReflection() {
   if (res.getSelectedButton() !== ui.Button.OK) return;
   const lesson = gbStr_(res.getResponseText(), 20);
   if (!lesson) return;
-  gbBuildReflection_(lesson);
-  gbToast_('차시성찰_' + lesson + ' 탭을 만들었습니다');
+  const r2 = ui.prompt('차시 성찰표 · 반 고르기', '한 반만 보려면 반 코드를 입력하세요 (예: 6301). 비워 두면 모든 반을 함께 봅니다.', ui.ButtonSet.OK_CANCEL);
+  if (r2.getSelectedButton() !== ui.Button.OK) return;
+  const code = gbStr_(r2.getResponseText(), 20).replace(/\s/g, '');
+  if (code && !/^[A-Za-z0-9\-]{1,20}$/.test(code)) { ui.alert('반 코드는 숫자 · 영어 · - 만 써요.'); return; }
+  const name = gbBuildReflection_(lesson, code);
+  gbToast_(name + ' 탭을 만들었습니다');
+}
+
+// ⑤ 반별 탭: 반 코드를 넣으면 그 반만, 비우면 게임로그에 있는 모든 반의 탭을 새로 만든다
+function gbMenuClassTabs() {
+  const ui = SpreadsheetApp.getUi();
+  const res = ui.prompt('반별 탭', '만들 반 코드를 입력하세요 (예: 6301). 비워 두면 게임로그에 기록이 있는 모든 반의 탭을 다시 만듭니다.', ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  const one = gbStr_(res.getResponseText(), 20).replace(/\s/g, '');
+  let codes = [];
+  if (one) {
+    if (!gbClassOk_(one)) { ui.alert('반 코드는 숫자 · 영어 · - 만 써요. (TEST · NOCLASS는 만들지 않아요)'); return; }
+    codes = [one];
+  } else {
+    const sh = gbSheet_(GB.SHEETS.LOG, GB_LOG_HEADERS), last = sh.getLastRow(), C = gbColMap_(GB_LOG_HEADERS);
+    if (last >= 2) sh.getRange(2, C['반코드'], last - 1, 1).getValues().forEach(function (r) { const c = String(r[0]); if (gbClassOk_(c) && codes.indexOf(c) < 0) codes.push(c); });
+  }
+  if (!codes.length) { ui.alert('아직 게임로그에 반 코드가 없어요. 반 코드를 직접 입력해 만들 수 있어요.'); return; }
+  codes.forEach(function (c) { gbClassTab_(c, 'log'); gbClassTab_(c, 'sum'); });
+  const props = PropertiesService.getScriptProperties(), known = JSON.parse(props.getProperty(GB_CLASS.PROP) || '[]');
+  codes.forEach(function (c) { if (known.indexOf(c) < 0) known.push(c); });
+  props.setProperty(GB_CLASS.PROP, JSON.stringify(known.slice(-60)));
+  gbToast_(codes.join(', ') + '반 탭을 만들었습니다 (반마다 기록 · 요약 두 탭)');
 }
 
 
@@ -163,7 +190,7 @@ function gbAnalyzeLesson_(lesson) {
     }
 
     const left = [
-      lesson, g.classCode, g.studentNo, g.playerKey,
+      lesson, gbCodeCell_(g.classCode), g.studentNo, g.playerKey,
       stats.ruleStage,
       ai && ai.ok ? ai.data.stage : '',
       ai && ai.ok ? (ai.data.stage === stats.ruleStage ? 'O' : 'X') : '',
@@ -199,7 +226,7 @@ function gbAnalyzeLesson_(lesson) {
 }
 
 // [게임로그]에서 해당 차시 이벤트를 학생별로 묶음
-function gbGroupEvents_(lesson) {
+function gbGroupEvents_(lesson, classCode) {
   const sh = gbSheet_(GB.SHEETS.LOG, GB_LOG_HEADERS);
   const last = sh.getLastRow();
   const groups = {};
@@ -208,11 +235,12 @@ function gbGroupEvents_(lesson) {
   const values = sh.getRange(2, 1, last - 1, GB_LOG_HEADERS.length).getValues();
   values.forEach(function (r) {
     if (String(r[C['차시'] - 1]) !== lesson) return;
-    const classCode = String(r[C['반코드'] - 1]);
+    const cc = String(r[C['반코드'] - 1]);
+    if (classCode && cc !== classCode) return;          // 반별 성찰표: 그 반 기록만
     const playerKey = String(r[C['플레이어키'] - 1]);
-    const key = classCode + '|' + playerKey;
+    const key = cc + '|' + playerKey;
     if (!groups[key]) {
-      groups[key] = { classCode: classCode, playerKey: playerKey, studentNo: r[C['번호'] - 1], events: [] };
+      groups[key] = { classCode: cc, playerKey: playerKey, studentNo: r[C['번호'] - 1], events: [] };
     }
     groups[key].events.push({
       time: r[C['서버수신시각'] - 1],
@@ -425,10 +453,10 @@ function gbAiKeys_() {
 //     자동 칸: 데이터 근거, 강점/보완 '후보'   /   교사 칸: 최종 판단, 근거 수업 장면, 4칸 성찰
 //     다시 만들어도 교사가 쓴 칸은 보존됩니다.
 // ============================================================
-function gbBuildReflection_(lesson) {
-  const m = gbReflectionMetrics_(lesson);
+function gbBuildReflection_(lesson, classCode) {
+  const m = gbReflectionMetrics_(lesson, classCode);
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const name = '차시성찰_' + lesson;
+  const name = '차시성찰_' + lesson + (classCode ? '_' + classCode : '');   // 반을 고르면 반별 성찰표
   let sh = ss.getSheetByName(name);
 
   // 교사가 이미 쓴 내용 보존
@@ -506,12 +534,13 @@ function gbBuildReflection_(lesson) {
   sh.getRange(start, 1, 1, 7).setFontWeight('bold').setBackground('#fde3cf');
   sh.getRange(start + box.length + 1, 1).setValue(
     '※ 강점/보완 "후보"는 GB_REFLECT 기준에 따른 자동 표시입니다. 최종 판단은 교사 칸에 적으세요. ' +
-    '표를 다시 만들어도 교사 칸은 보존됩니다.');
+    '표를 다시 만들어도 교사 칸은 보존됩니다.' + (classCode ? ' (' + classCode + '반 기록만 셌어요. 오류기록 건수는 모든 반을 합한 값이에요)' : ''));
   sh.autoResizeColumns(1, 7);
+  return name;
 }
 
-function gbReflectionMetrics_(lesson) {
-  const groups = gbGroupEvents_(lesson);
+function gbReflectionMetrics_(lesson, classCode) {
+  const groups = gbGroupEvents_(lesson, classCode);
   const keys = Object.keys(groups);
   const m = {
     players: keys.length, rReached: 0, reflections: 0, blankUsers: 0, completed: 0,
@@ -586,6 +615,7 @@ function gbReflectionMetrics_(lesson) {
     const C = gbColMap_(GB_SUMMARY_HEADERS);
     sum.getRange(2, 1, sum.getLastRow() - 1, GB_SUMMARY_HEADERS.length).getValues().forEach(function (r) {
       if (String(r[C['차시'] - 1]) !== lesson) return;
+      if (classCode && String(r[C['반코드'] - 1]) !== classCode) return;
       const a = r[C['단계일치'] - 1];
       if (a === 'O') m.agree++;
       if (a === 'X') m.disagree++;
