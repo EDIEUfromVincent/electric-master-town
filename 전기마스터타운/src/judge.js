@@ -171,7 +171,7 @@ const JUDGE_LABEL = {'a2.counterexample':'반례 사냥: 영구 자석을 쓰는
 const judgeQ = l => l.q || (Object.entries(JUDGE_LABEL).find(([k]) => String(l.node || '').startsWith(k)) || [])[1] || l.node;
 const judgeLine = l => `${judgeQ(l)} → ${l.text}${JUDGE_RES[l.result] ? ` (${JUDGE_RES[l.result]})` : ''}`;
 function judgeListHTML(list){ return `<ul class="jd-list">${list.map(l => `<li><small>${esc(judgeQ(l))}</small><br>「${esc(l.text)}」 <b class="jd-${esc(l.result)}">${esc(JUDGE_RES[l.result] || '')}</b></li>`).join('')}</ul>`; }
-/* 정리 회의 화면: 이 차시에 게임에서 한 판단을 펼쳐 볼 수 있다 (AI 튜터도 같은 기록을 참고 자료로 본다) */
+/* 정리 회의 화면: 이 차시에 게임에서 한 판단을 펼쳐 볼 수 있다 */
 function judgeWrapUI(lesson){
   const b = $('#wuJudge'), box = $('#wuJudgeList'); if (!b || !box) return;
   const list = judgeOfLesson(lesson);

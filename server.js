@@ -54,7 +54,7 @@ const nameId = n => 'n:' + n.toLowerCase();
 /* 예전 방식(반 · 번호) 기록: 이름 → 파일 목록을 시작할 때 한 번만 모아 둔다 (로그인마다 폴더 전체를 읽지 않게) */
 const LEGACY = new Map();
 try { for (const f of fs.readdirSync(STU_DIR)){ if (!f.endsWith('.json')) continue; try { const o = JSON.parse(fs.readFileSync(path.join(STU_DIR, f), 'utf8')); if (o && o.id && !String(o.id).startsWith('n:') && !o.migrated){ const k = cleanName(o.name); LEGACY.set(k, (LEGACY.get(k) || []).concat(f)); } } catch (e) {} } } catch (e) {}
-/* 정리 회의 · 구글 시트 기록 · 선생님 편지 (lad/). 구글 시트 연결은 환경 변수 GAS_WEBAPP_URL · GAS_SHARED_SECRET */
+/* 정리 회의 · 구글 시트 기록 (lad/). 구글 시트 연결은 환경 변수 GAS_WEBAPP_URL · GAS_SHARED_SECRET */
 const LAD = require('./lad').createLad({ROOT, DATA_DIR, SECRET, readStu, writeStu, idFromToken, send});
 /* 어떤 오류가 나도 서버가 꺼지지 않게 기록만 남긴다 */
 process.on('uncaughtException', e => console.error('uncaught', e));
@@ -96,7 +96,6 @@ async function handleApi(req, res, p){
   if (p === '/api/save'){
     const id = idFromToken(body.token); if (!id) return send(res, 401, {error:'다시 로그인해요'});
     const s = readStu(id); if (!s) return send(res, 401, {error:'다시 로그인해요'});
-    if (limited(req, 'save:' + id, 40)) return send(res, 429, {error:'잠시 뒤에 다시 저장해요'});   /* 한 학생이 1분에 40번 넘게 저장하지 않게 (게임은 2.5초에 한 번 모아서 저장) */
     if (!body.save || typeof body.save !== 'object') return send(res, 400, {error:'기록이 없어요'});
     s.save = body.save; s.sum = body.sum && typeof body.sum === 'object' ? body.sum : s.sum; s.updated = Date.now();
     writeStu(id, s);

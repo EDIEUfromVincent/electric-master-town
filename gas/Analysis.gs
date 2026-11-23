@@ -3,19 +3,11 @@
 //  ------------------------------------------------------------
 //  ■ GameBridge.gs와 같은 프로젝트에 넣습니다. 차시 ID는 L1 · L2 · L3 입니다.
 //  ■ 학생이 게임하는 동안에는 실행되지 않습니다. 교사가 수업 후 메뉴로 실행합니다.
-//    → Gemini를 쓰는 주체는 '교사'이며, 학생은 AI와 직접 대화하지 않습니다.
-//  ■ GEMINI_API_KEYS는 반드시 '결제 계정(Cloud Billing)이 연결된' 프로젝트의 키를 쓰세요.
-//    (무료 사용분은 입력 내용이 Google 제품 개선에 쓰일 수 있음)
-//  ■ AI에게는 반코드·번호·플레이어키를 보내지 않습니다. 대화 내용만 보냅니다.
+//  ■ AI를 쓰지 않습니다. 규칙 통계(단계·턴 수·힌트·플래그)만 시트에 정리합니다.
 // ============================================================
 
-const GB_AI = {
-  KEY_PROPERTY: 'GEMINI_API_KEYS',
-  MODEL: 'gemini-3.5-flash-lite',        // 기존 튜터 CONFIG.MODEL과 같은 값으로 맞추세요
-  TEMPERATURE: 0.3,
-  MAX_OUTPUT_TOKENS: 900,
+const GB_ANALYSIS = {
   TIME_BUDGET_MS: 4.5 * 60 * 1000,       // Apps Script 6분 제한 안에서 끊고 이어 하기
-  PAUSE_MS: 400,                         // 호출 사이 쉬는 시간 (분당 요청 한도 보호)
   STATE_PROPERTY: 'GB_ANALYSIS_LESSON'
 };
 
@@ -39,7 +31,7 @@ function onOpen() {
   SpreadsheetApp.getUi().createMenu('🎮 게임 LAD')
     .addItem('🔑 비밀 문자열 만들기 (처음 한 번)', 'gbMenuMakeSecret')
     .addItem('① 연결 점검', 'gbMenuTestSetup')
-    .addItem('② 차시 분석 실행 (AI 요약·피드백 초안)', 'gbMenuRunAnalysis')
+    .addItem('② 차시 분석 실행 (규칙 통계)', 'gbMenuRunAnalysis')
     .addItem('③ 승인 체크박스 정리', 'gbMenuPrepareSummary')
     .addSeparator()
     .addItem('④ 차시 성찰표 만들기 (여섯 관점 · 반별 가능)', 'gbMenuBuildReflection')
@@ -72,7 +64,6 @@ function gbMenuTestSetup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const props = PropertiesService.getScriptProperties();
   const secret = props.getProperty(GB.SECRET_PROPERTY) || '';
-  const keys = gbAiKeys_();
   const lines = [];
   lines.push('시트: ' + ss.getName());
   [GB.SHEETS.LOG, GB.SHEETS.SUMMARY, GB.SHEETS.LESSONS].forEach(function (n) {
@@ -81,11 +72,6 @@ function gbMenuTestSetup() {
   });
   lines.push((secret.length >= 20 ? '✅' : '❌') + ' GAME_SHARED_SECRET ' + (secret.length >= 20 ? '설정됨' : '없음 또는 20자 미만'));
   lines.push((props.getProperty(GB.ALERT_EMAIL_PROPERTY) ? '✅' : '⬜') + ' TEACHER_ALERT_EMAIL (선택)');
-  lines.push((keys.length ? '✅' : '⬜') + ' GEMINI_API_KEYS ' + keys.length + '개 (정리 회의 AI 튜터 + 수업 후 분석. 없으면 규칙 엔진으로 진행)');
-  if (keys.length) {
-    const r = gbCallGemini_('연결 점검입니다. {"ok":true} 만 JSON으로 답하세요.', '점검', null);
-    lines.push('Gemini 응답: ' + (r.ok ? '✅ 정상' : '❌ ' + r.error));
-  }
   SpreadsheetApp.getUi().alert('연결 점검 결과', lines.join('\n'), SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
@@ -95,7 +81,7 @@ function gbMenuRunAnalysis() {
   if (res.getSelectedButton() !== ui.Button.OK) return;
   const lesson = gbStr_(res.getResponseText(), 20);
   if (!lesson) return;
-  PropertiesService.getScriptProperties().setProperty(GB_AI.STATE_PROPERTY, lesson);
+  PropertiesService.getScriptProperties().setProperty(GB_ANALYSIS.STATE_PROPERTY, lesson);
   const done = gbAnalyzeLesson_(lesson);
   gbToast_(done ? lesson + ' 분석 완료' : lesson + ' 분석이 길어 1분 뒤 자동으로 이어서 합니다');
 }
@@ -103,7 +89,7 @@ function gbMenuRunAnalysis() {
 // 시간 트리거가 부르는 함수 (이어서 분석)
 function gbContinueAnalysis() {
   gbDeleteTriggers_('gbContinueAnalysis');
-  const lesson = PropertiesService.getScriptProperties().getProperty(GB_AI.STATE_PROPERTY);
+  const lesson = PropertiesService.getScriptProperties().getProperty(GB_ANALYSIS.STATE_PROPERTY);
   if (lesson) gbAnalyzeLesson_(lesson);
 }
 
@@ -151,14 +137,12 @@ function gbMenuClassTabs() {
 
 
 // ============================================================
-//  ② 차시 분석 — 학생별 규칙 통계 + (키가 있으면) AI 요약·피드백 초안
+//  ② 차시 분석 — 학생별 규칙 통계
 //  반환값: true = 모두 끝남 / false = 시간 부족으로 이어서 할 예정
 // ============================================================
 function gbAnalyzeLesson_(lesson) {
   const started = Date.now();
   const groups = gbGroupEvents_(lesson);
-  const meta = gbLessonMeta_(lesson);
-  const keys = gbAiKeys_();
 
   const sh = gbSheet_(GB.SHEETS.SUMMARY, GB_SUMMARY_HEADERS);
   const C = gbColMap_(GB_SUMMARY_HEADERS);
@@ -166,7 +150,7 @@ function gbAnalyzeLesson_(lesson) {
 
   const groupKeys = Object.keys(groups);
   for (let gi = 0; gi < groupKeys.length; gi++) {
-    if (Date.now() - started > GB_AI.TIME_BUDGET_MS) {
+    if (Date.now() - started > GB_ANALYSIS.TIME_BUDGET_MS) {
       gbDeleteTriggers_('gbContinueAnalysis');
       ScriptApp.newTrigger('gbContinueAnalysis').timeBased().after(60 * 1000).create();
       return false;
@@ -177,29 +161,16 @@ function gbAnalyzeLesson_(lesson) {
     if (existing && String(existing.status).indexOf(statusTag) >= 0) continue;   // 새 기록 없음 → 건너뜀
 
     const stats = gbRuleStats_(g.events);
-    let ai = null;
-    let status;
-    if (stats.flags.indexOf('위험') >= 0) {
-      status = '교사직접확인(위험 신호, AI 미사용) · ' + statusTag;
-    } else if (!keys.length) {
-      status = '규칙분석만(키 없음) · ' + statusTag;
-    } else {
-      ai = gbAiAnalyze_(meta, g.events);
-      status = (ai.ok ? '완료' : 'AI실패(' + ai.error + ')') + ' · ' + statusTag;
-      Utilities.sleep(GB_AI.PAUSE_MS);
-    }
+    const status = (stats.flags.indexOf('위험') >= 0 ? '교사직접확인(위험 신호) · ' : '규칙분석 · ') + statusTag;
 
     const left = [
       lesson, gbCodeCell_(g.classCode), g.studentNo, g.playerKey,
       stats.ruleStage,
-      ai && ai.ok ? ai.data.stage : '',
-      ai && ai.ok ? (ai.data.stage === stats.ruleStage ? 'O' : 'X') : '',
+      '', '',
       stats.turns.S, stats.turns.E, stats.turns.R, stats.maxHint,
       stats.flags.join(', '),
       stats.reflection,
-      ai && ai.ok ? (ai.data.summary + (ai.data.evidence ? ' (근거: ' + ai.data.evidence + ')' : '')) : '',
-      ai && ai.ok ? (ai.data.misconceptions || []).join(' / ') : '',
-      ai && ai.ok ? ai.data.feedback : ''
+      '', '', ''
     ].map(gbSafeCell_);
     const right = [new Date(), status];
 
@@ -221,7 +192,7 @@ function gbAnalyzeLesson_(lesson) {
       lock.releaseLock();
     }
   }
-  PropertiesService.getScriptProperties().deleteProperty(GB_AI.STATE_PROPERTY);
+  PropertiesService.getScriptProperties().deleteProperty(GB_ANALYSIS.STATE_PROPERTY);
   return true;
 }
 
@@ -326,125 +297,6 @@ function gbSummaryIndex_(sh, C, lesson) {
     index[key] = { row: i + 2, status: r[C['분석상태'] - 1] };
   });
   return index;
-}
-
-
-// ============================================================
-//  🤖 AI 분석 1명분 — 구조화된 JSON으로만 받음
-// ============================================================
-function gbAiAnalyze_(meta, events) {
-  const transcript = events
-    .filter(function (ev) { return ev.npcText || ev.studentText; })
-    .map(function (ev) {
-      const head = '[' + (ev.stage || '-') + '|' + ev.result + '|힌트' + ev.hintLevel + (ev.tag ? '|' + ev.tag : '') + ']';
-      return head + ' NPC: ' + ev.npcText + (ev.studentText ? '\n    학생: ' + ev.studentText : '');
-    })
-    .join('\n');
-
-  const system = [
-    '너는 초등학교 6학년 과학 수업의 과정중심평가를 돕는 보조 평가자다. 최종 판단은 교사가 한다.',
-    '',
-    '[차시] ' + meta.lessonId + ' ' + meta.title,
-    '[성취기준] ' + meta.standards,
-    '[목표 개념] ' + meta.concepts,
-    '[단계 판정 기준]',
-    '- S: ' + meta.S,
-    '- E: ' + meta.E,
-    '- R: ' + meta.R,
-    '',
-    '[입력] 게임 NPC와 학생의 대화 기록. 각 줄 머리의 [단계|판정|힌트]는 게임 규칙 엔진의 자동 판정이다.',
-    '규칙 엔진 판정을 그대로 따르지 말고, 학생 발화 자체를 근거로 독립적으로 판단하라.',
-    '',
-    '[출력 규칙]',
-    '- stage: S, E, R 중 하나.',
-    '- evidence: 판정 근거가 된 학생 발화를 짧게 인용한 1문장.',
-    '- misconceptions: 학생 발화에 드러난 오개념 목록. 없으면 빈 배열.',
-    '- summary: 학생의 탐구 흐름을 교사에게 보고하는 1~2문장.',
-    '- feedback: 다음 차시 시작 때 학생에게 전할 편지 초안. 다음을 지켜라.',
-    '  · 2~3문장, 다정한 반말, 초등 6학년 교과서 어휘만 사용.',
-    '  · 첫 문장은 학생이 스스로 말한 내용을 구체적으로 인정한다.',
-    '  · 부족한 점은 정답을 말하지 말고, 다음 시간에 생각해 볼 질문 1개로 남긴다.',
-    '  · 점수·등급·다른 학생과의 비교, 이름 부르기, 학생이 쓴 개인정보 반복은 금지.',
-    '  · 목표 개념과 어긋나는 과학적 내용은 절대 쓰지 않는다.'
-  ].join('\n');
-
-  const schema = {
-    type: 'OBJECT',
-    properties: {
-      stage: { type: 'STRING', enum: ['S', 'E', 'R'] },
-      evidence: { type: 'STRING' },
-      misconceptions: { type: 'ARRAY', items: { type: 'STRING' } },
-      summary: { type: 'STRING' },
-      feedback: { type: 'STRING' }
-    },
-    required: ['stage', 'evidence', 'misconceptions', 'summary', 'feedback']
-  };
-
-  const r = gbCallGemini_(transcript || '(대화 없음)', system, schema);
-  if (!r.ok) return r;
-  try {
-    const data = JSON.parse(r.text);
-    if (['S', 'E', 'R'].indexOf(data.stage) < 0) return { ok: false, error: 'bad_stage' };
-    data.feedback = gbMask_(String(data.feedback || '')).text.substring(0, GB.MAX_TEXT);
-    return { ok: true, data: data };
-  } catch (e) {
-    return { ok: false, error: 'bad_json' };
-  }
-}
-
-function gbCallGemini_(userText, systemText, schema) {
-  const keys = gbAiKeys_();
-  if (!keys.length) return { ok: false, error: 'no_key' };
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
-    encodeURIComponent(GB_AI.MODEL) + ':generateContent';
-  const generationConfig = {
-    temperature: GB_AI.TEMPERATURE,
-    maxOutputTokens: GB_AI.MAX_OUTPUT_TOKENS,
-    responseMimeType: 'application/json'
-  };
-  if (schema) generationConfig.responseSchema = schema;
-  const payload = {
-    systemInstruction: { parts: [{ text: systemText }] },
-    contents: [{ role: 'user', parts: [{ text: userText }] }],
-    generationConfig: generationConfig
-  };
-
-  const order = keys.slice().sort(function () { return Math.random() - 0.5; });
-  let lastErr = '';
-  for (let i = 0; i < order.length; i++) {
-    let res;
-    try {
-      res = UrlFetchApp.fetch(url, {
-        method: 'post',
-        contentType: 'application/json',
-        headers: { 'x-goog-api-key': order[i] },     // 키는 URL이 아니라 헤더로
-        payload: JSON.stringify(payload),
-        muteHttpExceptions: true
-      });
-    } catch (e) {
-      lastErr = 'fetch_failed';
-      continue;
-    }
-    const code = res.getResponseCode();
-    if (code === 429 || code >= 500) { lastErr = 'HTTP ' + code; continue; }
-    let json = {};
-    try { json = JSON.parse(res.getContentText()); } catch (e) { json = {}; }
-    if (code !== 200 || json.error) {
-      return { ok: false, error: 'HTTP ' + code + ' ' + ((json.error && json.error.status) || '') };
-    }
-    const c = json.candidates && json.candidates[0];
-    const text = c && c.content && c.content.parts
-      ? c.content.parts.filter(function (p) { return p.text && !p.thought; }).map(function (p) { return p.text; }).join('')
-      : '';
-    if (!text) return { ok: false, error: 'empty(' + ((c && c.finishReason) || 'blocked') + ')' };
-    return { ok: true, text: text };
-  }
-  return { ok: false, error: lastErr || 'busy' };
-}
-
-function gbAiKeys_() {
-  const raw = PropertiesService.getScriptProperties().getProperty(GB_AI.KEY_PROPERTY) || '';
-  return raw.split(',').map(function (k) { return k.trim().replace(/['"]/g, ''); }).filter(String);
 }
 
 

@@ -7,14 +7,10 @@
 //      (기존 소크라테스 튜터 프로젝트에 넣지 마세요. 기존 LAD를 건드리지 않기 위함)
 //  ■ 같은 프로젝트에 Analysis.gs 도 함께 넣습니다.
 //  ■ 이 웹앱은 '게임 서버(Railway)'만 호출합니다. 학생 브라우저는 이 주소를 모릅니다.
-//  ■ 정리 회의 AI 튜터: 게임 서버가 보낸 대화(tutor_turn)를 스크립트 속성 GEMINI_API_KEYS의 키로 Gemini에 물어 돌려줍니다.
-//    (Railway에 GEMINI_API_KEY를 넣으면 게임 서버가 직접 부르므로 이 길은 쓰지 않습니다)
-//    학생 이름·반·번호는 오지 않습니다. 게임 서버가 개인정보를 가린 대화만 보냅니다.
 //
 //  [스크립트 속성]  프로젝트 설정(⚙️) → 스크립트 속성
 //    GAME_SHARED_SECRET   : 게임 서버와 똑같이 맞춘 긴 무작위 문자열 (40자 이상 권장)
 //    TEACHER_ALERT_EMAIL  : (선택) 위험 신호 알림을 받을 교사 메일
-//    GEMINI_API_KEYS      : (Analysis.gs용) '결제 계정이 연결된' 프로젝트의 키만
 // ============================================================
 
 
@@ -52,7 +48,7 @@ const GB_ALLOWED = {
   STAGE: ['S', 'E', 'R', ''],
   RESULT: ['correct', 'partial', 'miss', 'misconception', 'avoid', 'offtopic', 'blocked', 'info', 'skip'],
   FLAG: ['이탈', '욕설', '욕설-3회', '개인정보', '위험', '지원필요', '중단'],
-  TAG: ['', 'reflection', 'blank', 'feedback-reply', 'session-start', 'session-end', 'quest-complete', 'lesson-complete', 'judgment']
+  TAG: ['', 'reflection', 'blank', 'session-start', 'session-end', 'quest-complete', 'lesson-complete', 'judgment']
 };
 
 
@@ -76,15 +72,9 @@ function doPost(e) {
   try {
     switch (body.action) {
       case 'ping':
-        return gbJson_({ ok: true, time: new Date().toISOString(), ai: gbTutorKeys_().length > 0 });
-      case 'tutor_turn':
-        return gbJson_(gbHandleTutorTurn_(body));
+        return gbJson_({ ok: true, time: new Date().toISOString() });
       case 'log_events':
         return gbJson_(gbHandleLogEvents_(body.events));
-      case 'get_feedback':
-        return gbJson_(gbHandleGetFeedback_(body.classCode, body.playerKey));
-      case 'ack_feedback':
-        return gbJson_(gbHandleAckFeedback_(body.lesson, body.classCode, body.playerKey, body.reply));
       case 'upsert_lessons':
         return gbJson_(gbHandleUpsertLessons_(body.lessons));
       default:
@@ -205,80 +195,6 @@ function gbValidateEvent_(ev) {
 
 
 // ============================================================
-//  ② 피드백 편지 조회 — 교사가 '승인'한 것만, 아직 전달 안 된 것만
-//     playerKey를 비우면 그 반 전체 목록을 돌려줌 (게임 서버가 몇 분 캐시)
-// ============================================================
-function gbHandleGetFeedback_(classCode, playerKey) {
-  classCode = gbStr_(classCode, 20);
-  playerKey = gbStr_(playerKey, 64);
-  if (!/^[A-Za-z0-9\-]{1,20}$/.test(classCode)) return { ok: false, error: 'bad_class' };
-
-  const sh = gbSheet_(GB.SHEETS.SUMMARY, GB_SUMMARY_HEADERS);
-  const last = sh.getLastRow();
-  if (last < 2) return { ok: true, items: [] };
-
-  const C = gbColMap_(GB_SUMMARY_HEADERS);
-  const values = sh.getRange(2, 1, last - 1, GB_SUMMARY_HEADERS.length).getValues();
-  const items = [];
-  values.forEach(function (r) {
-    if (String(r[C['반코드'] - 1]) !== classCode) return;
-    if (playerKey && String(r[C['플레이어키'] - 1]) !== playerKey) return;
-    if (r[C['승인'] - 1] !== true) return;
-    if (r[C['전달시각'] - 1]) return;
-    const teacherText = String(r[C['교사수정피드백'] - 1] || '').trim();
-    const aiText = String(r[C['AI피드백초안'] - 1] || '').trim();
-    const text = teacherText || aiText;
-    if (!text) return;
-    items.push({
-      lesson: String(r[C['차시'] - 1]),
-      classCode: classCode,
-      playerKey: String(r[C['플레이어키'] - 1]),
-      text: text.substring(0, GB.MAX_TEXT),
-      editedByTeacher: !!teacherText,
-      aiAssisted: true                    // 게임 화면에 'AI 도움 + 선생님 확인' 표시용
-    });
-  });
-  return { ok: true, items: items };
-}
-
-
-// ============================================================
-//  ③ 피드백 전달 확인 + 학생 답장 기록
-// ============================================================
-function gbHandleAckFeedback_(lesson, classCode, playerKey, reply) {
-  lesson = gbStr_(lesson, 20);
-  classCode = gbStr_(classCode, 20);
-  playerKey = gbStr_(playerKey, 64);
-  if (!lesson || !classCode || !playerKey) return { ok: false, error: 'bad_params' };
-
-  const masked = gbMask_(gbStr_(reply, GB.MAX_TEXT));
-  const lock = LockService.getScriptLock();
-  lock.waitLock(20000);
-  try {
-    const sh = gbSheet_(GB.SHEETS.SUMMARY, GB_SUMMARY_HEADERS);
-    const last = sh.getLastRow();
-    if (last < 2) return { ok: false, error: 'not_found' };
-    const C = gbColMap_(GB_SUMMARY_HEADERS);
-    const keys = sh.getRange(2, 1, last - 1, C['플레이어키']).getValues();
-    for (let i = 0; i < keys.length; i++) {
-      const r = keys[i];
-      if (String(r[C['차시'] - 1]) === lesson &&
-          String(r[C['반코드'] - 1]) === classCode &&
-          String(r[C['플레이어키'] - 1]) === playerKey) {
-        const rowNo = i + 2;
-        sh.getRange(rowNo, C['전달시각']).setValue(new Date());
-        if (masked.text) sh.getRange(rowNo, C['학생반응']).setValue(gbSafeCell_(masked.text));
-        return { ok: true };
-      }
-    }
-    return { ok: false, error: 'not_found' };
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-
-// ============================================================
 //  ③-2 차시 설정 동기화 — 게임의 차시 대본 JSON이 '단일 원본'
 //      게임 서버가 시작할 때 한 번 보내면 [차시설정] 탭이 갱신되고,
 //      Analysis.gs가 이 탭의 목표 개념·판정 기준으로 AI 분석을 합니다.
@@ -322,69 +238,6 @@ function gbHandleUpsertLessons_(lessons) {
   } finally {
     lock.releaseLock();
   }
-}
-
-
-// ============================================================
-//  ③-3 정리 회의 AI 튜터 — 게임 서버가 만든 지시문·대화를 Gemini에 묻고 글만 돌려준다
-// ============================================================
-const GB_TUTOR = {
-  KEY_PROPERTY: 'GEMINI_API_KEYS',
-  MODEL: 'gemini-3.5-flash-lite',      // 기존 소크라테스 튜터와 같은 모델
-  MAX_OUTPUT_TOKENS: 900,
-  PER_MINUTE: 150                       // 앱 전체 분당 상한 (한 반이 동시에 써도 넉넉하게)
-};
-function gbTutorKeys_() {
-  const raw = PropertiesService.getScriptProperties().getProperty(GB_TUTOR.KEY_PROPERTY) || '';
-  return raw.split(',').map(function (k) { return k.trim().replace(/['"]/g, ''); }).filter(String);
-}
-function gbHandleTutorTurn_(b) {
-  const keys = gbTutorKeys_();
-  if (!keys.length) return { ok: false, error: 'no_key' };
-  const system = gbStr_(b.system, 24000);
-  const contents = Array.isArray(b.contents) ? b.contents.slice(-60) : [];
-  if (!system || !contents.length) return { ok: false, error: 'bad_request' };
-  const clean = [];
-  for (let i = 0; i < contents.length; i++) {
-    const c = contents[i] || {};
-    const role = c.role === 'model' ? 'model' : 'user';
-    const text = gbStr_(c.parts && c.parts[0] && c.parts[0].text, 4000);
-    if (text) clean.push({ role: role, parts: [{ text: text }] });
-  }
-  // 분당 상한 (선생님 할당량 보호)
-  const cache = CacheService.getScriptCache();
-  const k = 'tutor:' + Math.floor(Date.now() / 60000);
-  const n = Number(cache.get(k) || 0) + 1;
-  cache.put(k, String(n), 120);
-  if (n > GB_TUTOR.PER_MINUTE) return { ok: false, error: 'busy' };
-
-  const generationConfig = { temperature: Math.max(0, Math.min(1, Number(b.temperature) || 0.6)), maxOutputTokens: GB_TUTOR.MAX_OUTPUT_TOKENS, responseMimeType: 'application/json' };
-  if (b.schema && typeof b.schema === 'object') generationConfig.responseSchema = b.schema;
-  const payload = {
-    systemInstruction: { parts: [{ text: system }] }, contents: clean, generationConfig: generationConfig,
-    safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT']
-      .map(function (c) { return { category: c, threshold: 'BLOCK_MEDIUM_AND_ABOVE' }; })
-  };
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(GB_TUTOR.MODEL) + ':generateContent';
-  const order = keys.slice().sort(function () { return Math.random() - 0.5; });
-  let last = 'busy';
-  for (let i = 0; i < order.length; i++) {
-    let res;
-    try {
-      res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', headers: { 'x-goog-api-key': order[i] }, payload: JSON.stringify(payload), muteHttpExceptions: true });
-    } catch (e) { last = 'fetch_failed'; continue; }
-    const code = res.getResponseCode();
-    if (code === 429 || code >= 500) { last = 'HTTP ' + code; continue; }
-    let json = {};
-    try { json = JSON.parse(res.getContentText()); } catch (e) { json = {}; }
-    if (code !== 200 || json.error) { gbLogError_('tutor_turn', 'HTTP ' + code + ' ' + ((json.error && json.error.status) || '')); return { ok: false, error: 'HTTP ' + code }; }
-    const cand = json.candidates && json.candidates[0];
-    const text = cand && cand.content && cand.content.parts
-      ? cand.content.parts.filter(function (p) { return p.text && !p.thought; }).map(function (p) { return p.text; }).join('') : '';
-    if (!text) return { ok: false, error: 'empty_' + ((cand && cand.finishReason) || 'blocked') };
-    return { ok: true, text: text };
-  }
-  return { ok: false, error: last };
 }
 
 
@@ -484,7 +337,7 @@ function gbCodeCell_(code) {
 
 // ============================================================
 //  ⑤ 반별 탭 — 반 코드마다 '게임로그'와 '차시요약'을 걸러 보여 주는 탭 (보기 전용 · 수식이라 저절로 갱신)
-//  · 원본은 하나(게임로그 · 차시요약)입니다. 분석 · 편지 · 승인은 모두 원본에서 하고, 반별 탭은 보기만 합니다.
+//  · 원본은 하나(게임로그 · 차시요약)입니다. 분석은 모두 원본에서 하고, 반별 탭은 보기만 합니다.
 //  · 새 반 코드의 기록이 처음 들어오면 '6301 기록' · '6301 요약' 탭이 저절로 생깁니다. (TEST · NOCLASS는 만들지 않음)
 //  · 탭을 지웠거나 모양이 깨졌으면 메뉴 ⑤로 다시 만듭니다.
 // ============================================================

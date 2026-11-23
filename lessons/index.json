@@ -10,8 +10,7 @@
       "npcs": [
         "volt",
         "sun"
-      ],
-      "feedbackLetterAtStart": true
+      ]
     },
     {
       "lessonId": "L2",
@@ -23,8 +22,7 @@
         "auto",
         "mayor",
         "evdriver"
-      ],
-      "feedbackLetterAtStart": true
+      ]
     },
     {
       "lessonId": "L3",
@@ -36,8 +34,7 @@
         "volt",
         "moon",
         "star"
-      ],
-      "feedbackLetterAtStart": true
+      ]
     }
   ]
 }

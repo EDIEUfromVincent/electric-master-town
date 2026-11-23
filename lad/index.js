@@ -1,13 +1,11 @@
 // ============================================================
-//  lad/index.js — 정리 회의 · 기록 · 선생님 편지 API (server.js가 부른다)
+//  lad/index.js — 정리 회의 · 기록 API (server.js가 부른다)
 //  ------------------------------------------------------------
 //  POST /api/lad/status      내 반·번호, 시트 연결 여부, 쓸 수 있는 차시
 //  POST /api/lad/class       반 코드 + 번호 저장 (이름 대신 시트에 남는 것)
 //  POST /api/reflect/start   정리 회의 시작(또는 이어 하기)
 //  POST /api/reflect/turn    학생 답 한 번
 //  POST /api/events          게임 이벤트(차시 첫 진입 · 활동 완료) 묶음
-//  POST /api/feedback/get    선생님이 승인한 편지
-//  POST /api/feedback/ack    편지 받음 + 답장
 //  · 모든 요청은 로그인 표(token)로 확인하고, 반·번호·플레이어키는 서버가 정한다 (브라우저 값은 믿지 않는다)
 //  · 시트에는 이름을 보내지 않는다. 반코드·번호·플레이어키(이름에서 만든 되돌릴 수 없는 열쇠)만 보낸다
 // ============================================================
@@ -15,8 +13,6 @@
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { ReflectEngine, loadLessons } = require('./engine');
 const { SheetRelay } = require('./relay');
-const { TutorBrain } = require('./tutor');
-const { createAi } = require('./ai');
 const R = require('./rules');
 
 const flag = (v, def) => v == null || v === '' ? def : !/^(0|false|no|off)$/i.test(String(v).trim());
@@ -27,22 +23,15 @@ const JUDGE_RESULTS = ['correct', 'partial', 'miss'];   /* 판단 기록: 인정
 function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeStu, idFromToken, send, logger = console }) {
   const cfg = {
     reflect: flag(env.NPC_REFLECTION_ENABLED, true),
-    letters: flag(env.FEEDBACK_LETTER_ENABLED, true),
-    aiLabel: flag(env.SHOW_AI_LABEL, true),
     classCodes: String(env.CLASS_CODES || '').split(',').map(s => s.trim()).filter(s => CLASS_RE.test(s)),
   };
   const PK_SALT = env.PLAYER_KEY_SALT || ('pk-salt:' + SECRET);
   const playerKey = id => crypto.createHmac('sha256', PK_SALT).update('pk:' + id).digest('base64url').slice(0, 16);
   const lessonsDir = path.join(ROOT, 'lessons');
   const lessons = loadLessons(lessonsDir, fs, path, logger);
-  let npcMail = {};
-  try { npcMail = JSON.parse(fs.readFileSync(path.join(lessonsDir, '_feedback-npc.json'), 'utf8')); } catch (e) {}
   const relay = new SheetRelay({ url: env.GAS_WEBAPP_URL, secret: env.GAS_SHARED_SECRET, dir: path.join(DATA_DIR, 'lad'), logger });
   const engine = new ReflectEngine({ lessons, emit: ev => relay.enqueue(ev) });
-  const ai = createAi({ env, relay, logger });
-  const tutor = new TutorBrain({ lessons, emit: ev => relay.enqueue(ev), ai, logger });
   relay.start();
-  ai.refresh(true).then(() => logger.log(`[lad] AI 튜터: ${({ direct: 'Gemini 바로 연결(GEMINI_API_KEY)', gas: 'GAS의 Gemini 키로 연결', none: '키 없음 → 규칙 엔진으로 진행', off: '꺼 둠(AI_TUTOR_ENABLED=false)' })[ai.status().mode]}`)).catch(() => {});
   if (relay.enabled) {
     const meta = Object.values(lessons).map(L => ({ lessonId: L.lessonId, title: L.title, standards: L.standards, concepts: L.concepts, rubric: L.rubric }));
     relay.upsertLessons(meta).then(r => logger.log(`[lad] 구글 시트 연결: 차시 설정 ${r.ok ? '동기화됨' : '실패(' + r.error + ')'}`)).catch(() => {});
@@ -56,26 +45,6 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     if (HITS.size > 5000) HITS.clear();
     return arr.length > max;
   };
-  /* 하루 사용 한도 (한국 시간 자정에 새로): 한 학생이 너무 많이 쓰지 않게 · 학급 전체 AI 사용량도 묶는다
-     넘으면 막지 않고 바꿀 수 있는 것은 바꾼다 — AI 튜터 한도를 넘으면 규칙 대본으로 정리 회의를 이어 간다 */
-  const num = (v, d) => { const n = parseInt(v, 10); return Number.isFinite(n) && n >= 0 ? n : d; };
-  const LIMIT = {
-    starts: num(env.DAILY_REFLECT_STARTS, 12),     // 학생 1명 · 정리 회의 새로 시작
-    turns: num(env.DAILY_REFLECT_TURNS, 300),       // 학생 1명 · 정리 회의 답
-    ai: num(env.DAILY_AI_TURNS, 80),                // 학생 1명 · AI 튜터 답 (넘으면 규칙 대본)
-    aiTotal: num(env.DAILY_AI_TOTAL, 3000),         // 학급 서버 전체 · AI 튜터 답
-    events: num(env.DAILY_EVENTS, 600),             // 학생 1명 · 게임 이벤트 기록
-  };
-  const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
-  const usageOf = s => { const L = ladOf(s); if (!L.usage || L.usage.day !== today()) L.usage = { day: today(), starts: 0, turns: 0, ai: 0, events: 0 }; return L.usage; };
-  const TOTAL_FILE = path.join(DATA_DIR, 'lad', 'usage.json');
-  let total = { day: today(), ai: 0 };
-  try { const t = JSON.parse(fs.readFileSync(TOTAL_FILE, 'utf8')); if (t && t.day === today()) total = t; } catch (e) {}
-  const totalAi = () => { if (total.day !== today()) total = { day: today(), ai: 0 }; return total; };
-  let totalT = null;
-  const saveTotal = () => { if (totalT) return; totalT = setTimeout(() => { totalT = null; try { fs.mkdirSync(path.dirname(TOTAL_FILE), { recursive: true }); fs.writeFileSync(TOTAL_FILE, JSON.stringify(total)); } catch (e) {} }, 3000); if (totalT.unref) totalT.unref(); };
-  const aiAllowed = u => u.ai < LIMIT.ai && totalAi().ai < LIMIT.aiTotal;
-
   const seenIds = new Set();
   const remember = id => { seenIds.add(id); if (seenIds.size > 20000) { const it = seenIds.values(); for (let i = 0; i < 5000; i++) seenIds.delete(it.next().value); } };
 
@@ -85,10 +54,10 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     const cls = s.cls || null, sid = typeof body.sessionId === 'string' && ID_RE.test(body.sessionId) ? body.sessionId : '';
     return { id, s, player: { id, playerKey: playerKey(id), classCode: cls ? cls.code : 'NOCLASS', studentNo: cls ? cls.no : '', sessionId: sid } };
   }
-  const ladOf = s => { if (!s.lad || typeof s.lad !== 'object') s.lad = {}; s.lad.reflect = s.lad.reflect || {}; s.lad.letters = s.lad.letters || {}; return s.lad; };
+  const ladOf = s => { if (!s.lad || typeof s.lad !== 'object') s.lad = {}; s.lad.reflect = s.lad.reflect || {}; return s.lad; };
 
   async function handle(req, res, p, body) {
-    if (!p.startsWith('/api/lad/') && !p.startsWith('/api/reflect/') && p !== '/api/events' && !p.startsWith('/api/feedback/')) return false;
+    if (!p.startsWith('/api/lad/') && !p.startsWith('/api/reflect/') && p !== '/api/events') return false;
     const W = who(body);
     if (!W) { send(res, 401, { error: '다시 로그인해요' }); return true; }
     const { id, s, player } = W;
@@ -96,7 +65,7 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     if (p === '/api/lad/status') {
       const L = ladOf(s);
       send(res, 200, {
-        reflect: cfg.reflect, letters: cfg.letters && relay.enabled, gas: relay.enabled, cls: s.cls || null, ai: ai.ready(),
+        reflect: cfg.reflect, gas: relay.enabled, cls: s.cls || null,
         fixedClass: cfg.classCodes.length === 1 ? cfg.classCodes[0] : null, lessons: Object.keys(lessons),
         reflected: Object.fromEntries(Object.entries(L.reflect).map(([k, v]) => [k, { at: v.at, sentence: v.sentence }])),
       });
@@ -115,27 +84,15 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
       if (!cfg.reflect) { send(res, 409, { error: 'off' }); return true; }
       if (tooMany('rs:' + id, 20)) { send(res, 429, { error: '잠시 뒤에 다시 해요' }); return true; }
       const lessonId = String(body.lessonId || '');
-      await ai.refresh();
-      /* AI 튜터가 켜져 있으면 AI가, 아니면 규칙 엔진이 정리 회의를 이끈다 (이어 하기는 하던 쪽으로) */
-      const u = usageOf(s), resuming = !!(body.resume && (tutor.has(body.resume) || engine.store.has(String(body.resume))));
-      if (!resuming && u.starts >= LIMIT.starts) { send(res, 429, { error: '오늘은 정리 회의를 여러 번 했어요. 내일 다시 해요', code: 'daily' }); return true; }
-      const useAi = body.resume && tutor.has(body.resume) ? true : body.resume && engine.store.has(String(body.resume)) ? false : tutor.ready(lessonId) && aiAllowed(u);   /* AI 한도를 넘으면 규칙 대본으로 */
-      if (!resuming) { u.starts++; writeStu(id, s); }
-      const judged = ((ladOf(s).judge || {})[lessonId] || []).slice(-8);   /* 이 차시에서 학생이 게임 속에서 한 판단 (AI 튜터의 참고 자료) */
-      const r = useAi ? tutor.start(player, lessonId, body.resume, judged) : engine.start(player, lessonId, body.resume);
+      const r = engine.start(player, lessonId, body.resume);
       if (r.error) { send(res, 404, { error: '정리 회의 대본이 없어요' }); return true; }
       send(res, 200, r);
       return true;
     }
     if (p === '/api/reflect/turn') {
       if (tooMany('rt:' + id, 40)) { send(res, 429, { error: '천천히 생각하고 답해요' }); return true; }
-      const u = usageOf(s);
-      if (u.turns >= LIMIT.turns) { send(res, 429, { error: '오늘은 정리 회의 답을 아주 많이 했어요. 내일 이어서 해요', code: 'daily' }); return true; }
-      const isAi = tutor.has(body.dialogueId);
-      u.turns++; if (isAi) { u.ai++; totalAi().ai++; saveTotal(); }
-      writeStu(id, s);
       let r;
-      try { r = isAi ? await tutor.turn(player, body.dialogueId, body.input || {}) : engine.turn(player, body.dialogueId, body.input || {}); }
+      try { r = engine.turn(player, body.dialogueId, body.input || {}); }
       catch (e) { logger.error('[lad] 대화 처리 오류: ' + e.message); send(res, 500, { error: '잠시 문제가 생겼어요' }); return true; }
       if (r.error) { send(res, r.error === 'no_dialogue' ? 410 : 400, { error: r.error }); return true; }
       if (r.done && r.summary) {   /* 학생 기록에도 칠판 정리를 남긴다 (여러 기기에서 이어 보기) */
@@ -149,12 +106,11 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
     }
     if (p === '/api/events') {
       const list = Array.isArray(body.events) ? body.events.slice(0, 40) : [];
-      const accepted = []; let judged = 0, counted = 0;
+      const accepted = []; 
       for (const e of list) {
         if (!e || !ID_RE.test(String(e.eventId || ''))) continue;
         if (seenIds.has(e.eventId)) { accepted.push(e.eventId); continue; }
         if (tooMany('ev:' + id, 60)) break;
-        const uu = usageOf(s); if (uu.events >= LIMIT.events) break; uu.events++; counted++;   /* 하루 이벤트 한도 */
         const tag = CLIENT_TAGS.includes(e.tag) ? e.tag : null, lesson = String(e.lesson || '');
         if (!tag || !/^L\d{1,3}$/.test(lesson)) { accepted.push(e.eventId); continue; }   // 모르는 것은 받았다고만 하고 버린다
         /* 판단 기록(judgment): 학생이 고른 문장이나 자유 응답 — 서버에서 다시 가리고 안전망을 거친다 */
@@ -170,56 +126,16 @@ function createLad({ ROOT, DATA_DIR, SECRET, env = process.env, readStu, writeSt
           playerKey: player.playerKey, sessionId: player.sessionId, npc: tag === 'judgment' ? R.cleanText(e.npc, 20) : '', nodeId: NODE_RE.test(String(e.nodeId || '')) ? e.nodeId : '',
           stage: '', tag, npcText, studentText, result, hintLevel: 0, flags,
         });
-        /* 판단 기록은 학생 기록에도 차시별로 남긴다 → 정리 회의 AI 튜터가 참고 자료로 본다 (최근 12개, 위험 표시 문장은 빼고) */
-        if (tag === 'judgment' && NODE_RE.test(String(e.nodeId || '')) && !flags.includes('위험')) {
-          const J = ladOf(s).judge = ladOf(s).judge || {}, arr = J[lesson] = Array.isArray(J[lesson]) ? J[lesson] : [];
-          arr.push({ nodeId: e.nodeId, text: studentText.slice(0, 120), result, at: Date.now() }); if (arr.length > 12) arr.splice(0, arr.length - 12); judged++;
-        }
         remember(e.eventId); accepted.push(e.eventId);
       }
-      if (judged || counted) writeStu(id, s);
       send(res, 200, { accepted });
-      return true;
-    }
-    if (p === '/api/feedback/get') {
-      if (!cfg.letters || !relay.enabled || !s.cls) { send(res, 200, { letters: [] }); return true; }
-      if (tooMany('fg:' + id, 10)) { send(res, 200, { letters: [] }); return true; }
-      let items = null;
-      try { items = await relay.getFeedback(player.classCode, player.playerKey); } catch (e) {}
-      const L = ladOf(s);
-      const letters = (items || []).filter(it => !(L.letters[it.lesson] && L.letters[it.lesson].acked))
-        .map(it => ({ lesson: String(it.lesson).slice(0, 20), text: R.maskPII(R.cleanText(it.text, 500)).text, ai: !!it.aiAssisted && cfg.aiLabel }));
-      send(res, 200, { letters, npc: npcMail.npc || { name: '마을 우체부' }, lines: npcMail.lines || {} });
-      return true;
-    }
-    if (p === '/api/feedback/ack') {
-      const lesson = R.cleanText(body.lesson, 20);
-      if (!/^L\d{1,3}$/.test(lesson)) { send(res, 400, { error: 'bad_lesson' }); return true; }
-      let reply = R.cleanText(body.reply, 200), flags = [];
-      if (reply) {
-        const sc = R.screen(reply, null);
-        if (sc.kind === 'danger') flags.push('위험');
-        if (sc.kind === 'profanity') { send(res, 400, { error: '바른 말로 다시 답장해 줄래요?' }); return true; }
-        if (sc.kind === 'pii') flags.push('개인정보');
-        reply = sc.masked;
-      }
-      const L = ladOf(s);
-      L.letters[lesson] = Object.assign(L.letters[lesson] || {}, { acked: Date.now(), reply });
-      writeStu(id, s);
-      relay.enqueue({
-        eventId: crypto.randomUUID(), clientTime: new Date().toISOString(), lesson, classCode: player.classCode, studentNo: player.studentNo,
-        playerKey: player.playerKey, sessionId: player.sessionId, npc: 'mailbox', nodeId: 'letter', stage: '', tag: 'feedback-reply',
-        npcText: String((npcMail.lines || {}).ask || '').slice(0, 500), studentText: reply, result: reply ? 'info' : 'skip', hintLevel: 0, flags,
-      });
-      relay.ackFeedback(lesson, player.classCode, player.playerKey, reply).catch(() => {});
-      send(res, 200, { ok: true, flagged: flags.includes('위험') });
       return true;
     }
     send(res, 404, { error: '없는 주소' });
     return true;
   }
 
-  return { handle, relay, engine, tutor, ai, lessons, cfg, playerKey, LIMIT, totalAi, shutdown: () => relay.shutdown() };
+  return { handle, relay, engine, lessons, cfg, playerKey, shutdown: () => relay.shutdown() };
 }
 
 module.exports = { createLad };

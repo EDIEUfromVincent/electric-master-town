@@ -1,14 +1,13 @@
 /* =========================================================
-   📋 정리 회의 · 📮 선생님 편지 · 📜 시청 기록실(배움 기록 문서)
+   📋 정리 회의 · 📜 시청 기록실(배움 기록 문서)
    · 정리 교실(course.js의 wrap 방): 그 차시 퀘스트를 맡은 인물들이 큰 칠판 앞에 모여 S-E-R 정리 회의를 연다.
      학급 서버(server.js)로 열면 서버의 규칙 엔진(lad/)이 판정한다. 정답 낱말은 서버에만 있고, 대화 한 줄 한 줄이
      구글 시트(LAD)로 간다. 파일로 열면(서버 없음) 같은 질문을 이 기기 안에서만 묻고 기록한다.
-   · 우체부: 선생님이 시트에서 '승인'한 편지를 다음 차시 구역에 들어올 때 전해 준다. 답장도 시트로 간다.
-   · 시청 기록실: 점등식이 끝나면 시장님과 볼트 박사가 세 차시 문장과 편지를 모아 문서로 만들어 준다 → 게임 끝.
+   · 시청 기록실: 점등식이 끝나면 시장님과 볼트 박사가 세 차시 문장을 모아 문서로 만들어 준다 → 게임 끝.
    · 화면에 넣는 NPC·학생 글은 모두 textContent 또는 esc()를 거친다.
    ========================================================= */
-const LAD = {st:null, sid:'', queue:[], qKey:'', flushing:false, entered:{}, letterChecked:false, letterBusy:false, timer:null, mail:null};
-const WRAP = {ai:false, z:null, lesson:null, did:null, msgs:[], mi:0, view:null, board:[], log:[], summary:null, busy:false, speak:null, off:null, phase:'', blankOk:null, prevBlank:{}, locked:false, typer:null};
+const LAD = {st:null, sid:'', queue:[], qKey:'', flushing:false, entered:{}, timer:null};
+const WRAP = {z:null, lesson:null, did:null, msgs:[], mi:0, view:null, board:[], log:[], summary:null, busy:false, speak:null, off:null, phase:'', blankOk:null, prevBlank:{}, locked:false, typer:null};
 const WRAPB = {cv:null, tex:null, key:'', quad:null};
 const FIN = {shown:-1};
 const NPC_EXTRA = {mayor:{name:'시장님', look:'mayor'}, evdriver:{name:'전기차 운전자', look:'driver'}};
@@ -37,7 +36,6 @@ function ladMask(t){
 
 /* ===== 저장 ===== */
 function wrapSave(){ if (!SAVE.reflect || typeof SAVE.reflect !== 'object') SAVE.reflect = {}; return SAVE.reflect; }
-function letterSave(){ if (!SAVE.letters || typeof SAVE.letters !== 'object') SAVE.letters = {}; return SAVE.letters; }
 
 /* ===== 정리 회의가 필요한가 · 끝났나 ===== */
 const wrapRoomOf = z => (z && z.rooms ? z.rooms.find(r => r.wrap) : null);
@@ -147,30 +145,27 @@ async function wrapStart(z, redo){
     const run = !redo && SAVE.wrapRun && SAVE.wrapRun.lesson === lesson ? SAVE.wrapRun.did : null;
     const r = await api('api/reflect/start', {token:ACC.token, sessionId:LAD.sid, lessonId:lesson, resume:run});
     if (r.locked){ wrapClose(); return showDialog('정리 회의', [`정리 회의가 잠시 멈춰 있어요. ${Math.max(1, Math.ceil(r.waitSec / 60))}분 뒤에 다시 해요.`, '걱정되는 일이 있으면 선생님께 꼭 말씀드려요.']); }
-    WRAP.did = r.dialogueId; WRAP.ai = !!r.ai; SAVE.wrapRun = {lesson, did:r.dialogueId}; persist();
+    WRAP.did = r.dialogueId; SAVE.wrapRun = {lesson, did:r.dialogueId}; persist();
     if (r.resumed && Array.isArray(r.board)) WRAP.board = r.board;
-    wrapHeadTag();
     ladFlush();
     wrapPlay(r.messages || [], r.view);
   } catch (e){
     wrapClose();
     if (e.status === 401){ ACC.token = null; return toast('다시 로그인해 주세요.', 'bad'); }
-    showDialog('정리 회의', [e.status === 429 ? (e.code === 'daily' ? e.message : '너무 빨리 여러 번 눌렀어요. 잠시 뒤에 다시 해요.') : '학급 서버와 연결이 잠시 끊겼어요. 조금 뒤에 칠판 앞에서 다시 E를 눌러요.']);
+    showDialog('정리 회의', [e.status === 429 ? '너무 빨리 여러 번 눌렀어요. 잠시 뒤에 다시 해요.' : '학급 서버와 연결이 잠시 끊겼어요. 조금 뒤에 칠판 앞에서 다시 E를 눌러요.']);
   }
 }
 function wrapOpen(z, lesson){
-  Object.assign(WRAP, {ai:false, z, lesson, did:null, msgs:[], mi:0, view:null, board:[], log:[], summary:null, busy:true, speak:null, off:null, phase:'load', blankOk:null, prevBlank:{}, locked:false});
+  Object.assign(WRAP, {z, lesson, did:null, msgs:[], mi:0, view:null, board:[], log:[], summary:null, busy:true, speak:null, off:null, phase:'load', blankOk:null, prevBlank:{}, locked:false});
   UI.wrap = true; KEYS.clear(); JOY.x = JOY.y = 0; PATH3.nodes = null; NEAR = null;
   const b = WORLD.objects.find(o => o.kind === 'wrapBoard');
   wrapStandAside(b); showHUD(false);
   $('#wrapUI').hidden = false; $('#wrapUI').style.setProperty('--zc', z.color);
-  $('#wuZone').textContent = `${z.icon} ${z.no}차시 정리 회의`; $('#wuAi').hidden = true;
+  $('#wuZone').textContent = `${z.icon} ${z.no}차시 정리 회의`;
   judgeWrapUI(lesson);   /* 🧭 게임 속 판단 기록 (judge.js) */
   wrapLine('', '🪑 모두 칠판 앞에 모이는 중…'); wrapInput(null);
   SFX.ping();
 }
-/* AI 튜터가 이끄는 회의임을 알린다 (선생님이 대화를 본다는 것도 함께) */
-function wrapHeadTag(){ const t = $('#wuAi'); if (!t) return; t.hidden = !WRAP.ai; t.textContent = '🤖 AI 튜터 · 선생님이 대화를 봐요'; }
 /* 회의 동안 주인공은 칠판 왼쪽 옆에 선다 (카메라 앞을 가리지 않게) */
 function wrapStandAside(b){
   if (!b) return;
@@ -218,10 +213,10 @@ async function wrapSubmit(input, shown){
     const r = await api('api/reflect/turn', {token:ACC.token, sessionId:LAD.sid, dialogueId:WRAP.did, input});
     if (!UI.wrap) return;
     if (r.last){
-      WRAP.log.push({who:v.who, q:v.prompt, a:r.last.text, stage:v.stage, result:r.last.result, label:r.last.label, hint:r.last.hintLevel, ai:!!r.ai});
-      if (!r.ai) wrapBoardSet(r.last);
+      WRAP.log.push({who:v.who, q:v.prompt, a:r.last.text, stage:v.stage, result:r.last.result, label:r.last.label, hint:r.last.hintLevel});
+      wrapBoardSet(r.last);
     }
-    if (Array.isArray(r.board)) WRAP.board = r.board;   /* AI 튜터: 칠판 전체를 서버가 정리해서 보낸다 (학생 말만 적힌다) */
+    if (Array.isArray(r.board)) WRAP.board = r.board;
     WRAP.blankOk = r.blankOk || null;
     if (r.locked){ WRAP.locked = r.locked; SAVE.wrapRun = null; persist(); }
     if (r.done) WRAP.summary = r.summary;
@@ -235,7 +230,7 @@ async function wrapSubmit(input, shown){
       setTimeout(() => { wrapClose(); wrapStart(z, true); }, 1500);
       return;
     }
-    toast(e.status === 429 ? (e.code === 'daily' ? e.message : '천천히 생각하고 답해요.') : /busy/.test(e.message) ? '아직 생각하는 중이에요. 잠깐만 기다려 줘요.' : '연결이 잠시 끊겼어요. 한 번 더 눌러 볼래요?', 'bad');
+    toast(e.status === 429 ? '천천히 생각하고 답해요.' : /busy/.test(e.message) ? '아직 생각하는 중이에요. 잠깐만 기다려 줘요.' : '연결이 잠시 끊겼어요. 한 번 더 눌러 볼래요?', 'bad');
     wrapInput(v);
   }
 }
@@ -245,7 +240,7 @@ function wrapBoardSet(last){
 }
 function wrapFinish(){
   const sm = WRAP.summary || {}, L = WRAP.lesson, z = WRAP.z;
-  const rec = {done:true, ai:!!(sm.ai || WRAP.ai), at:Date.now(), lesson:L, zone:z.id, sentence:sm.sentence || '', stage:sm.stage || '', praise:sm.praise || '', question:sm.question || '',
+  const rec = {done:true, at:Date.now(), lesson:L, zone:z.id, sentence:sm.sentence || '', stage:sm.stage || '', praise:sm.praise || '', question:sm.question || '',
     checkpoints:sm.checkpoints || [], log:WRAP.log, sent:!!sm.sent, offline:!!WRAP.off, minutes:sm.minutes || 0};
   wrapSave()[L] = rec; SAVE.wrapRun = null; persist(); ladFlush();
   WRAP.phase = 'filing'; WRAP.speak = null;
@@ -253,7 +248,7 @@ function wrapFinish(){
   setTimeout(() => {
     if (!UI.wrap) return;
     const where = rec.offline ? '💾 이 기기에 저장했어요. (학급 서버로 열면 선생님께도 전해져요)'
-      : rec.sent ? '✅ 선생님의 기록장(구글 시트)으로 보냈어요. 선생님이 읽고 다음 시간에 편지를 보내 주실 거예요.'
+      : rec.sent ? '✅ 선생님의 기록장(구글 시트)으로 보냈어요.'
       : '📦 학급 서버에 모아 두었어요. 선생님이 구글 시트를 연결하면 그대로 보내져요.';
     WRAP.phase = 'done'; wrapLine('📋 칠판 정리 끝!', where); wrapInput('done');
     SND.fanfare(); award(z.no === 1 ? 'em' : z.no === 2 ? 'ai' : 'safe', 6); award('ai', 4);
@@ -291,7 +286,7 @@ function wrapInput(kind){
   const box = $('#wuInput'); box.innerHTML = ''; box.className = 'wu-input';
   const btn = (label, cls, fn) => { const b = document.createElement('button'); b.className = 'btn ' + (cls || ''); b.textContent = label; b.onclick = e => { e.stopPropagation(); fn(); }; box.appendChild(b); return b; };
   if (!kind) return;
-  if (kind === 'wait'){ const s = document.createElement('span'); s.className = 'wu-wait'; s.textContent = WRAP.ai && WRAP.view && WRAP.view.who ? `🤔 ${WRAP.view.who}${josa(WRAP.view.who, '이', '가')} 네 생각을 듣고 생각하는 중…` : '🤔 생각을 칠판에 적는 중…'; box.appendChild(s); return; }
+  if (kind === 'wait'){ const s = document.createElement('span'); s.className = 'wu-wait'; s.textContent = '🤔 생각을 칠판에 적는 중…'; box.appendChild(s); return; }
   if (kind === 'next'){ btn('다음 ▶', 'primary', () => wrapKey({code:'Enter'})); return; }
   if (kind === 'done'){ btn('📋 칠판 정리 크게 보기', '', () => wrapSummaryPanel(WRAP.lesson)); btn('계속하기 ▶', 'primary', () => wrapClose(true)); return; }
   if (kind === 'locked'){ btn('알겠어요', 'primary', () => wrapClose(true)); return; }
@@ -397,7 +392,7 @@ function wrapSummaryPanel(lesson){
     <div class="ch-two"><div><small>⭐ 잘한 점</small><p class="ch-praise"></p></div><div><small>❓ 다음에 생각해 볼 질문</small><p class="ch-q"></p></div></div>
     <div class="ch-cps">${(rec.checkpoints || []).map(c => `<span class="ch-cp ${esc(c.status)}">${esc(c.label)} <b>${esc(CP_MARK[c.status] || '')}</b></span>`).join('')}</div>
     ${(rec.log || []).length ? `<details class="ch-log"><summary>정리 회의에서 주고받은 말 (${rec.log.length})</summary><ol>${rec.log.map(l => `<li><span class="ch-st">${esc(l.stage)}</span> <b>${esc(l.who)}</b> ${esc(l.q)}<br>✏️ ${esc(l.a)} <i>${esc(RES_MARK[l.result] || '')}</i></li>`).join('')}</ol></details>` : ''}
-    <p class="ch-sent">${rec.ai ? '🤖 AI 튜터와 함께한 정리 · ' : ''}${rec.offline ? '💾 이 기기에만 저장된 정리예요.' : rec.sent ? '✅ 선생님의 기록장(구글 시트)으로 보냈어요.' : rec.fromServer ? '☁️ 학급 서버에 저장된 정리예요.' : '📦 학급 서버에 모아 두었어요.'}</p></div>
+    <p class="ch-sent">${rec.offline ? '💾 이 기기에만 저장된 정리예요.' : rec.sent ? '✅ 선생님의 기록장(구글 시트)으로 보냈어요.' : rec.fromServer ? '☁️ 학급 서버에 저장된 정리예요.' : '📦 학급 서버에 모아 두었어요.'}</p></div>
     <div class="row"><button class="btn primary" data-close>닫기</button></div>`, {wide:true});
   p.querySelector('.ch-one p').textContent = rec.sentence || '(아직 없음)';
   p.querySelector('.ch-praise').textContent = rec.praise || '—';
@@ -450,13 +445,13 @@ function wrapBoardTexture(o){
 function wrapBoardModel(o){
   if (o.final){
     return {mode:'finale', shown:FIN.shown, rows:COURSE.zones.map(z => { const r = wrapSave()[wrapLessonOf(z)]; return {t:`${z.icon} ${z.no}차시 · ${z.name}`, s:r && r.sentence || ''}; }),
-      letters:Object.keys(letterSave()).length, made:!!(SAVE.story && SAVE.story.docMade)};
+      made:!!(SAVE.story && SAVE.story.docMade)};
   }
   const z = ZONE.zone; if (!z) return {mode:'off'};
   const L = wrapLessonOf(z), head = `${z.icon} ${z.no}차시 정리 회의`;
   if (UI.wrap && WRAP.z === z){
     if ((WRAP.phase === 'filing' || WRAP.phase === 'done') && WRAP.summary) return wrapSumModel(head, WRAP.summary, WRAP.phase === 'filing');
-    return {mode:'meet', head, ai:WRAP.ai, board:WRAP.board.map(b => ({st:b.stage, l:b.label, t:b.text, r:b.result}))};
+    return {mode:'meet', head, board:WRAP.board.map(b => ({st:b.stage, l:b.label, t:b.text, r:b.result}))};
   }
   if (wrapOff()) return {mode:'off', head};
   const rec = wrapSave()[L];
@@ -465,7 +460,7 @@ function wrapBoardModel(o){
   const items = zoneActs(z).map(a => ({t:`${ACTS.indexOf(a) + 1}. ${a.title}`, ok:actDone(a)})).concat((z.need || []).map(k => ({t:ZONE_NEEDS[k].label.replace(/^🚲\s*/, ''), ok:ZONE_NEEDS[k].ok()})));
   return {mode:ready ? 'ready' : 'todo', head, items};
 }
-const wrapSumModel = (head, s, filing) => ({mode:'sum', head, filing, ai:!!(s.ai || (s.log || []).some(l => l.ai)), one:s.sentence || '', praise:s.praise || '', q:s.question || '',
+const wrapSumModel = (head, s, filing) => ({mode:'sum', head, filing, one:s.sentence || '', praise:s.praise || '', q:s.question || '',
   cps:(s.checkpoints || []).map(c => ({l:c.label, s:c.status})), sent:s.offline ? 'off' : s.sent ? 'sent' : 'kept'});
 function chalkWrap(g, text, maxW, maxLines){
   const out = []; let line = '';
@@ -495,7 +490,7 @@ function wrapBoardPaint(g, m, W, H){
     return;
   }
   if (m.mode === 'meet'){
-    title(m.head + (m.ai ? ' — AI 튜터와 함께 생각하는 중' : ' — 내 말로 정리하는 중'));
+    title(m.head + ' — 내 말로 정리하는 중');
     const cols = [['S', '개념 떠올리기', yellow], ['E', '생활·안전과 잇기', blue], ['R', '오늘의 한 문장', pink]], cw = (W - 80) / 3;
     cols.forEach(([st, name, c], k) => {
       const x = 40 + k * cw; g.font = F('', 30); g.fillStyle = c; g.fillText(`${st} · ${name}`, x, 92);
@@ -534,13 +529,13 @@ function wrapBoardPaint(g, m, W, H){
       para(show ? (r.s ? `「${r.s}」` : '(정리 문장이 없어요)') : '…', 60, y + 36, W - 120, 26, chalk, 2);
     });
     g.font = F('', 22); g.fillStyle = green; g.textAlign = 'right';
-    g.fillText(m.made ? '✅ 배움 기록 문서 완성' : `📮 선생님 편지 ${m.letters}통 · 문서로 묶는 중`, W - 40, H - 40); g.textAlign = 'left';
+    g.fillText(m.made ? '✅ 배움 기록 문서 완성' : '📜 문서로 묶는 중', W - 40, H - 40); g.textAlign = 'left';
   }
 }
 
 /* ===== 학급 서버: 상태 · 반 번호 · 기록 이벤트 ===== */
 function ladInit(){
-  LAD.sid = ladUUID(); LAD.st = null; LAD.entered = {}; LAD.letterChecked = false; LAD.letterBusy = false;
+  LAD.sid = ladUUID(); LAD.st = null; LAD.entered = {};
   LAD.qKey = 'emt_event_queue_v1:' + (ACC.id || '');
   try { LAD.queue = JSON.parse(lsGet(LAD.qKey) || '[]') || []; } catch (e) { LAD.queue = []; }
   if (!Array.isArray(LAD.queue)) LAD.queue = [];
@@ -606,77 +601,13 @@ window.addEventListener('pagehide', () => {
   if (!ACC.server || !ACC.token || !LAD.queue.length || !LAD.st || !LAD.st.cls || !navigator.sendBeacon) return;
   try { navigator.sendBeacon('api/events', new Blob([JSON.stringify({token:ACC.token, sessionId:LAD.sid, events:LAD.queue.slice(0, 40)})], {type:'application/json'})); } catch (e) {}
 });
-/* 차시 구역에 들어올 때: 첫 진입 기록 · 반 번호 · 선생님 편지 */
+/* 차시 구역에 들어올 때: 첫 진입 기록 · 반 번호 */
 function ladZoneEnter(z){
   const L = wrapLessonOf(z); if (!L) return;
   if (!LAD.entered[z.id]){ LAD.entered[z.id] = true; ladEvent('session-start', L, z.id); }
   if (!ACC.server) return;
-  const go = () => { if (LAD.st && !LAD.st.cls) ladAskClass(() => ladCheckLetters()); else ladCheckLetters(); };
+  const go = () => { if (LAD.st && !LAD.st.cls) ladAskClass(() => {}); };
   setTimeout(() => { if (MODE !== 'play') return; if (uiBlocking()) UI.pending.push(go); else go(); }, 3600);
-}
-function ladOnEnter(){
-  if (LAD.letterChecked || !ACC.server) return;
-  LAD.letterChecked = true;
-  setTimeout(() => { if (MODE === 'play') ladCheckLetters(); }, 1600);
-}
-
-/* ===== 📮 선생님 편지 ===== */
-async function ladCheckLetters(done){
-  const fin = () => { if (done) done(); };
-  if (!ACC.server || !ACC.token || LAD.letterBusy) return fin();
-  if (!LAD.st) await ladStatus();
-  if (!LAD.st || !LAD.st.letters || !LAD.st.cls) return fin();
-  LAD.letterBusy = true;
-  let r = null;
-  try { r = await api('api/feedback/get', {token:ACC.token, sessionId:LAD.sid}); } catch (e) {}
-  LAD.letterBusy = false;
-  const list = ((r && r.letters) || []).filter(l => l && l.text && !(letterSave()[l.lesson] && letterSave()[l.lesson].acked));
-  if (!list.length) return fin();
-  LAD.mail = {npc:(r && r.npc) || {name:'마을 우체부'}, lines:(r && r.lines) || {}};
-  const next = i => (i >= list.length ? fin() : ladDeliver(list[i], () => next(i + 1)));
-  if (uiBlocking()) UI.pending.push(() => next(0)); else next(0);
-}
-function ladDeliver(L, done){
-  const who = '📮 ' + (LAD.mail.npc.name || '마을 우체부');
-  SFX.ping();
-  showDialog(who, [{who, text:LAD.mail.lines.intro || '딩동! 선생님이 편지를 남기셨어요.'}], () => openLetter(L, done));
-}
-function openLetter(L, done){
-  const ln = LAD.mail.lines, z = COURSE.zones.find(q => wrapLessonOf(q) === L.lesson);
-  let sent = false;
-  const p = openPanel(`<div class="letter"><div class="lt-head">📮 ${z ? `${z.no}차시 ${esc(z.name)} · ` : ''}선생님 편지</div>
-    <p class="lt-body"></p><p class="lt-ai" hidden></p>
-    <label class="lt-ask"></label><input id="ltReply" maxlength="200" autocomplete="off" placeholder="한 문장 답장 · 이름이나 전화번호는 쓰지 않아요">
-    <p class="cls-msg" id="ltMsg"></p>
-    <div class="row"><button class="btn primary" id="ltSend">답장 보내기 ✉️</button><button class="btn" id="ltSkip">나중에 · 건너뛰기</button></div></div>`,
-    {onClose:() => { if (!sent){ sent = true; ladAck(L, ''); } if (done) setTimeout(done, 50); }});
-  p.querySelector('.lt-body').textContent = L.text;
-  if (L.ai){ const a = p.querySelector('.lt-ai'); a.hidden = false; a.textContent = ln.aiLabel || '(선생님이 AI의 도움을 받아 쓰고 직접 확인한 편지예요)'; }
-  p.querySelector('.lt-ask').textContent = ln.ask || '편지를 읽고 드는 생각을 한 문장으로 답장해 줄래요?';
-  const inp = p.querySelector('#ltReply'), msg = p.querySelector('#ltMsg');
-  const send = async reply => {
-    p.querySelector('#ltSend').disabled = true; p.querySelector('#ltSkip').disabled = true;
-    const r = await ladAck(L, reply);
-    if (r && r.error){ msg.textContent = r.error; p.querySelector('#ltSend').disabled = false; p.querySelector('#ltSkip').disabled = false; return; }
-    sent = true; closePanel();
-    toast(reply ? (ln.thanks || '답장 고마워요!') : (ln.skipThanks || '편지는 시청 기록실에서 다시 볼 수 있어요.'), 'ok');
-    if (r && r.flagged) UI.pending.unshift(() => showDialog('📮 마을 우체부', ['그 이야기를 들으니 걱정돼요. 지금 바로 선생님이나 보호자께 꼭 말씀드려요.']));
-  };
-  p.querySelector('#ltSend').onclick = () => { const t = inp.value.trim(); if (!t) return inp.focus(); send(t); };
-  p.querySelector('#ltSkip').onclick = () => send('');
-  inp.onkeydown = e => { if (e.isComposing || e.keyCode === 229) return; if (e.key === 'Enter'){ e.preventDefault(); p.querySelector('#ltSend').click(); } };
-}
-async function ladAck(L, reply){
-  const t = ladMask(reply);
-  try {
-    const r = await api('api/feedback/ack', {token:ACC.token, sessionId:LAD.sid, lesson:L.lesson, reply:t});
-    letterSave()[L.lesson] = {text:L.text, ai:!!L.ai, reply:t, at:Date.now(), acked:true}; persist();
-    return r;
-  } catch (e){
-    if (e.status === 400) return {error:e.message || '다시 써 볼래요?'};
-    letterSave()[L.lesson] = {text:L.text, ai:!!L.ai, reply:t, at:Date.now(), acked:true, pendingAck:true}; persist();
-    return {ok:false};
-  }
 }
 
 /* ===== 📜 시청 기록실 · 배움 기록 문서 · 엔딩 ===== */
@@ -696,8 +627,8 @@ function finaleTalk(o){
   const made = !!(SAVE.story && SAVE.story.docMade);
   if (!SAVE.story.finale) return showDialog(o.name, ['점등식이 끝나면 여기서 배움 기록 문서를 만들어 줄게요.']);
   if (!made) return finaleCeremony();
-  showDialog(o.name, [{who:o.name, text:'배움 기록 문서를 다시 만들어 줄까요? 선생님 편지가 새로 왔으면 함께 묶여요.', choices:[
-    {label:'📜 문서 다시 만들기', fn:() => { UI.wrapAfter = () => ladCheckLetters(() => openLearningDoc(false)); }},
+  showDialog(o.name, [{who:o.name, text:'배움 기록 문서를 다시 만들어 줄까요?', choices:[
+    {label:'📜 문서 다시 만들기', fn:() => { UI.wrapAfter = () => openLearningDoc(false); }},
     {label:'🎉 엔딩 다시 보기', fn:() => { UI.wrapAfter = openEnding; }}, {label:'괜찮아요'}]}],
     () => { const f = UI.wrapAfter; UI.wrapAfter = null; if (f) f(); });
 }
@@ -706,14 +637,12 @@ function finaleCeremony(){
   const b = WORLD.objects.find(o => o.kind === 'wrapBoard');
   wrapStandAside(b); showHUD(false);
   FIN.shown = 0;
-  ladCheckLetters(() => {
+  {
     const steps = [{who:'시장님', text:'어서 와요, 전기 마스터! 이 큰 칠판에 세 차시 정리 회의에서 남긴 문장을 하나씩 모아 볼게요.'}];
     COURSE.zones.forEach((z, k) => {
       const r = wrapSave()[wrapLessonOf(z)];
       steps.push({who:'볼트 박사', text:`${z.no}차시 「${z.name}」에서 네가 남긴 문장이에요. ${r && r.sentence ? `「${r.sentence}」` : '(정리 문장이 없어요)'}`, fx:() => { FIN.shown = k + 1; SFX.tone(520 + k * 120, .18, 'triangle', .04, 780 + k * 120); }});
     });
-    const n = Object.keys(letterSave()).length;
-    steps.push({who:'시장님', text:n ? `선생님이 보내 주신 편지 ${n}통과 네 답장도 함께 묶었어요.` : '선생님 편지는 아직 도착하지 않았어요. 편지가 오면 이 기록실에서 문서를 다시 만들 수 있어요.'});
     steps.push({who:'볼트 박사', text:'AI는 틀릴 수 있어서 확인하는 사람이 필요하다고 했지요? 이 기록은 네가 직접 생각하고 확인해서 정리한 배움의 증거예요.'});
     steps.push({who:'시장님', text:'자, 문서로 만들어 줄게요. 내려받아서 선생님과 가족에게 보여 드려요!'});
     const run = i => {
@@ -723,7 +652,7 @@ function finaleCeremony(){
       showDialog(s.who, [{who:s.who, text:s.text}], () => run(i + 1));
     };
     run(0);
-  });
+  }
 }
 const DOC_MARK = {correct:'✔ 스스로', partial:'◐ 반쯤', miss:'💡 힌트로', avoid:'💡 힌트로', misconception:'💡 다시 생각', write:'✏️'};
 function docName(){ return String(SAVE.docName != null ? SAVE.docName : (SAVE.nickname || '')).slice(0, 12).trim() || '전기 마스터'; }
@@ -734,7 +663,7 @@ function buildLearningDoc(){
   H.push(`<header><div class="kicker">6학년 과학 · 전기의 이용 · AI 융합 수업</div><h1>⚡ 전기 마스터 타운 · 나의 배움 기록</h1>
     <p class="who"><b>${esc(name)}</b>${cls ? ` · ${esc(cls)}` : ''} · ${esc(date)}</p></header>`);
   for (const z of COURSE.zones){
-    const L = wrapLessonOf(z), rec = wrapSave()[L] || null, letter = letterSave()[L] || null;
+    const L = wrapLessonOf(z), rec = wrapSave()[L] || null;
     const acts = zoneActs(z);
     T.push(`■ ${z.no}차시 · ${z.name}`);
     T.push('한 활동: ' + acts.map(a => `${actDone(a) ? '✔' : '□'} ${a.title}`).join(' / '));
@@ -756,10 +685,6 @@ function buildLearningDoc(){
     } else {
       h += '<p class="none">정리 회의 기록이 없어요.</p>'; T.push('정리 회의 기록이 없어요.');
     }
-    if (letter && letter.text){
-      h += `<div class="letter"><small>📮 선생님 편지${letter.ai ? ' <i>(선생님이 AI의 도움을 받아 쓰고 직접 확인한 편지)</i>' : ''}</small><p>${esc(letter.text)}</p>${letter.reply ? `<p class="reply">✉️ 나의 답장: ${esc(letter.reply)}</p>` : ''}</div>`;
-      T.push(`선생님 편지: ${letter.text}`); if (letter.reply) T.push(`나의 답장: ${letter.reply}`);
-    }
     H.push(h + '</section>'); T.push('');
   }
   const plan = (wrapSave().L3 && wrapSave().L3.sentence) || '';
@@ -767,7 +692,7 @@ function buildLearningDoc(){
     <p><b>시장님</b> “전기 마스터 덕분에 마을의 불이 다시 켜졌어요. 이번 주에 실천하기로 한 일을 꼭 지켜 봐요!”</p>
     <p><b>볼트 박사</b> “AI는 틀릴 수 있어요. 그래서 확인하고 고치는 사람이 필요해요. 그 사람이 바로 여러분이에요.”</p>
     ${plan ? `<div class="one"><small>✅ 이번 주 나의 실천</small><p>${esc(plan)}</p></div>` : ''}
-    <p class="note">이 문서는 학생 기기에서 만들어졌어요. 정리 회의는 ${COURSE.zones.some(z => (wrapSave()[wrapLessonOf(z)] || {}).ai) ? 'AI 튜터가 게임 인물의 목소리로 이끌었고, ' : ''}판정(✔·◐·💡)은 생각을 돕기 위한 표시로 성적이 아니에요. '오늘의 한 문장'은 학생이 직접 쓴 문장이에요.</p></section>`);
+    <p class="note">이 문서는 학생 기기에서 만들어졌어요. 정리 회의의 판정(✔·◐·💡)은 생각을 돕기 위한 표시로 성적이 아니에요. '오늘의 한 문장'은 학생이 직접 쓴 문장이에요.</p></section>`);
   if (plan) T.push(`이번 주 나의 실천: ${plan}`);
   const css = `body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;color:#1c2733;max-width:820px;margin:24px auto;padding:0 18px;line-height:1.6}
     header{border-bottom:4px solid #ffd23f;margin-bottom:18px}.kicker{color:#6b7a8a;font-size:13px}h1{margin:4px 0;font-size:26px}.who{margin:4px 0 12px;color:#3a4a5a}
@@ -777,7 +702,6 @@ function buildLearningDoc(){
     table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}th,td{border-bottom:1px solid #e3e8ee;padding:6px;text-align:left;vertical-align:top}th{background:#f3f6f9}td.st{font-weight:700;width:34px}td.mk{white-space:nowrap;color:#6b7a8a;width:84px}
     .fb{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fb div{background:#fff8e1;border-radius:10px;padding:8px 12px}.fb div+div{background:#eaf5ff}.fb p{margin:2px 0 0}
     .cps span{display:inline-block;font-size:12px;border:1px solid #d5dbe2;border-radius:999px;padding:1px 8px;margin:6px 6px 0 0}.cps .self{border-color:#25a862;color:#1d7a46}.cps .support{border-color:#e5737f;color:#b23a48}
-    .letter{background:#fdf4e3;border-left:5px solid #e2a93a;border-radius:8px;padding:8px 12px;margin-top:10px}.letter i{font-weight:400;color:#8a6d3b}.letter p{margin:4px 0}.reply{color:#3a4a5a}
     .none{color:#8a96a3}.note{color:#6b7a8a;font-size:12.5px}small{font-weight:700}
     .jd{background:#f3f7fb;border-left:4px solid #2f74c0;border-radius:8px;padding:8px 12px;margin:8px 0}.jd small{color:#2f74c0;font-weight:700}.jd-list{margin:4px 0 0;padding-left:18px}.jd-list li{margin:4px 0}.jd-list small{color:#6b7a8a}
     @media print{body{margin:0}section{border-color:#bbb}}`;
@@ -796,7 +720,7 @@ function docDownload(file, mime, content){
 function openLearningDoc(final){
   let D = buildLearningDoc();
   const p = openPanel(`<h2>📜 나의 배움 기록 문서</h2>
-    <p class="sub" style="margin-top:0">세 차시 정리 회의 문장 · 칠판 정리 · 선생님 편지를 한 문서로 묶었어요.</p>
+    <p class="sub" style="margin-top:0">세 차시 정리 회의 문장 · 칠판 정리를 한 문서로 묶었어요.</p>
     <div class="row doc-name"><label>문서에 쓸 별명 <input id="docName" maxlength="12" autocomplete="off"></label><small>실명 대신 별명을 써요</small></div>
     <iframe class="doc-frame" sandbox title="문서 미리보기"></iframe>
     <div class="row doc-btns"><button class="btn primary" id="docHtml">📄 문서 내려받기</button><button class="btn" id="docWord">📝 한글·워드용 (.doc)</button><button class="btn" id="docPrint">🖨️ 인쇄 · PDF</button><button class="btn" id="docCopy">📋 글만 복사</button></div>
@@ -836,7 +760,7 @@ function openEnding(){
   const n = COURSE.zones.filter(z => wrapDoneL(wrapLessonOf(z))).length, c = masterCounts();
   const p = openPanel(`<div class="ending"><div class="end-icon">🎆</div><span class="zc-chip">THE END</span><h2>전기 마스터 타운 완주!</h2>
     <p>세 차시 동안 전자석과 전기 안전을 탐구하고, AI 두 가지를 직접 가르치고, 배운 것을 네 말로 정리했어요.</p>
-    <ul class="end-list"><li>🧲 전자석 마스터 ${c.em}/4 · ⚡ 전기 안전 마스터 ${c.es}/3</li><li>📋 정리 회의 ${n}/${COURSE.zones.length}차시 · 📮 선생님 편지 ${Object.keys(letterSave()).length}통</li><li>📜 배움 기록 문서 ${SAVE.story.docMade ? '완성' : '아직 내려받지 않음'}</li></ul>
+    <ul class="end-list"><li>🧲 전자석 마스터 ${c.em}/4 · ⚡ 전기 안전 마스터 ${c.es}/3</li><li>📋 정리 회의 ${n}/${COURSE.zones.length}차시</li><li>📜 배움 기록 문서 ${SAVE.story.docMade ? '완성' : '아직 내려받지 않음'}</li></ul>
     <div class="row end-btns"><button class="btn" id="endCert">🏅 마스터 인증서</button><button class="btn" id="endDoc">📜 문서 다시 보기</button><button class="btn" id="endTruck">🚚 보너스: 번개 트럭 타고 집에 가기</button><button class="btn primary" data-close>마을 둘러보기</button></div>
     <p class="note">고마워요, 전기 마스터! 마을은 언제든 다시 둘러볼 수 있어요.</p></div>`, {wide:true});
   p.querySelector('#endCert').onclick = () => { closePanel(); openCert(); };

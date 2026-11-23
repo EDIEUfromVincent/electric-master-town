@@ -208,7 +208,7 @@ function zoneGateFinish(){
   zoneCard(z, z.rooms.length > 1 ? `${ROOM_NO[i]} ${z.rooms[i].name} · 방 ${i + 1}/${z.rooms.length}` : z.goal || z.rooms[i].name);
   st.seen[z.id] = true; persist();
   if (first && z.gift && !st.teased) ZONE.teaseAt = TIME + 3.2;
-  if (!z.free) ladZoneEnter(z);   /* 차시 첫 진입 기록 · 반 번호 · 선생님 편지 (wrap.js) */
+  if (!z.free) ladZoneEnter(z);   /* 차시 첫 진입 기록 · 반 번호 (wrap.js) */
   if (z.id === 'z1') setTimeout(counterHuntOffer, 2600);   /* a2를 마쳤는데 반례 사냥을 안 했으면 한 번 권한다 (judge.js) */
 }
 function zoneSkip(){

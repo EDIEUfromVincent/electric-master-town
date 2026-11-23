@@ -13,7 +13,7 @@ const fs = require('fs'), path = require('path');
 
 const DEFAULTS = {
   flushMs: 10000, maxBatch: 150, maxBuffer: 20000, timeoutMs: 30000,
-  feedbackCacheMs: 3 * 60 * 1000, backoffMs: [5000, 15000, 60000, 120000], saveMs: 1500, soonMs: 2000,
+  backoffMs: [5000, 15000, 60000, 120000], saveMs: 1500, soonMs: 2000,
 };
 
 class SheetRelay {
@@ -33,7 +33,6 @@ class SheetRelay {
     this.sent = 0;
     this.lastOkAt = 0;
     this.lastError = '';
-    this.feedbackCache = new Map();
     this.timer = null;
     this.saveT = null;
     if (dir) { try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {} }
@@ -127,26 +126,6 @@ class SheetRelay {
 
   ping() { return this.call('ping'); }
 
-  // 반 단위로 3분 캐시 → 한 반이 동시에 접속해도 GAS 호출은 1번
-  async getFeedback(classCode, playerKey) {
-    if (!this.enabled || !classCode) return null;
-    const hit = this.feedbackCache.get(classCode);
-    let items;
-    if (hit && Date.now() - hit.at < this.opt.feedbackCacheMs) items = hit.items;
-    else {
-      const res = await this.call('get_feedback', { classCode });
-      if (!res.ok) return null;
-      items = (res.items || []).filter(it => it && typeof it.text === 'string' && it.text.trim());
-      this.feedbackCache.set(classCode, { at: Date.now(), items });
-    }
-    return items.filter(it => it.playerKey === playerKey);
-  }
-  async ackFeedback(lesson, classCode, playerKey, reply) {
-    const res = await this.call('ack_feedback', { lesson, classCode, playerKey, reply: reply || '' });
-    const hit = this.feedbackCache.get(classCode);
-    if (hit) hit.items = hit.items.filter(it => !(it.playerKey === playerKey && it.lesson === lesson));
-    return res;
-  }
   upsertLessons(lessons) { return this.call('upsert_lessons', { lessons }); }
 
   status() {

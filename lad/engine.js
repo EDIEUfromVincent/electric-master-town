@@ -282,8 +282,6 @@ function loadLessons(dir, fs, path, log) {
         profanity: '그 말은 우리 약속과 맞지 않아. 바른 말로 다시 이야기해 줄래?', profanityLimit: '규칙 위반이 세 번이라 정리 회의를 잠시 멈출게. 선생님께 도움을 요청하자.',
         pii: '개인정보는 적지 않기로 약속했지? 그 부분은 빼고 다시 말해 줄래?', danger: '그 이야기를 들으니 걱정돼. 지금 바로 선생님이나 보호자께 꼭 말씀드리자.',
       }, L.messages || {});
-      /* AI 튜터용 차시 설정 (선생님이 고치기 쉬운 글 파일): lessons/L1.tutor.txt */
-      try { L.tutorPrompt = fs.readFileSync(path.join(dir, L.lessonId + '.tutor.txt'), 'utf8').trim(); } catch (e) { L.tutorPrompt = ''; }
       out[L.lessonId] = L;
     } catch (e) { (log || console).warn(`[lad] ${f}: 대본을 읽지 못했어요 (${e.message})`); }
   }
